@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archiproject UI Clone</title>
+    <title>ArchiMind - AI-Powered Architecture Analysis</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
         :root {
             --background: #111827;
@@ -19,6 +20,9 @@
             --icon-green: #10B981;
             --icon-purple: #8B5CF6;
             --icon-blue: #3B82F6;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
         }
 
         * {
@@ -36,19 +40,9 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
-        }
-
-        a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        a:hover {
-            color: var(--text-primary);
         }
 
         /* Header */
@@ -69,51 +63,45 @@
             gap: 0.5rem;
             font-size: 1.25rem;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .logo svg {
             color: var(--primary);
         }
 
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            padding: 6rem 0;
+        /* Input Section */
+        .input-section {
+            padding: 3rem 0;
             text-align: center;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .hero-section h1 {
-            font-size: 3.5rem;
+        .input-section h1 {
+            font-size: 2.5rem;
             font-weight: 700;
-            line-height: 1.2;
             margin-bottom: 1rem;
         }
 
-        .hero-section h1 .highlight {
+        .input-section h1 .highlight {
             color: var(--primary);
         }
 
-        .hero-section .subtitle {
-            font-size: 1.25rem;
+        .input-section .subtitle {
+            font-size: 1.125rem;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 2.5rem auto;
+            margin-bottom: 2rem;
         }
 
         .repo-input-wrapper {
             position: relative;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 0 auto 1rem auto;
         }
 
         .repo-input {
             width: 100%;
-            padding: 1rem 1rem 1rem 3rem; /* Left padding for icon */
+            padding: 1rem 1rem 1rem 3rem;
             background-color: var(--background);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -136,18 +124,11 @@
             color: var(--text-secondary);
         }
 
-        .input-hint {
-            color: var(--text-secondary);
-            margin-top: 0.75rem;
-            font-size: 0.875rem;
-        }
-        
         .generate-button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            margin-top: 1.5rem;
             padding: 1rem 2rem;
             background-color: var(--primary);
             color: var(--text-primary);
@@ -159,240 +140,386 @@
             transition: background-color 0.2s ease;
         }
 
-        .generate-button:hover {
+        .generate-button:hover:not(:disabled) {
             background-color: var(--primary-hover);
         }
 
-        /* Features Section */
-        .features-section {
-            padding: 4rem 0 6rem 0;
+        .generate-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            display: flex;
+        .loading-indicator {
+            display: none;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .icon-green { background-color: rgba(16, 185, 129, 0.1); color: var(--icon-green); }
-        .icon-purple { background-color: rgba(139, 92, 246, 0.1); color: var(--icon-purple); }
-        .icon-blue { background-color: rgba(59, 130, 246, 0.1); color: var(--icon-blue); }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-card p {
+            gap: 0.5rem;
+            margin-top: 1rem;
             color: var(--text-secondary);
-            line-height: 1.6;
         }
 
-        /* Footer */
-        .main-footer {
-            padding: 4rem 0;
-            border-top: 1px solid var(--border-color);
-            background-color: #111827; /* Same as body for solid feel */
-        }
-        
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 4rem;
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .footer-col h4 {
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            padding: 2rem 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
             font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
         }
 
-        .footer-col p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            max-width: 250px;
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
         }
-        
-        .footer-col ul {
-            list-style: none;
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Documentation Tab */
+        .documentation-content {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .documentation-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Graph Tab */
+        .graph-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .view-switcher {
+            display: flex;
+            background-color: var(--surface);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .view-button {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .view-button.active {
+            background-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .graph-container {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 600px;
+            position: relative;
+        }
+
+        #graph-network {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Chat Tab */
+        .chat-container {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            height: 600px;
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
         }
-        
-        .social-links {
-            flex-direction: row;
-            gap: 1.5rem;
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
-        
-        .social-links a svg {
-            width: 24px;
-            height: 24px;
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .message.assistant .message-content {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background-color: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-send-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .chat-send-button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .chat-send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .nav-links {
-                display: none; /* Simple hiding for mobile */
+            .input-section h1 {
+                font-size: 2rem;
             }
 
-            .hero-section h1 {
-                font-size: 2.5rem;
+            .tabs {
+                flex-wrap: wrap;
             }
 
-            .hero-section .subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
             }
 
-            .footer-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
+            .graph-controls {
+                flex-direction: column;
+                align-items: stretch;
             }
-            
-            .footer-col p {
-                margin: 0 auto;
-            }
-            
-            .social-links {
-                justify-content: center;
+
+            .message {
+                max-width: 95%;
             }
         }
     </style>
 </head>
 <body>
-
     <header class="main-header">
         <div class="container">
             <nav class="main-nav">
-                <a href="#" class="logo">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    <span>Archiproject</span>
-                </a>
-                <div class="nav-links">
-                    <a href="#">Documentation</a>
-                    <a href="#">Examples</a>
-                    <a href="#">GitHub</a>
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>ArchiMind</span>
                 </div>
             </nav>
         </div>
     </header>
 
     <main>
-        <section class="hero-section">
+        <section class="input-section">
             <div class="container">
-                <h1>Visualize Your Software <span class="highlight">Architecture</span></h1>
-                <p class="subtitle">Automatically generate interactive High-Level and Low-Level Design diagrams from any GitHub repository using AI-powered analysis.</p>
+                <h1>Analyze Your <span class="highlight">Software Architecture</span></h1>
+                <p class="subtitle">Generate interactive diagrams and chat with AI about any GitHub repository</p>
 
-                <div class="repo-form-container">
-                    <div class="repo-input-wrapper">
-                        <svg class="repo-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                        <input type="text" class="repo-input" placeholder="https://github.com/username/repository">
-                    </div>
-                    <p class="input-hint">Enter a public GitHub repository URL to analyze its architecture</p>
-                    <button class="generate-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        <span>Generate Architecture</span>
-                    </button>
+                <div class="repo-input-wrapper">
+                    <svg class="repo-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                    <input type="text" id="repoInput" class="repo-input" placeholder="https://github.com/username/repository">
+                </div>
+                
+                <button id="generateButton" class="generate-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <span>Generate Architecture</span>
+                </button>
+
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <span>Analyzing repository...</span>
                 </div>
             </div>
         </section>
 
-        <section class="features-section">
+        <section class="main-content" id="mainContent">
             <div class="container">
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon icon-green">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        </div>
-                        <h3>High-Level Design</h3>
-                        <p>System components and their relationships</p>
-                    </div>
+                <div class="tabs">
+                    <button class="tab active" data-tab="documentation">Documentation</button>
+                    <button class="tab" data-tab="graph">Graph</button>
+                    <button class="tab" data-tab="chat">Chat</button>
+                </div>
 
-                    <div class="feature-card">
-                        <div class="feature-icon icon-purple">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                        </div>
-                        <h3>Low-Level Design</h3>
-                        <p>Detailed implementation architecture</p>
+                <div id="documentation" class="tab-content active">
+                    <div class="documentation-content" id="documentationContent">
+                        <p>Enter a GitHub repository URL and click "Generate Architecture" to see the README documentation here.</p>
                     </div>
+                </div>
 
-                    <div class="feature-card">
-                        <div class="feature-icon icon-blue">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <div id="graph" class="tab-content">
+                    <div class="graph-controls">
+                        <div class="view-switcher">
+                            <button class="view-button active" data-view="hld">HLD</button>
+                            <button class="view-button" data-view="lld">LLD</button>
                         </div>
-                        <h3>AI Chat Assistant</h3>
-                        <p>Ask questions about your architecture</p>
+                        <span id="graphStatus">Select a view to see the architecture diagram</span>
+                    </div>
+                    <div class="graph-container">
+                        <div id="graph-network"></div>
+                    </div>
+                </div>
+
+                <div id="chat" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message assistant">
+                                <div class="message-content">
+                                    Hello! I'm your AI architecture assistant. Ask me anything about the analyzed repository's code structure, design patterns, or implementation details.
+                                </div>
+                                <div class="message-time">Just now</div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="chat-input" placeholder="Ask about the architecture...">
+                            <button id="chatSendButton" class="chat-send-button">Send</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h4>Archiproject</h4>
-                    <p>AI-powered software architecture visualization for modern development teams.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Product</h4>
-                    <ul>
-                        <li><a href="#">Features</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">API</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">Documentation</a></li>
-                        <li><a href="#">Examples</a></li>
-                        <li><a href="#">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Connect</h4>
-                    <ul class="social-links">
-                        <li><a href="#">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.419 2.865 8.169 6.838 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"></path></svg>
-                        </a></li>
-                        <li><a href="#">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H4.68l4.717 6.231L12.98 2.25h5.264zM17.105 19.95l1.848-2.634-6.44-7.52L5.42 2.95h-1.88l6.19 8.263 6.843 8.737h1.532z"></path></svg>
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </footer>
-
+    <script src="/static/script.js"></script>
 </body>
 </html>
