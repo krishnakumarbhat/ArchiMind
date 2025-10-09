@@ -1,66 +1,58 @@
 from flask import Flask, render_template, jsonify, request, session
-import time
+import json
 import os
-from ollama_service import get_ollama_service
-from config import (
-    ANALYSIS_PROMPT_TEMPLATE, 
-    CHAT_PROMPT_TEMPLATE, 
-    DEFAULT_HLD_MERMAID, 
-    DEFAULT_LLD_MERMAID
-)
+
+from orchestrator import run_analysis, run_chat
+from config import DEFAULT_HLD_MERMAID, DEFAULT_LLD_MERMAID
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24) # Required for sessions
+# Use stable secret in development to preserve session across restarts
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
 @app.route('/')
 def index():
     """Renders the main input page."""
     return render_template('index3.html')
 
+
 @app.route('/api/analyze', methods=['POST'])
 def analyze_repo():
-    """
-    Analyzes the repo using Ollama, with default dummy graphs for HLD and LLD.
-    """
-    try:
-        # Get repository input from request
-        data = request.get_json()
-        repo_input = data.get('repo_url', 'No repository specified')
-        
-        # Get Ollama service instance
-        ollama = get_ollama_service()
-        
-        # Generate analysis using Ollama
-        prompt = ANALYSIS_PROMPT_TEMPLATE.format(repo_input=repo_input)
-        ai_analysis = ollama.generate_response(prompt)
-        
-        # Format the response with HTML
-        chat_explanation = f"""
-        <h3>AI-Generated Architecture Analysis</h3>
-        <p><strong>Repository:</strong> {repo_input}</p>
-        <div style="white-space: pre-wrap;">{ai_analysis}</div>
-        <hr>
-        <h3>Default Architecture Diagrams</h3>
-        <p>Use the tabs below to view separate HLD and LLD diagrams.</p>
-        """
-        
-        # Use separate dummy graphs
-        hld_diagram = DEFAULT_HLD_MERMAID
-        lld_diagram = DEFAULT_LLD_MERMAID
-        
-        # Save to session
-        session['analysis_data'] = {
-            "chat_response": chat_explanation,
-            "hld_diagram": hld_diagram,
-            "lld_diagram": lld_diagram
-        }
-        
-        return jsonify({"status": "success", "message": "Analysis complete."})
-    
-    except Exception as e:
-        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
+    """Analyze a repository, returning generated insights and diagrams."""
+    # try:
+    data = request.get_json()
+    repo_input = data.get('repo_url') if data else None
+    if not repo_input:
+        return jsonify({"status": "error", "message": "Repository URL required."}), 400
 
-# NEW: A single route for the results page
+    analysis_result = run_analysis(repo_input)
+
+    analysis_text = analysis_result.get('analysis', '')
+    knowledge_graph = analysis_result.get('knowledge_graph', {})
+    hld_diagram = analysis_result.get('hld') or DEFAULT_HLD_MERMAID
+    lld_diagram = analysis_result.get('lld') or DEFAULT_LLD_MERMAID
+
+    chat_explanation = f"""
+    <h3>AI-Generated Architecture Analysis</h3>
+    <p><strong>Repository:</strong> {repo_input}</p>
+    <pre style="white-space: pre-wrap;">{analysis_text}</pre>
+    <hr>
+    <h3>Knowledge Graph</h3>
+    <pre style="white-space: pre-wrap;">{json.dumps(knowledge_graph, indent=2)}</pre>
+    <hr>
+    <h3>Generated Architecture Diagrams</h3>
+    <p>Use the tabs below to view High-Level and Low-Level diagrams.</p>
+    """
+    
+    session['analysis_data'] = {
+        "chat_response": chat_explanation,
+        "hld_diagram": hld_diagram,
+        "lld_diagram": lld_diagram
+    }
+
+    return jsonify({"status": "success", "message": "Analysis complete."})
+    
+    # except Exception as e:
+        # return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
 @app.route('/doc')
 def doc_page():
     """Renders the consolidated results page with all three tabs."""
@@ -74,23 +66,19 @@ def chat_api():
     """
     Chat API using Ollama for architecture-related questions.
     """
-    try:
-        user_message = request.json.get('message', '')
-        
-        if not user_message:
-            return jsonify({"response": "Please provide a message."})
-        
-        # Get Ollama service instance
-        ollama = get_ollama_service()
-        
-        # Generate response using Ollama
-        prompt = CHAT_PROMPT_TEMPLATE.format(user_message=user_message)
-        ai_response = ollama.generate_response(prompt)
-        
-        return jsonify({"response": ai_response})
+    # try:
+    user_message = request.json.get('message', '')
     
-    except Exception as e:
-        return jsonify({"response": f"Error: {str(e)}"})
+    if not user_message:
+        return jsonify({"response": "Please provide a message."})
+    
+    chat_result = run_chat(user_message)
+    return jsonify({
+        "response": chat_result.get("answer"),
+        "context": chat_result.get("context", "")
+    })
+    # except Exception as e:
+        # return jsonify({"response": f"Error: {str(e)}"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, use_reloader=False)
