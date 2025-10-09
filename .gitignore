@@ -3,7 +3,6 @@
 .env.local
 .env.production
 .env.staging
-secre.txt
 secrets.txt
 *.secret
 

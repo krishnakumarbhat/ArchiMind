@@ -1,0 +1,62 @@
+<annotation>
+	<folder>dataset</folder>
+	<filename>Document 6_5.jpg</filename>
+	<path>/home/leticia/Documents/kurf/dataset/Document 6_5.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2424</width>
+		<height>1173</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>simple class</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1638</xmin>
+			<ymin>369</ymin>
+			<xmax>2165</xmax>
+			<ymax>722</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>simple class</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>238</xmin>
+			<ymin>169</ymin>
+			<xmax>923</xmax>
+			<ymax>492</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>simple class</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>204</xmin>
+			<ymin>663</ymin>
+			<xmax>989</xmax>
+			<ymax>967</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>inheritance</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>908</xmin>
+			<ymin>273</ymin>
+			<xmax>1671</xmax>
+			<ymax>799</ymax>
+		</bndbox>
+	</object>
+</annotation>

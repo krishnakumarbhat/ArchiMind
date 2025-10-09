@@ -1,0 +1,98 @@
+<annotation>
+	<folder>dataset</folder>
+	<filename>Document 6_4.jpg</filename>
+	<path>/home/leticia/Documents/kurf/dataset/Document 6_4.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2413</width>
+		<height>2612</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>745</xmin>
+			<ymin>98</ymin>
+			<xmax>1453</xmax>
+			<ymax>720</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>760</xmin>
+			<ymin>894</ymin>
+			<xmax>1542</xmax>
+			<ymax>1394</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>164</xmin>
+			<ymin>1768</ymin>
+			<xmax>690</xmax>
+			<ymax>2268</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1797</xmin>
+			<ymin>1712</ymin>
+			<xmax>2413</xmax>
+			<ymax>2390</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>979</xmin>
+			<ymin>1738</ymin>
+			<xmax>1538</xmax>
+			<ymax>2246</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>association</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1027</xmin>
+			<ymin>679</ymin>
+			<xmax>1208</xmax>
+			<ymax>953</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>inheritance</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>418</xmin>
+			<ymin>1364</ymin>
+			<xmax>2142</xmax>
+			<ymax>1769</ymax>
+		</bndbox>
+	</object>
+</annotation>

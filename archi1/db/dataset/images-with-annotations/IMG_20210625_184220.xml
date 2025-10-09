@@ -1,0 +1,38 @@
+<annotation>
+	<folder>dataset</folder>
+	<filename>IMG_20210625_184220.jpg</filename>
+	<path>/home/leticia/Documents/kurf/dataset/IMG_20210625_184220.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>773</width>
+		<height>685</height>
+		<depth>1</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>class attributes</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>23</xmin>
+			<ymin>28</ymin>
+			<xmax>495</xmax>
+			<ymax>523</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>association</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>258</xmin>
+			<ymin>265</ymin>
+			<xmax>667</xmax>
+			<ymax>628</ymax>
+		</bndbox>
+	</object>
+</annotation>

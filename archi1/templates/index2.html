@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchiMind - AI-Powered Architecture Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #111827;
+            --surface: #1F2937;
+            --primary: #10B981;
+            --primary-hover: #059669;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+            --icon-green: #10B981;
+            --icon-purple: #8B5CF6;
+            --icon-blue: #3B82F6;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        .main-header {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .logo svg {
+            color: var(--primary);
+        }
+
+        /* Input Section */
+        .input-section {
+            padding: 3rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .input-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .input-section h1 .highlight {
+            color: var(--primary);
+        }
+
+        .input-section .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .repo-input-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 1rem auto;
+        }
+
+        .repo-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background-color: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .repo-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+
+        .repo-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .generate-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background-color: var(--primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .generate-button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .generate-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+            padding: 2rem 0;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+        .main-content.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Documentation Tab */
+        .documentation-content {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .documentation-content p {
+            margin-bottom: 1rem;
+        }
+        .documentation-content h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.25rem;
+        }
+
+        /* Graph Tab */
+        .graph-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .view-switcher {
+            display: flex;
+            background-color: var(--surface);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .view-button {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .view-button.active {
+            background-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .graph-container {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 600px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        #mermaid-container svg {
+             max-width: 100%;
+             height: auto;
+        }
+
+
+        /* Chat Tab */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: var(--border-color);
+        }
+        
+        .message.user .message-avatar {
+             background-color: var(--primary);
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .message.assistant .message-content {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+             padding: 0 44px; /* Align with message content */
+        }
+        .message.user .message-time {
+            text-align: right;
+        }
+
+
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background-color: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-send-button {
+            padding: 0.75rem 1rem;
+            background-color: var(--primary);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .chat-send-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .chat-send-button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .chat-send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Status Messages */
+        #status-container {
+             max-width: 600px;
+             margin: 1rem auto 0 auto;
+        }
+        .status-message {
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .status-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .input-section h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .graph-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <nav class="main-nav">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M2 7L12 12L22 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M12 12V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>ArchiMind</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="input-section">
+            <div class="container">
+                <h1>Analyze Your <span class="highlight">Software Architecture</span></h1>
+                <p class="subtitle">Generate interactive diagrams and chat with AI about any GitHub repository</p>
+
+                <div class="repo-input-wrapper">
+                    <svg class="repo-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                    <input type="text" id="repoInput" class="repo-input" placeholder="https://github.com/username/repository">
+                </div>
+                
+                <button id="generateButton" class="generate-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <span>Generate Architecture</span>
+                </button>
+
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <span>Analyzing repository... This may take a moment.</span>
+                </div>
+                <div id="status-container"></div>
+            </div>
+        </section>
+
+        <section class="main-content" id="mainContent">
+            <div class="container">
+                <div class="tabs">
+                    <button class="tab active" data-tab="documentation">Documentation</button>
+                    <button class="tab" data-tab="graph">Graph</button>
+                    <button class="tab" data-tab="chat">Chat</button>
+                </div>
+
+                <div id="documentation" class="tab-content active">
+                    <div class="documentation-content" id="documentationContent">
+                    </div>
+                </div>
+
+                <div id="graph" class="tab-content">
+                    <div class="graph-controls">
+                        <div class="view-switcher">
+                            <button class="view-button active" data-view="hld">HLD</button>
+                            <button class="view-button" data-view="lld">LLD</button>
+                        </div>
+                    </div>
+                    <div class="graph-container">
+                        <div id="mermaid-container"></div>
+                    </div>
+                </div>
+
+                <div id="chat" class="tab-content">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                           <!-- Chat messages will be added here -->
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="chat-input" placeholder="Ask about the architecture...">
+                            <button id="chatSendButton" class="chat-send-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+        // --- DOM Elements ---
+        const generateButton = document.getElementById('generateButton');
+        const repoInput = document.getElementById('repoInput');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const mainContent = document.getElementById('mainContent');
+        const statusContainer = document.getElementById('status-container');
+        
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const documentationContent = document.getElementById('documentationContent');
+        const mermaidContainer = document.getElementById('mermaid-container');
+        const viewButtons = document.querySelectorAll('.view-button');
+        
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendButton = document.getElementById('chatSendButton');
+
+        // --- State ---
+        let fullMermaidDiagram = '';
+        let hldDiagram = '';
+        let lldDiagram = '';
+
+        // --- Mock API ---
+        function mockApiCall(repoUrl) {
+            return new Promise((resolve, reject) => {
+                // Simulate network delay
+                setTimeout(() => {
+                    if (repoUrl.toLowerCase().includes('github.com')) {
+                        resolve({
+                            chat_response: `<h3>High-Level Design (HLD) Overview</h3>
+                                <p>This architecture represents a typical microservices-based e-commerce platform. We've chosen this approach for scalability and maintainability. Each service is responsible for a distinct business capability.</p>
+                                <p><strong>Key Components:</strong></p>
+                                <ul>
+                                    <li><strong>Client (Browser/Mobile):</strong> The user interface that customers interact with.</li>
+                                    <li><strong>API Gateway:</strong> A single entry point for all client requests. It routes requests to the appropriate downstream service, handles authentication, and can perform rate limiting.</li>
+                                    <li><strong>Microservices:</strong> Independent services for Users, Products, and Orders. Each has its own database to ensure loose coupling.</li>
+                                    <li><strong>Message Queue:</strong> Facilitates asynchronous communication between services, such as when an order is placed and the product inventory needs to be updated.</li>
+                                </ul>
+
+                                <h3>Low-Level Design (LLD) - User Service</h3>
+                                <p>Diving deeper into the User Service, we see a standard layered architecture. This separation of concerns makes the service easier to test and manage.</p>
+                                <p><strong>Internal Modules:</strong></p>
+                                <ul>
+                                    <li><strong>Controller:</strong> Handles incoming HTTP requests from the API Gateway.</li>
+                                    <li><strong>Service Layer:</strong> Contains the core business logic (e.g., user registration, profile updates).</li>
+                                    <li><strong>Repository:</strong> Manages data access and interaction with the User Database.</li>
+                                    <li><strong>Model:</strong> Defines the data structure for a user.</li>
+                                </ul>`,
+                            mermaid_diagram: `
+                                graph TD
+                                    subgraph HLD [High-Level Design]
+                                        A[Client: Browser/Mobile] --> B(API Gateway)
+                                        B --> C{User Service}
+                                        B --> D{Product Service}
+                                        B --> E{Order Service}
+                                        E --> F((Message Queue))
+                                        F --> D
+                                        C --> G1[(User DB)]
+                                        D --> G2[(Product DB)]
+                                        E --> G3[(Order DB)]
+                                    end
+
+                                    subgraph LLD [Low-Level Design: User Service]
+                                        direction LR
+                                        AA[API Gateway] -- HTTP Request --> BB(Controller)
+                                        BB -- Calls --> CC(Service Layer)
+                                        CC -- Uses --> DD(Repository)
+                                        CC -- Works with --> EE(User Model)
+                                        DD -- Interacts with --> FF[(User DB)]
+                                    end`
+                        });
+                    } else {
+                        reject(new Error("Invalid GitHub URL provided. Please enter a valid URL."));
+                    }
+                }, 2500);
+            });
+        }
+
+        // --- Functions ---
+
+        function setUILoading(isLoading) {
+            if (isLoading) {
+                generateButton.disabled = true;
+                repoInput.disabled = true;
+                loadingIndicator.style.display = 'flex';
+                statusContainer.innerHTML = '';
+                 mainContent.classList.remove('visible');
+            } else {
+                generateButton.disabled = false;
+                repoInput.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        
+        function showStatus(message, type = 'error') {
+            statusContainer.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+        }
+
+        async function renderMermaid(diagram) {
+            try {
+                mermaidContainer.innerHTML = 'Rendering diagram...';
+                const { svg } = await mermaid.render('graphDiv', diagram);
+                mermaidContainer.innerHTML = svg;
+            } catch (error) {
+                mermaidContainer.innerHTML = `<p class="status-error">Error rendering diagram.</p>`;
+                console.error("Mermaid rendering error:", error);
+            }
+        }
+        
+        function parseDiagrams(fullDiagram) {
+            // A simple way to split HLD and LLD based on subgraphs. 
+            // This assumes 'subgraph HLD' and 'subgraph LLD' are present.
+            const hldMatch = fullDiagram.match(/subgraph HLD.*?end/s);
+            const lldMatch = fullDiagram.match(/subgraph LLD.*?end/s);
+            
+            hldDiagram = hldMatch ? `graph TD\n${hldMatch[0]}` : '';
+            lldDiagram = lldMatch ? `graph TD\n${lldMatch[0]}` : '';
+
+            if (!hldDiagram && !lldDiagram) {
+                // If subgraphs are not found, treat the whole thing as one diagram
+                hldDiagram = fullDiagram;
+                lldDiagram = 'graph TD\nA[No LLD subgraph found]';
+                viewButtons.forEach(btn => {
+                    if(btn.dataset.view === 'lld') btn.style.display = 'none';
+                });
+            } else {
+                 viewButtons.forEach(btn => btn.style.display = 'block');
+            }
+        }
+        
+        function addChatMessage(content, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = `<div class="message-avatar">
+                ${sender === 'user' ? 
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' : 
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h2a5 5 0 0 1 0 10h-2m-6 0H7A5 5 0 0 1 7 7h2"></path><path d="M8 12h8"></path></svg>'}
+            </div>`;
+
+            messageDiv.innerHTML = `
+                ${avatar}
+                <div class="message-body">
+                    <div class="message-content">${content}</div>
+                    <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>`;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+
+        // --- Event Listeners ---
+        
+        generateButton.addEventListener('click', async () => {
+            const repoUrl = repoInput.value.trim();
+            if (!repoUrl) {
+                showStatus('Please enter a GitHub repository URL.');
+                return;
+            }
+
+            setUILoading(true);
+
+            try {
+                const data = await mockApiCall(repoUrl);
+                
+                documentationContent.innerHTML = data.chat_response;
+                fullMermaidDiagram = data.mermaid_diagram;
+                parseDiagrams(fullMermaidDiagram);
+                
+                // Show HLD by default
+                renderMermaid(hldDiagram);
+                viewButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.view-button[data-view="hld"]').classList.add('active');
+
+                mainContent.classList.add('visible');
+
+            } catch (error) {
+                showStatus(error.message);
+            } finally {
+                setUILoading(false);
+            }
+        });
+        
+        repoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateButton.click();
+            }
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                viewButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const view = button.dataset.view;
+                if (view === 'hld') {
+                    renderMermaid(hldDiagram);
+                } else if (view === 'lld') {
+                    renderMermaid(lldDiagram);
+                }
+            });
+        });
+
+        const handleChatSend = () => {
+             const messageText = chatInput.value.trim();
+            if (!messageText) return;
+
+            addChatMessage(messageText, 'user');
+            chatInput.value = '';
+            chatSendButton.disabled = true;
+
+            // Mock assistant response
+            setTimeout(() => {
+                addChatMessage("As an AI assistant, I can provide details on the components. For example, what would you like to know about the 'API Gateway'?", 'assistant');
+                chatSendButton.disabled = false;
+            }, 1500);
+        };
+
+        chatSendButton.addEventListener('click', handleChatSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleChatSend();
+            }
+        });
+
+
+        // --- Initial Setup ---
+        mermaid.initialize({ startOnLoad: false, theme: 'dark', darkMode: true });
+        
+        // Initial chat message
+        addChatMessage("Hello! I'm your AI architecture assistant. Once you generate a diagram, ask me anything about its code structure, design patterns, or implementation details.", 'assistant');
+
+    </script>
+</body>
+</html>
