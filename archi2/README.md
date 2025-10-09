@@ -1,6 +1,6 @@
-# ArchiMind - Archi2 (Simplified)
+# ArchiMind - Archi2 (Multi-Agent Edition)
 
-A lightweight Flask application that uses Ollama models to analyze software repositories and provide architectural insights with HLD/LLD diagrams.
+A LangGraph-powered multi-agent system that analyzes GitHub repositories via the GitHub API, stores knowledge in Neo4j, generates architecture diagrams, and answers repository questions with RAG using a local Ollama LLM.
 
 ## Features
 
@@ -14,15 +14,23 @@ A lightweight Flask application that uses Ollama models to analyze software repo
 
 ```
 archi2/
-├── config.py           # Configuration and prompts
-├── ollama_service.py   # Singleton service for Ollama API
-├── main.py            # Flask application with routes
-├── requirements.txt   # Python dependencies
-├── templates/         # HTML templates
-│   ├── index3.html
-│   └── doc.html
-└── static/           # JavaScript files
-    └── scripts2.js
+├── agents/
+│   ├── analysis_agent.py    # Summarizes repository structure
+│   ├── base.py              # Shared agent abstractions
+│   ├── chat_agent.py        # RAG-powered Q&A
+│   ├── code_parser_agent.py # GitHub tree/blob ingestion
+│   ├── diagram_agent.py     # Mermaid HLD/LLD generation
+│   ├── embedding_agent.py   # Chunking + embeddings
+│   └── graph_agent.py       # Knowledge graph builder
+├── stores/
+│   └── neo4j_store.py       # Vector + graph persistence in Neo4j
+├── orchestrator.py          # LangGraph workflow definitions
+├── config.py                # Configuration, prompts, environment variables
+├── ollama_service.py        # Ollama HTTP client (singleton)
+├── main.py                  # Flask API + HTML views
+├── templates/               # HTML templates (`index3.html`, `doc.html`)
+├── static/                  # Frontend assets (`scripts2.js`)
+└── requirements.txt         # Python dependencies
 ```
 
 ## Prerequisites
@@ -50,12 +58,21 @@ archi2/
    ollama serve  # Run in a separate terminal
    ```
 
-3. **Start the Flask application**
+3. **Configure environment variables (optional but recommended)**
+   ```bash
+   export OLLAMA_BASE_URL=http://localhost:11434
+   export GITHUB_TOKEN=<your_personal_access_token>
+   export NEO4J_URI=bolt://localhost:7687
+   export NEO4J_USERNAME=neo4j
+   export NEO4J_PASSWORD=<your_password>
+   ```
+
+4. **Start the Flask application**
    ```bash
    python main.py
    ```
 
-4. **Open your browser** and go to `http://localhost:5000`
+5. **Open your browser** and go to `http://localhost:5000`
 
 ## Usage
 
@@ -95,7 +112,11 @@ archi2/
 2. **Model Not Found**:
    - Pull required models: `ollama pull deepseek-r1:1.5b` and `ollama pull nomic-embed-text:v1.5`
 
-3. **Flask Issues**:
+3. **Neo4j Connectivity**:
+   - Verify the database is running and credentials match environment variables
+   - Ensure APOC / vector indexes are enabled in Neo4j 5+
+
+4. **Flask Issues**:
    - Ensure all dependencies are installed from `requirements.txt`
 
 ## License
