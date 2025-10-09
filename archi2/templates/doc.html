@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Architecture Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --background: #111827; --surface: #1F2937; --primary: #10B981; --text-primary: #F9FAFB; --text-secondary: #9CA3AF; --border-color: #374151; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
+        .tab { padding: 1rem 2rem; background: none; border: none; color: var(--text-secondary); font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .documentation-content { background-color: var(--surface); padding: 2rem; border-radius: 8px; line-height: 1.6; }
+        .graph-container { background-color: var(--surface); padding: 2rem; border-radius: 8px; min-height: 500px; display: flex; justify-content: center; align-items: center; }
+        .chat-container { background-color: var(--surface); border-radius: 8px; height: 70vh; display: flex; flex-direction: column; }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; }
+        .chat-input-container { display: flex; padding: 1rem; border-top: 1px solid var(--border-color); }
+        #chatInput { flex: 1; background-color: var(--background); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 6px;}
+        #chatSendButton { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; margin-left: 0.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="documentation">Documentation</button>
+            <button class="tab" data-tab="graph">Graph</button>
+            <button class="tab" data-tab="chat">Chat</button>
+        </div>
+
+        <div id="documentation" class="tab-content active">
+            <div class="documentation-content">
+                {{ data.chat_response | safe }}
+            </div>
+        </div>
+
+        <div id="graph" class="tab-content">
+            <div class="graph-container">
+                <div class="mermaid">{{ data.mermaid_diagram }}</div>
+            </div>
+        </div>
+
+        <div id="chat" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="Ask about the architecture...">
+                    <button id="chatSendButton">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Tab Switching Logic ---
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // --- Chat Logic ---
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendButton = document.getElementById('chatSendButton');
+
+        function addChatMessage(text, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = text;
+            messageDiv.style.color = role === 'user' ? '#10B981' : '#F9FAFB';
+            messageDiv.style.textAlign = role === 'user' ? 'right' : 'left';
+            messageDiv.style.padding = '0.5rem';
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function handleChatSend() {
+            const messageText = chatInput.value.trim();
+            if (!messageText) return;
+            addChatMessage(messageText, 'user');
+            chatInput.value = '';
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: messageText }),
+            });
+            const data = await response.json();
+            addChatMessage(data.response, 'assistant');
+        }
+
+        chatSendButton.addEventListener('click', handleChatSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleChatSend();
+        });
+        
+        addChatMessage('Hello! Ask anything about the architecture shown.', 'assistant');
+    });
+    </script>
+</body>
+</html>

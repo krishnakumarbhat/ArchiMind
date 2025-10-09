@@ -59,6 +59,7 @@ pip install -r requirements.txt
 3. **Copy your connection details** (URI, username, password) from the Aura console
 4. **Note**: Neo4j Aura includes APOC procedures by default, so no additional setup is needed
 5. **Create the vector index** by running the following Cypher query in Neo4j Browser:
+5. **Set up the database schema** by running the setup script (see step 6 in Installation).
 
 ```cypher
 // Create constraints and indexes
@@ -106,7 +107,9 @@ Create a `.env` file in the project root:
 # Neo4j Aura Configuration
 NEO4J_URI=neo4j+s://your-instance-id.databases.neo4j.io
 NEO4J_USER=your-username
+NEO4J_USER=neo4j
 NEO4J_PASSWORD=your-password
+NEO4J_DATABASE=neo4j
 
 # Flask Configuration
 FLASK_ENV=development

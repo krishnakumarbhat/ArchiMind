@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ArchiMind - AI-Powered Architecture Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Your CSS remains the same, but add these styles */
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .input-section { padding: 3rem 0; text-align: center; }
+        /* Add other necessary styles from your previous version */
+        .results-link-container { display: none; margin-top: 2rem; }
+        .results-link-container.visible { display: block; }
+        .results-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #10B981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .results-link:hover { background-color: #059669; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        </header>
+    <main>
+        <section class="input-section">
+            <div class="container">
+                <h1>Analyze Your <span style="color: #10B981;">Software Architecture</span></h1>
+                <div class="repo-input-wrapper">
+                     <input type="text" id="repoInput" class="repo-input" placeholder="https://github.com/username/repository" value="https://github.com/google/gemini-python" style="color:white; background-color:#1F2937; border:1px solid #374151; width: 100%; padding: 1rem; border-radius: 8px;">
+                </div>
+                <br>
+                <button id="generateButton" class="generate-button" style="background-color: #10B981; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    <span>Generate Architecture</span>
+                </button>
+                <div id="loadingIndicator" style="display: none;">Analyzing...</div>
+                
+                <div id="resultsLinkContainer" class="results-link-container">
+                    <a href="/doc" target="_blank" class="results-link">View Results</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="/static/scripts2.js" defer></script>
+</body>
+</html>
