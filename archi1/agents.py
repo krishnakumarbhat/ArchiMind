@@ -76,6 +76,11 @@ class CodeParserAgent:
         # Get repository info
         repo_info_url = f"https://api.github.com/repos/{owner}/{repo}"
         headers = {'Accept': 'application/vnd.github.v3+json'}
+        headers = {
+            'Accept': 'application/vnd.github.v3+json',
+        }
+        if 'GITHUB_TOKEN' in os.environ:
+            headers['Authorization'] = f"token {os.environ['GITHUB_TOKEN']}"
         
         repo_response = requests.get(repo_info_url, headers=headers)
         if repo_response.status_code != 200:
