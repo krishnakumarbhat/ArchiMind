@@ -1,32 +1,47 @@
-# worker.py
 """
-This script runs the repository analysis as a standalone process.
+ArchiMind Worker Process
+Standalone background worker for repository analysis.
 """
 import os
 import sys
 import json
 import logging
+from datetime import datetime
 
-# Add the project root to the Python path
+# Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import config
-import repo_manager
-from vector_manager import VectorManager
-from doc_generator import DocGenerator
+from services import RepositoryService, VectorStoreService, DocumentationService
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
-def run_analysis(repo_url, analysis_log_id=None):
-    status = {'status': 'processing', 'result': None, 'error': None}
-    with open(config.STATUS_FILE_PATH, 'w') as f:
-        json.dump(status, f)
 
-    try:
-        # Update analysis log status if provided
-        if analysis_log_id:
+class AnalysisWorker:
+    """Worker class for background repository analysis."""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.repo_service = RepositoryService()
+        self.status_file = config.STATUS_FILE_PATH
+    
+    def _update_status(self, status: dict) -> None:
+        """Updates the status file with current analysis state."""
+        with open(self.status_file, 'w') as f:
+            json.dump(status, f)
+    
+    def _update_database_log(self, analysis_log_id: int, status: str) -> None:
+        """Updates the analysis log in the database."""
+        if not analysis_log_id:
+            return
+        
+        try:
             from flask import Flask
-            from models import db, AnalysisLog
+            from app import db, AnalysisLog
+            
             app = Flask(__name__)
             app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
                 'DATABASE_URL',
@@ -38,123 +53,149 @@ def run_analysis(repo_url, analysis_log_id=None):
             with app.app_context():
                 log = AnalysisLog.query.get(analysis_log_id)
                 if log:
-                    log.status = 'processing'
+                    log.status = status
+                    if status == 'completed':
+                        log.completed_at = datetime.utcnow()
                     db.session.commit()
-        
-        repo_name = repo_url.split('/')[-1]
-
-        if not repo_manager.clone_repo(repo_url, config.LOCAL_CLONE_PATH):
-            raise Exception("Failed to clone repository")
-
-        vector_mgr = VectorManager(
-            db_path=config.CHROMA_DB_PATH,
-            collection_name=repo_name,
-            embedding_model=config.EMBEDDING_MODEL
-        )
-
-        if vector_mgr.is_empty():
-            all_content = repo_manager.read_repo_files(
-                config.LOCAL_CLONE_PATH,
-                config.ALLOWED_EXTENSIONS,
-                config.IGNORED_DIRECTORIES
-            )
-            if not all_content:
-                raise Exception("No processable files found")
-            vector_mgr.generate_and_store_embeddings(all_content)
-
-        query_text = "Generate a complete technical documentation for this software project."
-        context = vector_mgr.query_relevant_documents(query_text)
-
-        if not context:
-            raise Exception("Failed to retrieve context from vector store")
-
-        doc_gen = DocGenerator(api_key=config.GEMINI_API_KEY, model_name=config.GENERATION_MODEL)
-        docs = doc_gen.generate_all_docs(context, repo_name)
-
-        def clean_json(raw_value: str) -> str:
-            if not raw_value:
-                return ''
-            cleaned = raw_value.strip()
-            if cleaned.startswith('```'):
-                cleaned = cleaned.lstrip('`')
-                if cleaned.startswith('json'):
-                    cleaned = cleaned[len('json'):]
-                cleaned = cleaned.strip()
-                if cleaned.endswith('```'):
-                    cleaned = cleaned[:-3]
-            cleaned = cleaned.strip()
-            if cleaned and cleaned[0] != '{':
-                start = cleaned.find('{')
-                end = cleaned.rfind('}')
-                if start != -1 and end != -1 and end > start:
-                    cleaned = cleaned[start:end+1]
-            return cleaned
-
-        def parse_graph(raw_value, label):
-            if not raw_value:
-                return {'status': 'error', 'message': f'No {label} data returned.'}
-            try:
-                normalized = clean_json(raw_value)
-                parsed = json.loads(normalized)
-                if isinstance(parsed, dict):
-                    return {'status': 'ok', 'graph': parsed}
-                return {
-                    'status': 'error',
-                    'message': f'{label} data was not a JSON object.',
-                    'raw_preview': normalized[:400]
-                }
-            except json.JSONDecodeError as exc:
-                logging.error(f"Failed to parse {label} JSON: {exc}")
-                return {
-                    'status': 'error',
-                    'message': f'Failed to parse {label} JSON.',
-                    'raw_preview': (raw_value or '')[:400]
-                }
-
-        hld_result = parse_graph(docs.get('hld'), 'HLD')
-        lld_result = parse_graph(docs.get('lld'), 'LLD')
-
-        status['status'] = 'completed'
-        status['result'] = {
-            'chat_response': docs.get('documentation'),
-            'hld_graph': hld_result,
-            'lld_graph': lld_result
-        }
-        
-        # Mark analysis as completed in database
-        if analysis_log_id:
-            with app.app_context():
-                log = AnalysisLog.query.get(analysis_log_id)
-                if log:
-                    log.status = 'completed'
-                    from datetime import datetime
-                    log.completed_at = datetime.utcnow()
-                    db.session.commit()
-
-    except Exception as e:
-        logging.error(f"An error occurred during analysis: {e}")
-        status['status'] = 'error'
-        status['error'] = str(e)
-        
-        # Mark analysis as failed in database
-        if analysis_log_id:
-            try:
-                with app.app_context():
-                    log = AnalysisLog.query.get(analysis_log_id)
-                    if log:
-                        log.status = 'failed'
-                        db.session.commit()
-            except:
-                pass  # Don't fail the whole process if DB update fails
+        except Exception as e:
+            self.logger.warning(f"Failed to update database log: {e}")
     
-    finally:
-        with open(config.STATUS_FILE_PATH, 'w') as f:
-            json.dump(status, f)
+    def _clean_json_response(self, raw_value: str) -> str:
+        """Cleans JSON response from LLM by removing markdown fences."""
+        if not raw_value:
+            return ''
+        
+        cleaned = raw_value.strip()
+        if cleaned.startswith('```'):
+            cleaned = cleaned.lstrip('`')
+            if cleaned.startswith('json'):
+                cleaned = cleaned[len('json'):]
+            cleaned = cleaned.strip()
+            if cleaned.endswith('```'):
+                cleaned = cleaned[:-3]
+        
+        cleaned = cleaned.strip()
+        if cleaned and cleaned[0] != '{':
+            start = cleaned.find('{')
+            end = cleaned.rfind('}')
+            if start != -1 and end != -1 and end > start:
+                cleaned = cleaned[start:end+1]
+        
+        return cleaned
+    
+    def _parse_graph_data(self, raw_value: str, label: str) -> dict:
+        """Parses and validates graph JSON data."""
+        if not raw_value:
+            return {'status': 'error', 'message': f'No {label} data returned.'}
+        
+        try:
+            normalized = self._clean_json_response(raw_value)
+            parsed = json.loads(normalized)
+            if isinstance(parsed, dict):
+                return {'status': 'ok', 'graph': parsed}
+            return {
+                'status': 'error',
+                'message': f'{label} data was not a JSON object.',
+                'raw_preview': normalized[:400]
+            }
+        except json.JSONDecodeError as exc:
+            self.logger.error(f"Failed to parse {label} JSON: {exc}")
+            return {
+                'status': 'error',
+                'message': f'Failed to parse {label} JSON.',
+                'raw_preview': (raw_value or '')[:400]
+            }
+    
+    def run_analysis(self, repo_url: str, analysis_log_id: int = None) -> None:
+        """
+        Executes the complete repository analysis workflow.
+        
+        Args:
+            repo_url: URL of the repository to analyze
+            analysis_log_id: Optional database log ID for tracking
+        """
+        status = {'status': 'processing', 'result': None, 'error': None}
+        self._update_status(status)
+        
+        try:
+            self._update_database_log(analysis_log_id, 'processing')
+            
+            repo_name = repo_url.split('/')[-1]
+            self.logger.info(f"Starting analysis for repository: {repo_name}")
+            
+            # Clone repository
+            if not self.repo_service.clone_repository(repo_url, config.LOCAL_CLONE_PATH):
+                raise Exception("Failed to clone repository")
+            
+            # Initialize vector store
+            vector_service = VectorStoreService(
+                db_path=config.CHROMA_DB_PATH,
+                collection_name=repo_name,
+                embedding_model=config.EMBEDDING_MODEL
+            )
+            
+            # Generate embeddings if needed
+            if vector_service.is_empty():
+                file_contents = self.repo_service.read_repository_files(
+                    config.LOCAL_CLONE_PATH,
+                    config.ALLOWED_EXTENSIONS,
+                    config.IGNORED_DIRECTORIES
+                )
+                if not file_contents:
+                    raise Exception("No processable files found in repository")
+                vector_service.generate_embeddings(file_contents)
+            
+            # Query relevant context
+            query_text = "Generate a complete technical documentation for this software project."
+            context = vector_service.query_similar_documents(query_text)
+            
+            if not context:
+                raise Exception("Failed to retrieve context from vector store")
+            
+            # Generate documentation
+            doc_service = DocumentationService(
+                api_key=config.GEMINI_API_KEY,
+                model_name=config.GENERATION_MODEL
+            )
+            docs = doc_service.generate_all_documentation(context, repo_name)
+            
+            # Parse graph data
+            hld_result = self._parse_graph_data(docs.get('hld'), 'HLD')
+            lld_result = self._parse_graph_data(docs.get('lld'), 'LLD')
+            
+            # Update status with results
+            status['status'] = 'completed'
+            status['result'] = {
+                'chat_response': docs.get('documentation'),
+                'hld_graph': hld_result,
+                'lld_graph': lld_result
+            }
+            
+            self._update_database_log(analysis_log_id, 'completed')
+            self.logger.info("Analysis completed successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Analysis failed: {e}")
+            status['status'] = 'error'
+            status['error'] = str(e)
+            self._update_database_log(analysis_log_id, 'failed')
+        
+        finally:
+            self._update_status(status)
+
+
+def main():
+    """Main entry point for worker process."""
+    if len(sys.argv) < 2:
+        logging.error("No repository URL provided.")
+        sys.exit(1)
+    
+    repo_url = sys.argv[1]
+    analysis_log_id = int(sys.argv[2]) if len(sys.argv) > 2 else None
+    
+    worker = AnalysisWorker()
+    worker.run_analysis(repo_url, analysis_log_id)
+
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        repo_url_arg = sys.argv[1]
-        analysis_log_id = int(sys.argv[2]) if len(sys.argv) > 2 else None
-        run_analysis(repo_url_arg, analysis_log_id)
-    else:
-        logging.error("No repository URL provided.")
+    main()
