@@ -1,0 +1,584 @@
+{
+  "project_name": "Scalable eCommerce Platform",
+  "project_goal": "To design and architect a highly available, scalable eCommerce platform capable of handling millions of users and transactions, focusing on robust Order, Payment, and Inventory management.",
+  "design_focus": "Microservices Architecture, Asynchronous Communication, Distributed Transactions, Caching, and Fault Tolerance.",
+  "high_level_design": {
+    "architecture_style": "Microservices",
+    "key_services": [
+      {
+        "service_name": "API Gateway",
+        "description": "Single entry point for all client requests, handles routing, authentication, and rate limiting."
+      },
+      {
+        "service_name": "User Service",
+        "description": "Manages user profiles, authentication (OAuth/JWT), and authorization."
+      },
+      {
+        "service_name": "Product Catalog Service",
+        "description": "Handles product information, search, categorization, and media (via CDN)."
+      },
+      {
+        "service_name": "Inventory Service",
+        "description": "Manages stock levels, handles stock reservation, and updates. Must be highly consistent (ACID)."
+      },
+      {
+        "service_name": "Order Service",
+        "description": "Orchestrates the order lifecycle (creation, status update, fulfillment) and manages the shopping cart."
+      },
+      {
+        "service_name": "Payment Service",
+        "description": "Integrates with third-party payment gateways, handles transaction processing, and fraud checks."
+      },
+      {
+        "service_name": "Shipping/Fulfillment Service",
+        "description": "Integrates with logistics providers and manages shipping labels and tracking."
+      },
+      {
+        "service_name": "Notification Service",
+        "description": "Handles emails (e.g., order confirmation) and mobile notifications (e.g., shipping updates)."
+      }
+    ],
+    "data_stores": [
+      {
+        "store_type": "Relational DB (PostgreSQL/MySQL)",
+        "purpose": "Order Service, Inventory Service (for strong consistency and transactional integrity)."
+      },
+      {
+        "store_type": "NoSQL DB (Cassandra/MongoDB)",
+        "purpose": "Product Catalog Service (for flexible schema, high read throughput of product data)."
+      },
+      {
+        "store_type": "Key-Value Cache (Redis/Memcached)",
+        "purpose": "Session management, product detail caching, and frequently accessed inventory counts."
+      },
+      {
+        "store_type": "Search Engine (Elasticsearch/Solr)",
+        "purpose": "Full-text product search and filtering."
+      }
+    ],
+    "communication_mechanisms": [
+      {
+        "mechanism": "Synchronous (REST/gRPC)",
+        "use_case": "Client-to-Gateway, Gateway-to-Service (for immediate reads, e.g., fetching product details)."
+      },
+      {
+        "mechanism": "Asynchronous (Message Queue - Kafka/RabbitMQ)",
+        "use_case": "Order fulfillment workflow (e.g., Order Created -> Inventory Reservation -> Payment Processing -> Notification). Essential for loose coupling and scalability."
+      }
+    ],
+    "core_hld_flow_example": "Placing an Order",
+    "hld_flow_steps": [
+      "Client submits POST /orders to API Gateway.",
+      "API Gateway forwards to Order Service.",
+      "Order Service validates cart and user, publishes 'Order_Created' event to Message Queue.",
+      "Inventory Service consumes 'Order_Created' event and attempts to reserve stock, publishes 'Stock_Reserved' or 'Stock_Failed' event.",
+      "Order Service consumes 'Stock_Reserved', updates order status to 'Pending Payment'.",
+      "Payment Service consumes 'Stock_Reserved', initiates payment via Gateway, publishes 'Payment_Successful' or 'Payment_Failed' event.",
+      "Order Service consumes final payment event and updates status to 'Confirmed' or 'Cancelled'.",
+      "Notification Service consumes 'Payment_Successful' and sends email/push notification."
+    ]
+  },
+  "low_level_design_example": {
+    "component_name": "Order Service LLD",
+    "technology_stack": "Java/Spring Boot, PostgreSQL, Kafka.",
+    "data_model_ll_schema": {
+      "table_name": "Orders",
+      "fields": [
+        {"field_name": "order_id", "data_type": "UUID", "constraints": "PK"},
+        {"field_name": "user_id", "data_type": "BIGINT", "constraints": "FK to User Service DB (denormalized for read)"},
+        {"field_name": "status", "data_type": "VARCHAR(50)", "values": ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"]},
+        {"field_name": "total_amount", "data_type": "NUMERIC(10,2)"},
+        {"field_name": "created_at", "data_type": "TIMESTAMP"},
+        {"field_name": "payment_ref", "data_type": "VARCHAR(100)", "constraints": "Unique index"}
+      ],
+      "indexes": ["user_id", "status", "created_at"]
+    },
+    "api_endpoints_ll_details": [
+      {
+        "method": "POST",
+        "path": "/orders",
+        "function": "createOrder(requestBody)",
+        "authentication": "Required (JWT)",
+        "rate_limiting": "5 requests/sec/user",
+        "request_body": "{\"user_id\":..., \"items\":[{\"product_id\":..., \"quantity\":...}], \"shipping_address\":...}"
+      },
+      {
+        "method": "GET",
+        "path": "/orders/{orderId}",
+        "function": "getOrderDetails(orderId)",
+        "authentication": "Required (Owner or Admin)",
+        "caching": "Read-through cache on order_id (e.g., Redis) for frequently checked orders."
+      }
+    ],
+    "asynchronous_processing_ll_details": {
+      "topic_produced": "order_events (key=order_id)",
+      "events_produced": ["OrderCreated", "OrderCancelled"],
+      "topic_consumed": "inventory_events, payment_events, shipping_events",
+      "consumption_strategy": "Idempotent Consumers (using unique transaction/event IDs to prevent duplicate processing)."
+    },
+    "scaling_strategy": "Database Sharding on 'user_id' or 'order_id' to manage write load. Read Replicas for reporting."
+  }
+}
+
+
+
+
+
+
+
+Project 1: Design an eCommerce Platform
+This design outlines a microservices-based architecture for a scalable and resilient eCommerce platform.
+High-Level Design (HLD) in JSON
+The HLD provides a macro-level view of the system's architecture, components, and their interactions.
+code
+JSON
+{
+  "projectName": "Scalable eCommerce Platform",
+  "architecture": "Microservices",
+  "description": "A distributed system composed of independent services to handle different business capabilities of an eCommerce platform, ensuring scalability and fault tolerance.",
+  "components": [
+    {
+      "name": "User Service",
+      "description": "Manages user authentication, profiles, and addresses.",
+      "responsibilities": ["User registration", "Login and authentication (JWT)", "User profile management"],
+      "database": "PostgreSQL"
+    },
+    {
+      "name": "Product Catalog Service",
+      "description": "Handles product information, categories, and search functionality.",
+      "responsibilities": ["Product management", "Categorization", "Search and filtering"],
+      "database": "PostgreSQL, Elasticsearch for search"
+    },
+    {
+      "name": "Order Service",
+      "description": "Manages the lifecycle of an order from creation to completion.",
+      "responsibilities": ["Order creation", "Order status tracking", "Order history"],
+      "database": "PostgreSQL"
+    },
+    {
+      "name": "Payment Service",
+      "description": "Integrates with payment gateways to process transactions.",
+      "responsibilities": ["Process payments", "Handle refunds", "Ensure PCI compliance"],
+      "integrations": ["Stripe", "PayPal"]
+    },
+    {
+      "name": "Inventory Service",
+      "description": "Manages stock levels of products.",
+      "responsibilities": ["Track stock", "Update inventory on order placement and returns"],
+      "database": "Redis for fast lookups, PostgreSQL for persistence"
+    }
+  ],
+  "apiGateway": {
+    "purpose": "Single entry point for all client requests, handling routing, authentication, and rate limiting.",
+    "technology": "AWS API Gateway / Nginx"
+  },
+  "communication": {
+    "synchronous": "REST APIs for client-service and some service-service interactions.",
+    "asynchronous": "Message Queue (RabbitMQ/Kafka) for inter-service communication to decouple services and handle long-running processes."
+  },
+  "scalability": {
+    "loadBalancing": "Distributes incoming traffic across multiple instances of services.",
+    "containerization": "Docker and Kubernetes for service deployment, scaling, and management."
+  }
+}
+Low-Level Design (LLD) for the Order Service in JSON
+The LLD delves into the specifics of a single component, in this case, the Order Service.
+code
+JSON
+{
+  "serviceName": "Order Service",
+  "databaseSchema": {
+    "tables": [
+      {
+        "name": "orders",
+        "columns": ["order_id (PK)", "user_id", "status", "total_price", "shipping_address", "created_at"]
+      },
+      {
+        "name": "order_items",
+        "columns": ["order_item_id (PK)", "order_id (FK)", "product_id", "quantity", "price"]
+      }
+    ]
+  },
+  "apiEndpoints": [
+    {
+      "method": "POST",
+      "path": "/orders",
+      "description": "Create a new order.",
+      "requestBody": {"user_id", "items": [{"product_id", "quantity"}], "shipping_address"},
+      "response": {"order_id", "status"}
+    },
+    {
+      "method": "GET",
+      "path": "/orders/{order_id}",
+      "description": "Get details of a specific order.",
+      "response": "Full order details"
+    }
+  ]
+}
+Sequence Diagram for "Placing an Order" in JSON
+This JSON structure describes the sequence of interactions when a user places an order.
+code
+JSON
+{
+  "diagram": "Place Order Sequence",
+  "participants": ["User", "API Gateway", "Order Service", "Inventory Service", "Payment Service", "Notification Service"],
+  "flow": [
+    {"from": "User", "to": "API Gateway", "action": "POST /orders"},
+    {"from": "API Gateway", "to": "Order Service", "action": "Create Order Request"},
+    {"from": "Order Service", "to": "Inventory Service", "action": "Check Stock"},
+    {"from": "Inventory Service", "to": "Order Service", "action": "Stock Available"},
+    {"from": "Order Service", "to": "Payment Service", "action": "Process Payment"},
+    {"from": "Payment Service", "to": "Order Service", "action": "Payment Successful"},
+    {"from": "Order Service", "to": "Order Service", "action": "Save Order"},
+    {"from": "Order Service", "to": "Inventory Service", "action": "Update Stock"},
+    {"from": "Order Service", "to": "API Gateway", "action": "Order Confirmation"},
+    {"from": "API Gateway", "to": "User", "action": "Return Confirmation"},
+    {"from": "Order Service", "to": "Notification Service", "action": "Send Order Confirmation Notification (Asynchronous)"}
+  ]
+}
+Class Diagram for Core eCommerce Entities in JSON
+This JSON represents the key classes and their relationships within the eCommerce system.
+code
+JSON
+{
+  "diagram": "eCommerce Class Diagram",
+  "classes": [
+    {
+      "name": "User",
+      "attributes": ["userId", "username", "email"],
+      "methods": ["register()", "login()"]
+    },
+    {
+      "name": "Product",
+      "attributes": ["productId", "name", "price", "description"]
+    },
+    {
+      "name": "Order",
+      "attributes": ["orderId", "userId", "status", "totalPrice"],
+      "methods": ["calculateTotal()", "updateStatus()"]
+    },
+    {
+      "name": "OrderItem",
+      "attributes": ["orderItemId", "productId", "quantity", "price"]
+    },
+    {
+      "name": "Payment",
+      "attributes": ["paymentId", "orderId", "amount", "status"]
+    }
+  ],
+  "relationships": [
+    {"from": "User", "to": "Order", "type": "One-to-Many"},
+    {"from": "Order", "to": "OrderItem", "type": "One-to-Many"},
+    {"from": "Product", "to": "OrderItem", "type": "One-to-Many"},
+    {"from": "Order", "to": "Payment", "type": "One-to-One"}
+  ]
+}
+
+
+
+
+
+
+
+Project 2: Build a Content Delivery Network (CDN)
+This design outlines a globally distributed network of proxy servers designed for high-performance and high-availability delivery of content.
+High-Level Design (HLD) in JSON
+The HLD focuses on the overall distributed nature of the CDN, its core components, and how user requests are routed.
+code
+JSON
+{
+  "projectName": "Content Delivery Network (CDN) Architecture",
+  "architecture": "Geographically Distributed System",
+  "description": "A network of Points of Presence (PoPs) distributed globally to cache content closer to users, reducing latency and offloading traffic from origin servers.",
+  "components": [
+    {
+      "name": "Points of Presence (PoPs)",
+      "description": "Geographically distributed data centers containing clusters of cache servers.",
+      "responsibilities": ["Cache static and dynamic content", "Serve content to local users", "Aggregate logs and metrics"],
+      "technology": "Nginx, Varnish, or custom proxy servers"
+    },
+    {
+      "name": "Origin Server",
+      "description": "The primary source of the content. The CDN pulls content from this server when a cache miss occurs.",
+      "responsibilities": ["Store the authoritative version of all content", "Respond to fetch requests from PoPs"],
+      "technology": "AWS S3, Google Cloud Storage, or any web server"
+    },
+    {
+      "name": "Request Routing System",
+      "description": "Directs user requests to the most appropriate PoP, usually the one with the lowest latency.",
+      "responsibilities": ["Resolve DNS queries with PoP IP addresses", "Perform health checks on PoPs", "Balance load based on geography, network latency, and server health"],
+      "technology": "DNS-based routing (GeoDNS), Anycast routing"
+    },
+    {
+      "name": "Control Plane / Management API",
+      "description": "Centralized system for managing CDN configuration.",
+      "responsibilities": ["Content purging/invalidation", "Configuring caching rules", "Analytics and monitoring", "SSL certificate management"],
+      "interface": "REST API, Web Dashboard"
+    }
+  ],
+  "cachingStrategy": {
+    "policy": "Cache-Aside (Lazy Loading)",
+    "description": "Content is pulled from the origin and cached only when a user requests it for the first time from a specific PoP (cache miss).",
+    "evictionPolicies": ["Time-To-Live (TTL)", "Least Recently Used (LRU)"]
+  },
+  "keyFeatures": ["SSL/TLS Termination at the edge", "HTTP/2 and HTTP/3 support", "DDoS mitigation", "Gzip/Brotli compression"]
+}
+Low-Level Design (LLD) for a PoP Cache Server in JSON
+The LLD provides specifics on how a single cache server within a Point of Presence operates.
+code
+JSON
+{
+  "componentName": "PoP Cache Server",
+  "storageHierarchy": [
+    {
+      "level": "L1 Cache",
+      "type": "In-Memory (RAM)",
+      "technology": "Redis / Memcached",
+      "purpose": "Store hot content (most frequently accessed) for the lowest latency."
+    },
+    {
+      "level": "L2 Cache",
+      "type": "Persistent Storage (SSD)",
+      "technology": "File System / Nginx Proxy Cache",
+      "purpose": "Store less frequently accessed content that doesn't fit in RAM."
+    }
+  ],
+  "cacheEvictionLogic": {
+    "policy": "LRU (Least Recently Used)",
+    "implementation": "A hash map for O(1) lookups is paired with a doubly-linked list. When content is accessed, its node moves to the front of the list. When eviction is needed, the node at the tail is removed."
+  },
+  "internalApi": [
+    {
+      "method": "GET",
+      "path": "/content?key=<content_hash>",
+      "description": "Retrieve content from cache. Checks L1, then L2. If miss, fetches from Origin."
+    },
+    {
+      "method": "PUT",
+      "path": "/content",
+      "description": "Store content in cache with associated TTL and metadata."
+    },
+    {
+      "method": "DELETE",
+      "path": "/content?key=<content_hash>",
+      "description": "Purge (invalidate) a specific piece of content from the cache."
+    }
+  ]
+}
+Sequence Diagram for "User Request with Cache Miss" in JSON
+This JSON describes the interactions when a user requests content that is not currently cached at their local PoP.
+code
+JSON
+{
+  "diagram": "CDN Cache Miss Sequence",
+  "participants": ["User", "DNS Resolver", "CDN GeoDNS", "PoP Cache Server", "Origin Server"],
+  "flow": [
+    {"from": "User", "to": "DNS Resolver", "action": "DNS Query for content.domain.com"},
+    {"from": "DNS Resolver", "to": "CDN GeoDNS", "action": "Forward Query"},
+    {"from": "CDN GeoDNS", "to": "DNS Resolver", "action": "Return IP of nearest PoP (based on resolver's IP)"},
+    {"from": "DNS Resolver", "to": "User", "action": "Return PoP IP"},
+    {"from": "User", "to": "PoP Cache Server", "action": "GET /media/image.jpg"},
+    {"from": "PoP Cache Server", "to": "PoP Cache Server", "action": "Check internal cache (Cache Miss)"},
+    {"from": "PoP Cache Server", "to": "Origin Server", "action": "GET /media/image.jpg (forward request)"},
+    {"from": "Origin Server", "to": "PoP Cache Server", "action": "Return content (image.jpg)"},
+    {"from": "PoP Cache Server", "to": "PoP Cache Server", "action": "Store content in cache with TTL"},
+    {"from": "PoP Cache Server", "to": "User", "action": "Return content (image.jpg)"}
+  ]
+}
+Class Diagram for Core CDN Entities in JSON
+This JSON represents the key classes and their relationships in a CDN system.
+code
+JSON
+{
+  "diagram": "CDN Class Diagram",
+  "classes": [
+    {
+      "name": "RequestRouter",
+      "attributes": ["routingRules"],
+      "methods": ["getBestPoP(userIp)"]
+    },
+    {
+      "name": "PointOfPresence (PoP)",
+      "attributes": ["location", "ipAddressRange", "healthStatus"],
+      "methods": ["handleRequest(request)"]
+    },
+    {
+      "name": "CacheServer",
+      "attributes": ["ramCache", "diskCache"],
+      "methods": ["fetchFromCache(key)", "storeInCache(key, data)", "fetchFromOrigin(key)"]
+    },
+    {
+      "name": "CacheObject",
+      "attributes": ["key", "data", "ttl", "lastAccessedTimestamp"]
+    },
+    {
+      "name": "OriginServer",
+      "attributes": ["address"],
+      "methods": ["getContent(key)"]
+    }
+  ],
+  "relationships": [
+    {"from": "RequestRouter", "to": "PointOfPresence", "type": "Directs to"},
+    {"from": "PointOfPresence", "to": "CacheServer", "type": "Composition (contains one or more)"},
+    {"from": "CacheServer", "to": "CacheObject", "type": "Aggregation (manages many)"},
+    {"from": "CacheServer", "to": "OriginServer", "type": "Association (communicates with)"}
+  ]
+}
+
+
+
+Project 3: Create a Social Networking Platform
+This design outlines a microservices architecture for a scalable social networking platform featuring user profiles, a news feed, real-time messaging, and notifications.
+High-Level Design (HLD) in JSON
+The HLD defines the distributed system's components, each handling a distinct business capability to ensure scalability and resilience.
+code
+JSON
+{
+  "projectName": "Social Networking Platform",
+  "architecture": "Microservices",
+  "description": "A platform built with decoupled services to manage user interactions, content creation, real-time communication, and personalized content delivery.",
+  "components": [
+    {
+      "name": "User & Profile Service",
+      "description": "Manages user identity, authentication, and user profile information (bio, profile picture, etc.).",
+      "responsibilities": ["User registration/login (OAuth, JWT)", "Profile CRUD operations", "User settings"],
+      "database": "PostgreSQL or MySQL"
+    },
+    {
+      "name": "Social Graph Service",
+      "description": "Manages the relationships between users, such as friendships or follower/following connections.",
+      "responsibilities": ["Follow user", "Unfollow user", "List followers/following", "Block user"],
+      "database": "Graph Database (Neo4j) or a NoSQL DB optimized for relationships (e.g., Redis Graph)"
+    },
+    {
+      "name": "Post Service",
+      "description": "Handles the creation, storage, and retrieval of user-generated content (posts, images, videos).",
+      "responsibilities": ["Create, read, update, delete (CRUD) posts", "Handle likes and comments"],
+      "database": "Cassandra or a similar wide-column NoSQL store for high write throughput and scalability."
+    },
+    {
+      "name": "Feed Service",
+      "description": "Generates and delivers personalized news feeds for each user. This is a read-heavy system.",
+      "responsibilities": ["Aggregate posts from followed users", "Rank and sort feed content", "Implement fan-out logic"],
+      "database": "Redis (for storing pre-computed feeds) and Kafka (for the fan-out process)."
+    },
+    {
+      "name": "Messaging Service",
+      "description": "Enables real-time, one-on-one, and group chat.",
+      "responsibilities": ["Send/receive messages", "Manage chat history", "Indicate user presence (online/offline)"],
+      "communication": "WebSockets for persistent connections",
+      "database": "Cassandra or HBase for message storage."
+    },
+    {
+      "name": "Notification Service",
+      "description": "Sends notifications to users about relevant events (new followers, likes, messages).",
+      "responsibilities": ["Generate notifications", "Push to clients via Firebase Cloud Messaging (FCM) / Apple Push Notification Service (APNS)"],
+      "communication": "Asynchronous via a Message Queue (RabbitMQ/Kafka)."
+    }
+  ],
+  "apiGateway": {
+    "purpose": "A single entry point for all client applications (web, mobile) to abstract the microservices backend.",
+    "technology": "Kong, AWS API Gateway"
+  }
+}
+Low-Level Design (LLD) for the Feed Service in JSON
+The LLD details the implementation of the Feed Service, focusing on the hybrid fan-out model for generating user feeds.
+code
+JSON
+{
+  "serviceName": "Feed Service",
+  "feedGenerationModel": {
+    "name": "Hybrid Fan-out Model",
+    "description": "Combines push and pull strategies. For most users, new posts are pushed to their followers' feeds on write. For 'celebrity' users (high follower count), followers pull their posts on read to avoid massive write operations.",
+    "pushProcess (Fan-out on Write)": {
+      "trigger": "User creates a post.",
+      "steps": [
+        "Post Service publishes a 'new post' event to a message queue (e.g., Kafka).",
+        "A Feed Service worker consumes the event.",
+        "Worker fetches the user's followers from the Social Graph Service.",
+        "For each follower, the new post ID is pushed to their feed list stored in Redis.",
+        "The Redis feed is a sorted list (e.g., ZSET) capped at a certain size (e.g., 500 entries)."
+      ]
+    },
+    "pullProcess (Fan-out on Read)": {
+      "trigger": "User requests their feed.",
+      "steps": [
+        "Fetch the pre-computed feed (list of post IDs) from Redis.",
+        "Identify any 'celebrity' users the current user follows.",
+        "Separately fetch recent posts from those celebrities from the Post Service.",
+        "Merge the celebrity posts with the Redis feed, rank, and return the final list."
+      ]
+    }
+  },
+  "apiEndpoints": [
+    {
+      "method": "GET",
+      "path": "/feed",
+      "description": "Retrieve the user's personalized news feed.",
+      "queryParams": ["cursor (for pagination)", "limit"],
+      "response": "A paginated list of post objects."
+    }
+  ]
+}```
+
+#### **Sequence Diagram for "User Posts an Update (Fan-out on Write)" in JSON**
+
+This sequence illustrates the asynchronous process of updating follower feeds after a new post is created.
+
+```json
+{
+  "diagram": "User Post and Feed Fan-out Sequence",
+  "participants": ["User", "API Gateway", "Post Service", "Message Queue", "Feed Service Worker", "Social Graph Service", "Redis Cache"],
+  "flow": [
+    {"from": "User", "to": "API Gateway", "action": "POST /posts"},
+    {"from": "API Gateway", "to": "Post Service", "action": "Create Post Request"},
+    {"from": "Post Service", "to": "Post Service", "action": "Store Post in Database"},
+    {"from": "Post Service", "to": "API Gateway", "action": "Return Post Created (201)"},
+    {"from": "API Gateway", "to": "User", "action": "Confirm Post Creation"},
+    {"from": "Post Service", "to": "Message Queue", "action": "Publish {postId, userId} event (Asynchronous)"},
+    {"from": "Message Queue", "to": "Feed Service Worker", "action": "Consume Event"},
+    {"from": "Feed Service Worker", "to": "Social Graph Service", "action": "GET /followers/{userId}"},
+    {"from": "Social Graph Service", "to": "Feed Service Worker", "action": "Return follower list"},
+    {"from": "Feed Service Worker", "to": "Redis Cache", "action": "Loop: Add postId to each follower's feed list (ZADD follower_feed_key timestamp postId)"}
+  ]
+}
+Class Diagram for Core Social Media Entities in JSON
+This JSON represents the key classes and their relationships within the platform.
+code
+JSON
+{
+  "diagram": "Social Media Class Diagram",
+  "classes": [
+    {
+      "name": "User",
+      "attributes": ["userId", "username", "email", "hashedPassword"],
+      "methods": ["createPost()", "follow(User)", "sendMessage(User, content)"]
+    },
+    {
+      "name": "UserProfile",
+      "attributes": ["profileId", "bio", "profilePictureUrl", "fullName"]
+    },
+    {
+      "name": "Post",
+      "attributes": ["postId", "content", "mediaUrl", "timestamp", "authorId"],
+      "methods": ["addComment(Comment)", "like(User)"]
+    },
+    {
+      "name": "Comment",
+      "attributes": ["commentId", "text", "timestamp", "authorId", "postId"]
+    },
+    {
+      "name": "Follow",
+      "attributes": ["followerId", "followingId", "timestamp"]
+    }
+  ],
+  "relationships": [
+    {"from": "User", "to": "UserProfile", "type": "One-to-One", "description": "Has a"},
+    {"from": "User", "to": "Post", "type": "One-to-Many", "description": "Creates"},
+    {"from": "User", "to": "Follow", "type": "One-to-Many", "label": "is follower"},
+    {"from": "User", "to": "Follow", "type": "One-to-Many", "label": "is following"},
+    {"from": "Post", "to": "Comment", "type": "One-to-Many", "description": "Contains"}
+  ]
+}
+
+

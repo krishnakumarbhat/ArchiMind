@@ -6,10 +6,22 @@ import logging
 from typing import Dict
 
 from config import DEFAULT_HLD_MERMAID, DEFAULT_LLD_MERMAID, DIAGRAM_PROMPT_TEMPLATE
-from ollama_service import get_ollama_service
+from ollama_service import OllamaService
 from .base import AgentContext, BaseAgent
 
 LOGGER = logging.getLogger(__name__)
+
+
+def parse_diagram_response(response: str) -> Dict[str, str]:
+    """Parse LLM response into HLD/LLD diagrams with safe fallbacks."""
+    try:
+        parsed = json.loads(response)
+        hld = parsed.get("hld", DEFAULT_HLD_MERMAID)
+        lld = parsed.get("lld", DEFAULT_LLD_MERMAID)
+        return {"hld": hld, "lld": lld}
+    except json.JSONDecodeError:
+        LOGGER.warning("Diagram response invalid JSON. Using default diagrams.")
+        return {"hld": DEFAULT_HLD_MERMAID, "lld": DEFAULT_LLD_MERMAID}
 
 
 class DiagramAgent(BaseAgent):
@@ -17,7 +29,7 @@ class DiagramAgent(BaseAgent):
 
     def __init__(self) -> None:
         super().__init__(name="diagram_agent")
-        self.ollama = get_ollama_service()
+        self.ollama = OllamaService()
 
     def run(self, context: AgentContext) -> AgentContext:
         knowledge_graph = context.get("knowledge_graph")
@@ -28,20 +40,7 @@ class DiagramAgent(BaseAgent):
         prompt = DIAGRAM_PROMPT_TEMPLATE.format(graph_description=graph_json)
         response = self.ollama.generate_response(prompt)
 
-        diagrams = self._parse_diagram_response(response)
+        diagrams = parse_diagram_response(response)
         context = self.update_context(context, diagrams=diagrams)
         return context
-
-    def _parse_diagram_response(self, response: str) -> Dict[str, str]:
-        try:
-            parsed = json.loads(response)
-            hld = parsed.get("hld", DEFAULT_HLD_MERMAID)
-            lld = parsed.get("lld", DEFAULT_LLD_MERMAID)
-            return {"hld": hld, "lld": lld}
-        except json.JSONDecodeError:
-            LOGGER.warning("Diagram response invalid JSON. Using default diagrams.")
-            return {"hld": DEFAULT_HLD_MERMAID, "lld": DEFAULT_LLD_MERMAID}
-
-
-def build_diagram_agent() -> DiagramAgent:
-    return DiagramAgent()
+ 

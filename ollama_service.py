@@ -118,9 +118,4 @@ class OllamaService:
                 "embedding_available": False,
                 "all_models": []
             }
-
-
-# Factory function for easy access
-def get_ollama_service() -> OllamaService:
-    """Factory function to get OllamaService instance."""
-    return OllamaService()
+ 

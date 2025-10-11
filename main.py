@@ -12,7 +12,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 @app.route('/')
 def index():
     """Renders the main input page."""
-    return render_template('index3.html')
+    return render_template('index.html')
 
 
 @app.route('/api/analyze', methods=['POST'])
