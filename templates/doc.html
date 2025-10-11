@@ -58,8 +58,7 @@
     <div class="container">
         <div class="tabs">
             <button class="tab active" data-tab="documentation">Documentation</button>
-            <button class="tab" data-tab="graph">Graph</button>
-            <button class="tab" data-tab="chat">Chat</button>
+            <button class="tab" data-tab="graph">Architecture Graphs</button>
         </div>
 
         <div id="documentation" class="tab-content active">
@@ -97,14 +96,6 @@
             </div>
         </div>
 
-        <div id="chat" class="tab-content">
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages"></div>
-                <div class="chat-input-container">
-                    <input type="text" id="chatInput" placeholder="Ask about the architecture...">
-                    <button id="chatSendButton">Send</button>
-            </div>
-        </div>
     </div>
 
     <script type="module">
@@ -344,43 +335,6 @@
             document.addEventListener('touchend', () => {
                 isPanning = false;
             });
-
-            // --- Chat Logic ---
-            const chatMessages = document.getElementById('chatMessages');
-            const chatInput = document.getElementById('chatInput');
-            const chatSendButton = document.getElementById('chatSendButton');
-
-            function addChatMessage(text, role) {
-                const messageDiv = document.createElement('div');
-                messageDiv.textContent = text;
-                messageDiv.style.color = role === 'user' ? '#10B981' : '#F9FAFB';
-                messageDiv.style.textAlign = role === 'user' ? 'right' : 'left';
-                messageDiv.style.padding = '0.5rem';
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-
-            async function handleChatSend() {
-                const messageText = chatInput.value.trim();
-                if (!messageText) return;
-                addChatMessage(messageText, 'user');
-                chatInput.value = '';
-
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: messageText }),
-                });
-                const data = await response.json();
-                addChatMessage(data.response, 'assistant');
-            }
-
-            chatSendButton.addEventListener('click', handleChatSend);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleChatSend();
-            });
-            
-            addChatMessage('Hello! Ask anything about the architecture shown.', 'assistant');
         });
     </script>
 </body>
