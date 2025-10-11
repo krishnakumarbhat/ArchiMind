@@ -39,7 +39,7 @@ class CodeParserAgent(BaseAgent):
             self.session.headers["Authorization"] = f"Bearer {self.github_token}"
 
     def run(self, context: AgentContext) -> AgentContext:
-        repo_url = context.get("repo_url")
+        repo_url = context.get("repo_url") or context.get("repo_input")
         if not repo_url:
             raise ValueError("CodeParserAgent requires 'repo_url' in context")
 
