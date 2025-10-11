@@ -34,15 +34,19 @@
         .chapter-chevron { margin-left: auto; font-size: 1.15rem; transition: transform 0.2s ease; }
         .documentation-content .collapsed .chapter-chevron { transform: rotate(-90deg); }
         @media (max-width: 1080px) { .documentation-layout { grid-template-columns: 1fr; } .toc-panel { position: static; width: 100%; } }
-        .graph-container { background-color: var(--surface); padding: 2rem; border-radius: 8px; min-height: 700px; display: flex; justify-content: center; align-items: center; overflow: auto; }
-        .graph-subtabs { display: flex; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
-        .graph-subtab { padding: 0.75rem 1.5rem; background: none; border: none; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent; margin-right: 1rem; }
-        .graph-subtab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .mermaid-container { position: relative; overflow: hidden; }
-        .mermaid svg { max-width: 100%; height: auto; }
-        .zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
-        .zoom-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .zoom-btn:hover { background: #059669; }
+        .graph-container { background-color: var(--surface); padding: 2rem; border-radius: 14px; min-height: 720px; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: 0 22px 60px rgba(8, 13, 26, 0.45); }
+        .graph-subtabs { display: flex; gap: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        .graph-subtab { padding: 0.75rem 1.5rem; background: rgba(31, 41, 55, 0.8); border: 1px solid transparent; color: var(--text-secondary); font-size: 0.95rem; cursor: pointer; border-radius: 9999px; transition: all 0.2s ease; }
+        .graph-subtab:hover { color: var(--text-primary); border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); }
+        .graph-subtab.active { color: var(--primary); border-color: var(--primary); background: rgba(16, 185, 129, 0.16); }
+        .graph-meta { display: flex; flex-direction: column; gap: 0.35rem; }
+        .graph-meta h3 { margin: 0; font-size: 1.35rem; letter-spacing: 0.02em; color: var(--text-primary); }
+        .graph-meta p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
+        .graph-stage { position: relative; flex: 1; min-height: 560px; }
+        .graph-canvas { position: absolute; inset: 0; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; background: rgba(12, 18, 30, 0.95); display: none; padding: 1rem; box-sizing: border-box; }
+        .graph-canvas.active { display: block; }
+        .graph-message { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-secondary); font-size: 1rem; padding: 2rem; }
+        .graph-message.error { color: #fca5a5; }
         .chat-container { background-color: var(--surface); border-radius: 8px; height: 70vh; display: flex; flex-direction: column; }
         .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; }
         .chat-input-container { display: flex; padding: 1rem; border-top: 1px solid var(--border-color); }
@@ -78,15 +82,16 @@
                     <button class="graph-subtab active" data-diagram="hld">High-Level Design (HLD)</button>
                     <button class="graph-subtab" data-diagram="lld">Low-Level Design (LLD)</button>
                 </div>
-                <div class="graph-content">
-                    <div class="mermaid-container">
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" onclick="zoomIn()">+</button>
-                            <button class="zoom-btn" onclick="zoomOut()">-</button>
-                            <button class="zoom-btn" onclick="resetZoom()">Reset</button>
-                        </div>
-                        <div class="mermaid hld-diagram" style="display: block;">{{ data.hld_diagram }}</div>
-                        <div class="mermaid lld-diagram" style="display: none;">{{ data.lld_diagram }}</div>
+                <div class="graph-meta" id="graphMeta">
+                    <h3>Architecture Graph</h3>
+                    <p>Switch tabs to explore the generated system views.</p>
+                </div>
+                <div class="graph-stage">
+                    <div class="graph-canvas active" id="hldCanvas">
+                        <div class="graph-message">Awaiting High-Level Design data…</div>
+                    </div>
+                    <div class="graph-canvas" id="lldCanvas">
+                        <div class="graph-message">Awaiting Low-Level Design data…</div>
                     </div>
                 </div>
             </div>

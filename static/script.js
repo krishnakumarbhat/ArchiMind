@@ -73,6 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.status === 202) {
                 pollStatus();
+            } else if (response.status === 403) {
+                // Rate limit reached - show login modal
+                const data = await response.json();
+                setLoading(false);
+                loadingIndicator.innerHTML = defaultLoadingMarkup;
+                
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
             } else {
                 const data = await response.json();
                 showError(data.error || 'Failed to start analysis.');

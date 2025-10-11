@@ -286,11 +286,23 @@
                     </svg>
                     <span>GitHub</span>
                 </a>
-                <div class="brand">
-                    <div class="brand-logo">AM</div>
-                    <div class="brand-text">
-                        <span class="brand-title">ArchiMind</span>
-                        <span class="brand-tagline">Multi-Agent Architect Explorer</span>
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    {% if user.is_authenticated %}
+                        <span style="color: var(--muted); font-size: 0.9rem;">Welcome, {{ user.first_name }}</span>
+                        <a class="github-link" href="/logout" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3);">
+                            <span>Logout</span>
+                        </a>
+                    {% else %}
+                        <a class="github-link" href="/login">
+                            <span>Login</span>
+                        </a>
+                    {% endif %}
+                    <div class="brand">
+                        <div class="brand-logo">AM</div>
+                        <div class="brand-text">
+                            <span class="brand-title">ArchiMind</span>
+                            <span class="brand-tagline">Multi-Agent Architect Explorer</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -330,6 +342,26 @@
             Crafted with multi-agent intelligence. © 2025 ArchiMind.
         </footer>
     </div>
+    <script>
+        const isAuthenticated = {{ 'true' if user.is_authenticated else 'false' }};
+    </script>
     <script src="/static/script.js" defer></script>
+    
+    <!-- Login Prompt Modal -->
+    <div id="loginModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #1F2937; border-radius: 20px; padding: 2.5rem; max-width: 450px; width: 90%; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+            <h2 style="margin: 0 0 1rem; font-size: 1.5rem; color: #F9FAFB;">Generation Limit Reached</h2>
+            <p style="color: #9CA3AF; margin-bottom: 1.5rem; line-height: 1.6;">You've used all 5 free generations. Create an account to enjoy unlimited repository analysis!</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="/sign-up" style="flex: 1; padding: 0.875rem; background: linear-gradient(135deg, #10B981, #22d3ee); color: white; text-align: center; border-radius: 10px; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    Sign Up
+                </a>
+                <a href="/login" style="flex: 1; padding: 0.875rem; background: rgba(16, 185, 129, 0.15); color: #10B981; text-align: center; border-radius: 10px; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.3); transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.25)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.15)'">
+                    Login
+                </a>
+            </div>
+            <button onclick="document.getElementById('loginModal').style.display='none'" style="margin-top: 1rem; width: 100%; padding: 0.75rem; background: transparent; color: #9CA3AF; border: 1px solid #374151; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">Close</button>
+        </div>
+    </div>
 </body>
 </html>
