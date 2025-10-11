@@ -4,6 +4,7 @@
 .env.production
 .env.staging
 secrets.txt
+secret.txt
 *.secret
 
 # Python

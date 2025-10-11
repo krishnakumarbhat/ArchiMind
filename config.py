@@ -3,6 +3,13 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
+
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 # Ollama Model Configuration
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -107,3 +114,9 @@ Context:
 
 Answer in 3-5 paragraphs, referencing relevant components.
 """
+
+def get_github_token() -> Optional[str]:
+    """Return GitHub token from environment variables."""
+
+    token = os.getenv("GITHUB_TOKEN")
+    return token.strip() if token else None

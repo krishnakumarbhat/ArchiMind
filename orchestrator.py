@@ -5,28 +5,27 @@ from typing import Dict
 
 from langgraph.graph import END, StateGraph
 
-from agents.analysis_agent import build_analysis_agent
-from agents.chat_agent import build_chat_agent
-from agents.code_parser_agent import build_code_parser_agent
-from agents.diagram_agent import build_diagram_agent
-from agents.embedding_agent import build_embedding_agent
-from agents.graph_agent import build_graph_agent
-from agents.base import AgentContext
-from stores.neo4j_store import get_graph_store, get_vector_store
+from agents.analysis_agent import AnalysisAgent
+from agents.chat_agent import ChatAgent
+from agents.code_parser_agent import CodeParserAgent
+from agents.diagram_agent import DiagramAgent
+from agents.embedding_agent import EmbeddingAgent
+from agents.graph_agent import GraphAgent
+from stores.neo4j_store import Neo4jGraphStore, Neo4jVectorStore
 
 
-class AnalysisState(AgentContext):
+class AnalysisState(dict):
     """State passed between LangGraph nodes."""
 
 
 def _analysis_workflow() -> StateGraph:
     graph = StateGraph(AnalysisState)
 
-    code_parser = build_code_parser_agent()
-    analysis_agent = build_analysis_agent()
-    embedding_agent = build_embedding_agent()
-    graph_agent = build_graph_agent()
-    diagram_agent = build_diagram_agent()
+    code_parser = CodeParserAgent()
+    analysis_agent = AnalysisAgent()
+    embedding_agent = EmbeddingAgent()
+    graph_agent = GraphAgent()
+    diagram_agent = DiagramAgent()
 
     def parse_repo(state: AnalysisState) -> AnalysisState:
         return code_parser.run(state)
@@ -35,11 +34,11 @@ def _analysis_workflow() -> StateGraph:
         return analysis_agent.run(state)
 
     def embed_repo(state: AnalysisState) -> AnalysisState:
-        state.setdefault("vector_store", get_vector_store())
+        state.setdefault("vector_store", Neo4jVectorStore())
         return embedding_agent.run(state)
 
     def build_graph(state: AnalysisState) -> AnalysisState:
-        state.setdefault("graph_store", get_graph_store())
+        state.setdefault("graph_store", Neo4jGraphStore())
         return graph_agent.run(state)
 
     def generate_diagrams(state: AnalysisState) -> AnalysisState:
@@ -68,7 +67,7 @@ def build_analysis_executor():
 
 def run_analysis(repo_url: str) -> Dict[str, object]:
     executor = build_analysis_executor()
-    initial_state = AnalysisState(repo_url=repo_url)
+    initial_state = AnalysisState(repo_url=repo_url, repo_input=repo_url)
     result = executor.invoke(initial_state)
     diagrams = result.get("diagrams", {})
     return {
@@ -80,8 +79,8 @@ def run_analysis(repo_url: str) -> Dict[str, object]:
 
 
 def run_chat(question: str) -> Dict[str, object]:
-    chat_agent = build_chat_agent()
-    state = AnalysisState(chat_question=question, vector_store=get_vector_store())
+    chat_agent = ChatAgent()
+    state = AnalysisState(chat_question=question, vector_store=Neo4jVectorStore())
     result = chat_agent.run(state)
     return {
         "answer": result.get("chat_answer", "No answer available"),

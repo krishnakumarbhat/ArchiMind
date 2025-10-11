@@ -1,4 +1,4 @@
-"""Neo4j-backed storage for embeddings and knowledge graphs."""
+"""Unified Neo4j-backed storage for embeddings and knowledge graphs."""
 from __future__ import annotations
 
 import logging
@@ -20,13 +20,15 @@ LOGGER = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
-def _get_driver():
+def get_driver():
+    """Get cached Neo4j driver instance."""
     LOGGER.info("Connecting to Neo4j at %s", NEO4J_URI)
     return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 
-def _get_session() -> Session:
-    driver = _get_driver()
+def get_session() -> Session:
+    """Get Neo4j session for database operations."""
+    driver = get_driver()
     if NEO4J_DATABASE:
         return driver.session(database=NEO4J_DATABASE)
     return driver.session()
@@ -70,7 +72,7 @@ class Neo4jVectorStore:
         if not payload:
             return
 
-        with _get_session() as session:
+        with get_session() as session:
             session.run(
                 """
                 UNWIND $rows AS row
@@ -89,7 +91,7 @@ class Neo4jVectorStore:
         if not query_vector:
             return []
         self._ensure_index(len(query_vector))
-        with _get_session() as session:
+        with get_session() as session:
             result = session.run(
                 """
                 CALL db.index.vector.queryNodes($index_name, $top_k, $embedding)
@@ -113,7 +115,7 @@ class Neo4jVectorStore:
     def _ensure_index(self, dimension: int) -> None:
         if self._index_ready:
             return
-        with _get_session() as session:
+        with get_session() as session:
             existing = session.run(
                 """
                 SHOW INDEXES YIELD name
@@ -151,7 +153,7 @@ class Neo4jGraphStore:
     def store_graph(self, graph: Dict[str, Any]) -> None:
         nodes = graph.get("nodes", [])
         relationships = graph.get("relationships", [])
-        with _get_session() as session:
+        with get_session() as session:
             if nodes:
                 session.run(
                     """
@@ -187,9 +189,4 @@ class Neo4jGraphStore:
                 )
 
 
-def get_vector_store() -> Neo4jVectorStore:
-    return Neo4jVectorStore()
-
-
-def get_graph_store() -> Neo4jGraphStore:
-    return Neo4jGraphStore()
+ 

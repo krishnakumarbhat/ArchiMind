@@ -4,9 +4,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-
-class AgentContext(Dict[str, Any]):
-    """Simple alias for dict-based context passed between agents."""
+# Use a type alias for the dict-based context passed between agents.
+# This avoids having multiple classes in this file while keeping type clarity.
+AgentContext = Dict[str, Any]
 
 
 class BaseAgent(ABC):
