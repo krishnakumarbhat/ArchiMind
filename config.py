@@ -18,7 +18,7 @@ if not GEMINI_API_KEY:
 
 # --- Models ---
 EMBEDDING_MODEL = 'nomic-embed-text'
-GENERATION_MODEL = 'gemini-1.5-pro-latest' # Using a more recent model
+GENERATION_MODEL = 'gemini-2.5-pro' # Using a more recent model
 
 # --- File and Directory Settings ---
 ALLOWED_EXTENSIONS = {
@@ -31,5 +31,7 @@ IGNORED_DIRECTORIES = {
 }
 
 # --- Database and Local Paths ---
-LOCAL_CLONE_PATH = "./temp_repo"
-CHROMA_DB_PATH = "./chroma_db"
+DATA_PATH = os.path.abspath('./data')
+LOCAL_CLONE_PATH = os.path.join(DATA_PATH, 'temp_repo')
+CHROMA_DB_PATH = os.path.join(DATA_PATH, 'chroma_db')
+STATUS_FILE_PATH = os.path.join(DATA_PATH, 'status.json')

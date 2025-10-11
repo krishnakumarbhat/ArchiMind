@@ -2,8 +2,8 @@
 """
 Main script to run the RAG-based documentation generation workflow.
 """
-import argparse
 import logging
+from flask import Flask, render_template, request, jsonify
 
 # Import configurations and managers
 import config
@@ -14,70 +14,63 @@ from doc_generator import DocGenerator
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def main(repo_url: str):
-    """Main function to run the documentation generation workflow."""
-    repo_name = repo_url.split('/')[-1]
+app = Flask(__name__)
 
-    # 1. Clone the repository
-    if not repo_manager.clone_repo(repo_url, config.LOCAL_CLONE_PATH):
-        logging.error("Exiting due to repository cloning failure.")
-        return
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-    # 2. Initialize the vector manager
-    vector_mgr = VectorManager(
-        db_path=config.CHROMA_DB_PATH,
-        collection_name=repo_name,
-        embedding_model=config.EMBEDDING_MODEL
-    )
+import subprocess
+import json
+import os
+import sys
 
-    # 3. Embed files if the collection is empty
-    if vector_mgr.is_empty():
-        logging.info(f"Vector store for '{repo_name}' is empty. Proceeding with embedding.")
-        all_content = repo_manager.read_repo_files(
-            config.LOCAL_CLONE_PATH,
-            config.ALLOWED_EXTENSIONS,
-            config.IGNORED_DIRECTORIES
-        )
-        if not all_content:
-            logging.warning("No processable files found. Exiting.")
-            return
-        vector_mgr.generate_and_store_embeddings(all_content)
-    else:
-        logging.info(f"Embeddings already exist for '{repo_name}'. Skipping embedding process.")
+@app.route('/api/analyze', methods=['POST'])
+def analyze_repo():
+    repo_url = request.json.get('repo_url')
+    if not repo_url:
+        return jsonify({'error': 'Repository URL is required'}), 400
 
-    # 4. Generate the final documentation
-    query_text = (
-        "Generate a complete technical documentation for this software project, "
-        "including architecture, workflow, and a breakdown of key components."
-    )
-    context = vector_mgr.query_relevant_documents(query_text)
-
-    if not context:
-        logging.error("Failed to retrieve context from vector store. Cannot generate documentation.")
-        return
-
+    # Check if a process is already running
     try:
-        doc_gen = DocGenerator(api_key=config.GEMINI_API_KEY, model_name=config.GENERATION_MODEL)
-        documentation = doc_gen.generate_documentation(context, repo_name)
-        
-        if documentation:
-            output_filename = f"{repo_name}_documentation.md"
-            with open(output_filename, 'w', encoding='utf-8') as f:
-                f.write(documentation)
-            logging.info(f"Successfully generated and saved documentation to '{output_filename}'")
-        else:
-            logging.error("Documentation generation failed.")
-    except Exception as e:
-        logging.error(f"An error occurred during documentation generation: {e}")
+        with open(config.STATUS_FILE_PATH, 'r') as f:
+            status = json.load(f)
+            if status.get('status') == 'processing':
+                return jsonify({'error': 'An analysis is already in progress'}), 409
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass # No status file or it's invalid, so we can proceed
 
+    # Start the worker as a separate process
+    subprocess.Popen([sys.executable, 'worker.py', repo_url])
+    
+    return jsonify({'status': 'success', 'message': 'Analysis started'}), 202
+
+@app.route('/api/status')
+def get_status():
+    try:
+        with open(config.STATUS_FILE_PATH, 'r') as f:
+            status = json.load(f)
+            return jsonify(status)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'status': 'idle', 'result': None, 'error': None})
+
+@app.route('/doc')
+def documentation():
+    try:
+        with open(config.STATUS_FILE_PATH, 'r') as f:
+            status = json.load(f)
+        if status.get('status') == 'completed':
+            return render_template('doc.html', data=status.get('result'))
+        else:
+            return "Analysis not complete or failed. Please check the status.", 404
+    except (FileNotFoundError, json.JSONDecodeError):
+        return "Analysis has not been run yet.", 404
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate technical documentation for a GitHub repository.")
-    parser.add_argument(
-        "repo_url",
-        type=str,
-        help="The URL of the GitHub repository to document."
-    )
-    args = parser.parse_args()
-    
-    main(args.repo_url)
+    # Ensure the data directory and status file are initialized
+    if not os.path.exists(config.DATA_PATH):
+        os.makedirs(config.DATA_PATH)
+    with open(config.STATUS_FILE_PATH, 'w') as f:
+        json.dump({'status': 'idle'}, f)
+
+    app.run(debug=True)
