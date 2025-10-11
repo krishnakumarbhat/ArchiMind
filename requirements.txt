@@ -1,4 +1,8 @@
 Flask
+Flask-Login
+Flask-SQLAlchemy
+psycopg2-binary
 google-generativeai
 GitPython
 chromadb
+python-dotenv

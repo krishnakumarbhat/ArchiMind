@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - ArchiMind</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --background: #111827; --surface: #1F2937; --primary: #10B981; --text-primary: #F9FAFB; --text-secondary: #9CA3AF; --border-color: #374151; --error: #EF4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 0; }
+        .container { max-width: 450px; width: 100%; padding: 2rem; }
+        .auth-card { background: var(--surface); border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .auth-header p { color: var(--text-secondary); font-size: 0.95rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 0.875rem 1rem; background: var(--background); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 1rem; transition: all 0.2s; }
+        .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .btn { width: 100%; padding: 0.875rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
+        .btn:hover { background: #0ea770; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #FCA5A5; }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6EE7B7; }
+        .auth-footer { text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+        .auth-footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .auth-footer a:hover { text-decoration: underline; }
+        .back-home { text-align: center; margin-top: 1rem; }
+        .back-home a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+        .back-home a:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Get unlimited repository analysis</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="your@email.com"
+                        required
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        placeholder="John"
+                        required
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="password1">Password</label>
+                    <input
+                        type="password"
+                        id="password1"
+                        name="password1"
+                        placeholder="At least 7 characters"
+                        required
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="password2">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="password2"
+                        name="password2"
+                        placeholder="Re-enter password"
+                        required
+                    />
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            
+            <div class="auth-footer">
+                Already have an account? <a href="/login">Login</a>
+            </div>
+            <div class="back-home">
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

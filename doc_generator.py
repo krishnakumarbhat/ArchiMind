@@ -85,57 +85,72 @@ class DocGenerator:
         return self._generate(prompt)
 
     def generate_hld(self, context: str, repo_name: str) -> str:
-        """Generates and returns the High-Level Design Mermaid diagram."""
+        """Generates and returns the High-Level Design graph definition."""
         prompt = f"""
-        You are a senior software architect. From the supplied context of '{repo_name}', produce a
-        polished Mermaid.js architecture schematic using `graph LR` syntax.
+        You are a senior software architect. From the supplied context of '{repo_name}', craft a JSON
+        specification for a force-directed architecture graph that will be rendered with D3.js.
 
-        Requirements:
-        - Represent client, API/services, and data platforms using distinct shapes.
-          * Clients: rounded rectangles
-          * Services: sharp rectangles
-          * Data stores / queues: cylinders
-        - Group related services with `subgraph` blocks.
-        - Apply class definitions for colour-coding: `classDef client fill:#0ea5e9,stroke:#0c4a6e,color:#fff;`
-          `classDef service fill:#6366f1,stroke:#312e81,color:#fff;`
-          `classDef datastore fill:#f59e0b,stroke:#92400e,color:#1f2937;`
-          `classDef external fill:#10b981,stroke:#065f46,color:#052e16;`
-        - Attach the classes using `class` statements.
-        - Highlight external dependencies or third-party APIs in a dedicated `subgraph External Systems`.
-        - Show primary data/control flow using directional arrows with labels (e.g., `A -->|REST| B`).
+        Output a single JSON object with the exact shape below (no Markdown code fences):
+        {{
+          "title": "<short name>",
+          "description": "<one sentence summary>",
+          "nodes": [
+            {{"id": "string", "label": "string", "type": "client|service|datastore|external", "group": "string", "layer": integer}},
+            ...
+          ],
+          "links": [
+            {{"source": "node_id", "target": "node_id", "label": "string", "channel": "REST|gRPC|Event|DB|Queue|Other"}},
+            ...
+          ]
+        }}
+
+        Rules:
+        - Include between 6 and 12 nodes.
+        - Assign every node a `layer` number (0 for clients, higher numbers as depth increases).
+        - Ensure all nodes referenced by links exist.
+        - Use precise labels derived from the provided context only.
+        - Prefer short `group` names (e.g., "API", "Services", "Data").
 
         --- RELEVANT CONTEXT ---
         {context}
         ---
 
-        Output only the Mermaid `graph LR` code block.
+        Return only valid JSON.
         """
         return self._generate(prompt)
 
     def generate_lld(self, context: str, repo_name: str) -> str:
-        """Generates and returns the Low-Level Design Mermaid diagram."""
+        """Generates and returns the Low-Level Design graph definition."""
         prompt = f"""
-        You are a staff-level engineer. Using the provided context for '{repo_name}', construct a
-        detailed Mermaid.js workflow diagram with `flowchart TD` syntax that captures the primary
-        runtime pathway end-to-end.
+        You are a staff-level engineer. Using the provided context for '{repo_name}', produce a JSON
+        workflow model for D3.js that captures the primary runtime path end-to-end.
 
-        Requirements:
-        - Use the following shapes consistently:
-          * `([Start])` and `([End])` for entry/exit
-          * `( )` rounded rectangles for user/system actions
-          * `[ ]` rectangles for processing steps / business logic
-          * `{{ }}` diamonds for decisions (include labelled yes/no branches)
-        - Annotate asynchronous steps with `:::async` and define `classDef async stroke-dasharray: 5 5;`
-        - Define additional styles: `classDef success fill:#34d399,stroke:#047857,color:#064e3b;`
-          `classDef failure fill:#fca5a5,stroke:#b91c1c,color:#7f1d1d;`
-        - Highlight error handling branches clearly.
-        - Include key data artefacts or messages as parallelogram nodes using `[/Label/]` syntax.
+        Output a single JSON object with this structure (no Markdown fences):
+        {{
+          "title": "<short workflow name>",
+          "description": "<one sentence summary>",
+          "nodes": [
+            {{"id": "string", "label": "string", "type": "start|end|action|process|decision|async|data", "layer": integer, "notes": "short detail"}},
+            ...
+          ],
+          "links": [
+            {{"source": "node_id", "target": "node_id", "label": "string", "path": "success|failure|async|default"}},
+            ...
+          ]
+        }}
+
+        Rules:
+        - Use between 8 and 14 nodes to cover the main happy path plus error handling.
+        - Ensure `layer` increases as the workflow progresses (top-to-bottom rendering).
+        - Include at least one `decision` node with explicit labelled branches in `links`.
+        - Mark asynchronous steps with `type": "async"`.
+        - Derive all labels from the given context; no hallucinations.
 
         --- RELEVANT CONTEXT ---
         {context}
         ---
 
-        Return only the Mermaid `flowchart TD` code block.
+        Return only valid JSON.
         """
         return self._generate(prompt)
 
