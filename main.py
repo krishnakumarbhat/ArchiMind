@@ -1,84 +1,83 @@
-from flask import Flask, render_template, jsonify, request, session
-import json
-import os
+# main.py
+"""
+Main script to run the RAG-based documentation generation workflow.
+"""
+import argparse
+import logging
 
-from orchestrator import run_analysis, run_chat
-from config import DEFAULT_HLD_MERMAID, DEFAULT_LLD_MERMAID
+# Import configurations and managers
+import config
+import repo_manager
+from vector_manager import VectorManager
+from doc_generator import DocGenerator
 
-app = Flask(__name__)
-# Use stable secret in development to preserve session across restarts
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-@app.route('/')
-def index():
-    """Renders the main input page."""
-    return render_template('index.html')
+def main(repo_url: str):
+    """Main function to run the documentation generation workflow."""
+    repo_name = repo_url.split('/')[-1]
+
+    # 1. Clone the repository
+    if not repo_manager.clone_repo(repo_url, config.LOCAL_CLONE_PATH):
+        logging.error("Exiting due to repository cloning failure.")
+        return
+
+    # 2. Initialize the vector manager
+    vector_mgr = VectorManager(
+        db_path=config.CHROMA_DB_PATH,
+        collection_name=repo_name,
+        embedding_model=config.EMBEDDING_MODEL
+    )
+
+    # 3. Embed files if the collection is empty
+    if vector_mgr.is_empty():
+        logging.info(f"Vector store for '{repo_name}' is empty. Proceeding with embedding.")
+        all_content = repo_manager.read_repo_files(
+            config.LOCAL_CLONE_PATH,
+            config.ALLOWED_EXTENSIONS,
+            config.IGNORED_DIRECTORIES
+        )
+        if not all_content:
+            logging.warning("No processable files found. Exiting.")
+            return
+        vector_mgr.generate_and_store_embeddings(all_content)
+    else:
+        logging.info(f"Embeddings already exist for '{repo_name}'. Skipping embedding process.")
+
+    # 4. Generate the final documentation
+    query_text = (
+        "Generate a complete technical documentation for this software project, "
+        "including architecture, workflow, and a breakdown of key components."
+    )
+    context = vector_mgr.query_relevant_documents(query_text)
+
+    if not context:
+        logging.error("Failed to retrieve context from vector store. Cannot generate documentation.")
+        return
+
+    try:
+        doc_gen = DocGenerator(api_key=config.GEMINI_API_KEY, model_name=config.GENERATION_MODEL)
+        documentation = doc_gen.generate_documentation(context, repo_name)
+        
+        if documentation:
+            output_filename = f"{repo_name}_documentation.md"
+            with open(output_filename, 'w', encoding='utf-8') as f:
+                f.write(documentation)
+            logging.info(f"Successfully generated and saved documentation to '{output_filename}'")
+        else:
+            logging.error("Documentation generation failed.")
+    except Exception as e:
+        logging.error(f"An error occurred during documentation generation: {e}")
 
 
-@app.route('/api/analyze', methods=['POST'])
-def analyze_repo():
-    """Analyze a repository, returning generated insights and diagrams."""
-    # try:
-    data = request.get_json()
-    repo_input = data.get('repo_url') if data else None
-    if not repo_input:
-        return jsonify({"status": "error", "message": "Repository URL required."}), 400
-
-    analysis_result = run_analysis(repo_input)
-
-    analysis_text = analysis_result.get('analysis', '')
-    knowledge_graph = analysis_result.get('knowledge_graph', {})
-    hld_diagram = analysis_result.get('hld') or DEFAULT_HLD_MERMAID
-    lld_diagram = analysis_result.get('lld') or DEFAULT_LLD_MERMAID
-
-    chat_explanation = f"""
-    <h3>AI-Generated Architecture Analysis</h3>
-    <p><strong>Repository:</strong> {repo_input}</p>
-    <pre style="white-space: pre-wrap;">{analysis_text}</pre>
-    <hr>
-    <h3>Knowledge Graph</h3>
-    <pre style="white-space: pre-wrap;">{json.dumps(knowledge_graph, indent=2)}</pre>
-    <hr>
-    <h3>Generated Architecture Diagrams</h3>
-    <p>Use the tabs below to view High-Level and Low-Level diagrams.</p>
-    """
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate technical documentation for a GitHub repository.")
+    parser.add_argument(
+        "repo_url",
+        type=str,
+        help="The URL of the GitHub repository to document."
+    )
+    args = parser.parse_args()
     
-    session['analysis_data'] = {
-        "chat_response": chat_explanation,
-        "hld_diagram": hld_diagram,
-        "lld_diagram": lld_diagram
-    }
-
-    return jsonify({"status": "success", "message": "Analysis complete."})
-    
-    # except Exception as e:
-        # return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
-@app.route('/doc')
-def doc_page():
-    """Renders the consolidated results page with all three tabs."""
-    data = session.get('analysis_data', None)
-    if not data:
-        return "No analysis data found. Please generate it on the main page first.", 404
-    return render_template('doc.html', data=data)
-
-@app.route('/api/chat', methods=['POST'])
-def chat_api():
-    """
-    Chat API using Ollama for architecture-related questions.
-    """
-    # try:
-    user_message = request.json.get('message', '')
-    
-    if not user_message:
-        return jsonify({"response": "Please provide a message."})
-    
-    chat_result = run_chat(user_message)
-    return jsonify({
-        "response": chat_result.get("answer"),
-        "context": chat_result.get("context", "")
-    })
-    # except Exception as e:
-        # return jsonify({"response": f"Error: {str(e)}"})
-
-if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False)
+    main(args.repo_url)
