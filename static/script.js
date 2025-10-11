@@ -10,17 +10,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const defaultLoadingMarkup = loadingIndicator.innerHTML;
 
-    const setLoading = (isLoading) => {
-        loadingIndicator.style.display = isLoading ? 'inline-flex' : 'none';
+    const setLoading = (isLoading, message = 'Analyzing repository...') => {
         generateButton.disabled = isLoading;
+        loadingIndicator.style.display = isLoading ? 'inline-flex' : 'none';
         if (isLoading) {
-            loadingIndicator.innerHTML = defaultLoadingMarkup;
+            loadingIndicator.querySelector('div').textContent = message;
         }
     };
 
     const showError = (message) => {
         loadingIndicator.style.display = 'block';
         loadingIndicator.innerHTML = `<div style="color:#f87171; font-weight:500;">${message}</div>`;
+        generateButton.disabled = false;
+    };
+
+    const pollStatus = () => {
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(interval);
+                    setLoading(false);
+                    resultsLinkContainer.classList.add('visible');
+                } else if (data.status === 'error') {
+                    clearInterval(interval);
+                    showError(data.error || 'An unknown error occurred.');
+                } else {
+                    // Still processing
+                    setLoading(true, 'Analysis in progress...');
+                }
+            } catch (error) {
+                clearInterval(interval);
+                showError('Failed to get analysis status.');
+            }
+        }, 3000); // Poll every 3 seconds
     };
 
     generateButton.addEventListener('click', async () => {
@@ -37,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resultsLinkContainer.classList.remove('visible');
-        setLoading(true);
+        setLoading(true, 'Starting analysis...');
 
         try {
             const response = await fetch('/api/analyze', {
@@ -46,18 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ repo_url: repoUrl }),
             });
 
-            const data = await response.json();
-
-            if (response.ok && data.status === 'success') {
-                resultsLinkContainer.classList.add('visible');
+            if (response.status === 202) {
+                pollStatus();
             } else {
-                showError(data.message || 'Analysis failed.');
+                const data = await response.json();
+                showError(data.error || 'Failed to start analysis.');
             }
         } catch (error) {
-            console.error('Fetch error:', error);
-            showError('Unable to analyze repository. Check console for details.');
-        } finally {
-            setLoading(false);
+            showError('Unable to start analysis. Check console for details.');
         }
     });
 });
