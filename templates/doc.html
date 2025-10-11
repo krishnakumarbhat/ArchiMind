@@ -2,56 +2,326 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Architecture Results</title>
+    <title>Architecture Results - ArchiMind</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --background: #111827; --surface: #1F2937; --primary: #10B981; --text-primary: #F9FAFB; --text-secondary: #9CA3AF; --border-color: #374151; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
-        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
-        .tab { padding: 1rem 2rem; background: none; border: none; color: var(--text-secondary); font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent; }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .documentation-layout { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: flex-start; }
-        .toc-panel { background-color: rgba(17, 24, 39, 0.92); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; position: sticky; top: 6rem; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45); }
-        .toc-panel h3 { margin-top: 0; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
-        .chapter-nav { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
-        .chapter-link { padding: 0.65rem 0.85rem; border-radius: 10px; color: var(--text-secondary); font-size: 0.95rem; text-decoration: none; background: rgba(31, 41, 55, 0.85); border: 1px solid transparent; transition: all 0.2s ease; display: block; }
-        .chapter-link:hover { color: var(--text-primary); border-color: rgba(16, 185, 129, 0.35); transform: translateX(6px); }
-        .chapter-link.active { color: var(--primary); border-color: var(--primary); background: rgba(16, 185, 129, 0.12); }
-        .documentation-content { background-color: var(--surface); padding: 2.5rem; border-radius: 14px; line-height: 1.75; box-shadow: 0 22px 60px rgba(8, 13, 26, 0.55); }
-        .documentation-content h1 { font-size: 2.2rem; margin-bottom: 1.5rem; letter-spacing: 0.01em; }
-        .documentation-content h2 { margin-top: 2.5rem; margin-bottom: 1.2rem; padding: 1rem 1.2rem; border-radius: 12px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(59, 130, 246, 0.12)); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem; }
-        .documentation-content h3 { margin-top: 1.5rem; color: var(--primary); letter-spacing: 0.03em; }
-        .documentation-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; background: rgba(17, 24, 39, 0.9); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 12px; overflow: hidden; }
-        .documentation-content table th,
-        .documentation-content table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(55, 65, 81, 0.65); }
-        .documentation-content table thead { background: rgba(59, 130, 246, 0.18); color: var(--text-primary); }
-        .documentation-content blockquote { margin: 1.5rem 0; padding: 1rem 1.5rem; border-left: 4px solid var(--primary); background: rgba(17, 24, 39, 0.9); border-radius: 0 12px 12px 0; color: var(--text-secondary); }
-        .documentation-content code { background: rgba(55, 65, 81, 0.85); padding: 0.2rem 0.35rem; border-radius: 6px; color: #60a5fa; }
-        .documentation-content pre { background: rgba(17, 24, 39, 0.92); padding: 1rem; border-radius: 12px; overflow-x: auto; border: 1px solid rgba(59, 130, 246, 0.35); }
-        .chapter-chevron { margin-left: auto; font-size: 1.15rem; transition: transform 0.2s ease; }
-        .documentation-content .collapsed .chapter-chevron { transform: rotate(-90deg); }
-        @media (max-width: 1080px) { .documentation-layout { grid-template-columns: 1fr; } .toc-panel { position: static; width: 100%; } }
-        .graph-container { background-color: var(--surface); padding: 2rem; border-radius: 14px; min-height: 720px; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: 0 22px 60px rgba(8, 13, 26, 0.45); }
-        .graph-subtabs { display: flex; gap: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
-        .graph-subtab { padding: 0.75rem 1.5rem; background: rgba(31, 41, 55, 0.8); border: 1px solid transparent; color: var(--text-secondary); font-size: 0.95rem; cursor: pointer; border-radius: 9999px; transition: all 0.2s ease; }
-        .graph-subtab:hover { color: var(--text-primary); border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); }
-        .graph-subtab.active { color: var(--primary); border-color: var(--primary); background: rgba(16, 185, 129, 0.16); }
-        .graph-meta { display: flex; flex-direction: column; gap: 0.35rem; }
-        .graph-meta h3 { margin: 0; font-size: 1.35rem; letter-spacing: 0.02em; color: var(--text-primary); }
-        .graph-meta p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
-        .graph-stage { position: relative; flex: 1; min-height: 560px; }
-        .graph-canvas { position: absolute; inset: 0; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 16px; background: rgba(12, 18, 30, 0.95); display: none; padding: 1rem; box-sizing: border-box; }
-        .graph-canvas.active { display: block; }
-        .graph-message { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-secondary); font-size: 1rem; padding: 2rem; }
-        .graph-message.error { color: #fca5a5; }
-        .chat-container { background-color: var(--surface); border-radius: 8px; height: 70vh; display: flex; flex-direction: column; }
-        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; }
-        .chat-input-container { display: flex; padding: 1rem; border-top: 1px solid var(--border-color); }
-        #chatInput { flex: 1; background-color: var(--background); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 6px;}
-        #chatSendButton { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; margin-left: 0.5rem; cursor: pointer; }
+        :root {
+            --background: #111827;
+            --surface: #1F2937;
+            --primary: #10B981;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab:hover {
+            color: var(--text-primary);
+            background: rgba(31, 41, 55, 0.5);
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Documentation Layout */
+        .documentation-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .toc-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+        .toc-panel h3 {
+            margin: 0 0 1rem 0;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .chapter-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .chapter-link {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-decoration: none;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            display: block;
+        }
+        .chapter-link:hover {
+            color: var(--text-primary);
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .chapter-link.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.15);
+            font-weight: 600;
+        }
+        
+        /* Documentation Content */
+        .documentation-content {
+            background-color: var(--surface);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .documentation-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 0.75rem;
+        }
+        .documentation-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding: 1.25rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.12));
+            border-left: 4px solid var(--primary);
+            font-size: 1.75rem;
+            color: var(--text-primary);
+        }
+        .documentation-content h3 {
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            font-size: 1.35rem;
+        }
+        .documentation-content h4 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1.15rem;
+        }
+        .documentation-content p {
+            margin: 1rem 0;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+        .documentation-content ul,
+        .documentation-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .documentation-content li {
+            margin: 0.5rem 0;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        .documentation-content strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* TABLE STYLES - FIXED */
+        .documentation-content table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2rem 0;
+            background: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .documentation-content thead {
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .documentation-content th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary);
+            white-space: nowrap;
+        }
+        .documentation-content td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            vertical-align: top;
+        }
+        .documentation-content tr:last-child td {
+            border-bottom: none;
+        }
+        .documentation-content tbody tr:hover {
+            background: rgba(16, 185, 129, 0.08);
+        }
+        
+        .documentation-content blockquote {
+            margin: 1.5rem 0;
+            padding: 1rem 1.5rem;
+            border-left: 4px solid var(--primary);
+            background: rgba(17, 24, 39, 0.5);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+        }
+        .documentation-content code {
+            background: rgba(55, 65, 81, 0.8);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: #60a5fa;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .documentation-content pre {
+            background: rgba(17, 24, 39, 0.9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 1.5rem 0;
+        }
+        .documentation-content pre code {
+            background: none;
+            padding: 0;
+            color: #e5e7eb;
+        }
+        
+        /* Graph Styles */
+        .graph-container {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .graph-subtabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        .graph-subtab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        .graph-subtab:hover {
+            color: var(--text-primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .graph-subtab.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .graph-meta h3 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: var(--text-primary);
+        }
+        .graph-meta p {
+            margin: 0.5rem 0 0 0;
+            color: var(--text-secondary);
+        }
+        .graph-stage {
+            position: relative;
+            flex: 1;
+            min-height: 500px;
+        }
+        .graph-canvas {
+            position: absolute;
+            inset: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(17, 24, 39, 0.95);
+            display: none;
+            overflow: auto;
+        }
+        .graph-canvas.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .graph-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+        .graph-message.error {
+            color: #fca5a5;
+        }
+        .mermaid-container {
+            width: 100%;
+            padding: 2rem;
+            overflow: auto;
+        }
+        
+        @media (max-width: 1024px) {
+            .documentation-layout {
+                grid-template-columns: 1fr;
+            }
+            .toc-panel {
+                position: static;
+                max-height: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -61,45 +331,51 @@
             <button class="tab" data-tab="graph">Architecture Graphs</button>
         </div>
 
+        <!-- Documentation Tab -->
         <div id="documentation" class="tab-content active">
             <div class="documentation-layout">
                 <aside class="toc-panel">
                     <h3>Chapters</h3>
                     <nav class="chapter-nav" id="chapterNav">
-                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Loading…</span>
+                        <span style="color: var(--text-secondary); font-size: 0.875rem;">Loading chapters...</span>
                     </nav>
                 </aside>
                 <div class="documentation-content" id="documentationContent">
-                    {{ data.chat_response | safe }}
+                    <p style="color: var(--text-secondary);">Loading documentation...</p>
                 </div>
             </div>
         </div>
 
+        <!-- Graph Tab -->
         <div id="graph" class="tab-content">
             <div class="graph-container">
                 <div class="graph-subtabs">
                     <button class="graph-subtab active" data-diagram="hld">High-Level Design (HLD)</button>
                     <button class="graph-subtab" data-diagram="lld">Low-Level Design (LLD)</button>
                 </div>
-                <div class="graph-meta" id="graphMeta">
+                <div class="graph-meta">
                     <h3>Architecture Graph</h3>
                     <p>Switch tabs to explore the generated system views.</p>
                 </div>
                 <div class="graph-stage">
                     <div class="graph-canvas active" id="hldCanvas">
-                        <div class="graph-message">Awaiting High-Level Design data…</div>
+                        <div class="graph-message">Loading High-Level Design...</div>
                     </div>
                     <div class="graph-canvas" id="lldCanvas">
-                        <div class="graph-message">Awaiting Low-Level Design data…</div>
+                        <div class="graph-message">Loading Low-Level Design...</div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+        
+        // Initialize Mermaid
         mermaid.initialize({ 
             startOnLoad: false, 
             theme: 'dark',
@@ -112,228 +388,172 @@
             themeVariables: {
                 fontSize: '16px',
                 primaryColor: '#10B981',
-                primaryTextColor: '#fff',
+                primaryTextColor: '#F9FAFB',
                 primaryBorderColor: '#10B981',
                 lineColor: '#10B981',
-                sectionBkgColor: '#1F2937',
-                altSectionBkgColor: '#1F2937',
-                gridColor: '#374151',
-                tertiaryColor: '#374151'
+                secondaryColor: '#1F2937',
+                tertiaryColor: '#374151',
+                background: '#111827',
+                mainBkg: '#1F2937',
+                textColor: '#F9FAFB'
             }
         });
-        
-        // Zoom and pan functionality for Mermaid diagrams
-        let currentZoom = 1;
-        let currentPanX = 0;
-        let currentPanY = 0;
 
-        function applyTransform() {
-            const containers = document.querySelectorAll('.mermaid-container');
-            containers.forEach(container => {
-                const svg = container.querySelector('svg');
-                if (svg) {
-                    svg.style.transform = `scale(${currentZoom}) translate(${currentPanX}px, ${currentPanY}px)`;
-                    svg.style.transformOrigin = 'center center';
-                }
-            });
+        // Backend data
+        const backendData = {
+            chat_response: {{ data.chat_response | tojson | safe }},
+            hld_graph: {{ data.hld_graph | tojson | safe }},
+            lld_graph: {{ data.lld_graph | tojson | safe }}
+        };
+
+        console.log('Backend data loaded:', backendData);
+
+        // Render Markdown documentation
+        function renderDocumentation() {
+            const docContent = document.getElementById('documentationContent');
+            
+            if (backendData.chat_response) {
+                // Configure marked for GFM (GitHub Flavored Markdown)
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    headerIds: true,
+                    mangle: false
+                });
+                
+                const htmlContent = marked.parse(backendData.chat_response);
+                docContent.innerHTML = htmlContent;
+                
+                // Build table of contents
+                buildTableOfContents();
+            } else {
+                docContent.innerHTML = '<p style="color: var(--text-secondary);">No documentation available.</p>';
+            }
         }
 
-        function zoomIn() {
-            currentZoom = Math.min(currentZoom * 1.2, 3);
-            applyTransform();
-        }
-
-        function zoomOut() {
-            currentZoom = Math.max(currentZoom / 1.2, 0.3);
-            applyTransform();
-        }
-
-        function resetZoom() {
-            currentZoom = 1;
-            currentPanX = 0;
-            currentPanY = 0;
-            applyTransform();
-        }
-
-        // Add pan functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            let isPanning = false;
-            let startX, startY;
-
-            document.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.mermaid-container')) {
-                    isPanning = true;
-                    startX = e.clientX - currentPanX;
-                    startY = e.clientY - currentPanY;
-                }
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (isPanning) {
-                    currentPanX = e.clientX - startX;
-                    currentPanY = e.clientY - startY;
-                    applyTransform();
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                isPanning = false;
-            });
-
-            // Touch support for mobile
-            document.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.mermaid-container')) {
-                    isPanning = true;
-                    startX = e.touches[0].clientX - currentPanX;
-                    startY = e.touches[0].clientY - currentPanY;
-                }
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                if (isPanning) {
-                    currentPanX = e.touches[0].clientX - startX;
-                    currentPanY = e.touches[0].clientY - startY;
-                    applyTransform();
-                }
-            });
-
-            document.addEventListener('touchend', () => {
-                isPanning = false;
-            });
-        });
-        
-        document.addEventListener('DOMContentLoaded', () => {
+        // Build table of contents from h2 headings
+        function buildTableOfContents() {
             const docContent = document.getElementById('documentationContent');
             const chapterNav = document.getElementById('chapterNav');
+            
+            if (!docContent || !chapterNav) return;
 
-            const slugify = (text) => text.toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .trim()
-                .replace(/\s+/g, '-');
+            const headings = Array.from(docContent.querySelectorAll('h2'));
+            chapterNav.innerHTML = '';
 
-            if (docContent && chapterNav) {
-                const headings = Array.from(docContent.querySelectorAll('h2'));
-                chapterNav.innerHTML = '';
+            if (!headings.length) {
+                chapterNav.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.875rem;">No chapters detected.</span>';
+            } else {
+                headings.forEach((heading, index) => {
+                    const text = heading.textContent.trim();
+                    const id = 'chapter-' + index;
+                    heading.id = id;
 
-                if (!headings.length) {
-                    chapterNav.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.9rem;">No chapters detected.</span>';
-                } else {
-                    headings.forEach((heading, index) => {
-                        const label = heading.textContent.trim() || `Chapter ${index + 1}`;
-                        const slug = slugify(label || `chapter-${index + 1}`);
-                        heading.id = slug;
-                        heading.classList.add('chapter-heading');
-
-                        const link = document.createElement('a');
-                        link.href = `#${slug}`;
-                        link.textContent = label;
-                        link.className = 'chapter-link';
-                        link.addEventListener('click', (event) => {
-                            event.preventDefault();
-                            document.getElementById(slug)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        });
-                        chapterNav.appendChild(link);
+                    const link = document.createElement('a');
+                    link.href = '#' + id;
+                    link.textContent = text;
+                    link.className = 'chapter-link';
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        
+                        // Update active state
+                        document.querySelectorAll('.chapter-link').forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
                     });
+                    chapterNav.appendChild(link);
+                });
 
-                    const observer = new IntersectionObserver((entries) => {
-                        entries.forEach((entry) => {
-                            const targetId = entry.target.id;
-                            const anchor = chapterNav.querySelector(`a[href="#${targetId}"]`);
-                            if (anchor) {
-                                if (entry.isIntersecting) {
-                                    chapterNav.querySelectorAll('.chapter-link').forEach((el) => el.classList.remove('active'));
-                                    anchor.classList.add('active');
-                                }
-                            }
-                        });
-                    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0.1 });
+                // Auto-highlight active chapter on scroll
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.id;
+                            document.querySelectorAll('.chapter-link').forEach(l => l.classList.remove('active'));
+                            const activeLink = chapterNav.querySelector(`a[href="#${id}"]`);
+                            if (activeLink) activeLink.classList.add('active');
+                        }
+                    });
+                }, { rootMargin: '-20% 0px -70% 0px' });
 
-                    headings.forEach((heading) => observer.observe(heading));
-                }
+                headings.forEach(heading => observer.observe(heading));
             }
+        }
 
-            // --- Tab Switching Logic ---
+        // Render Mermaid graphs
+        async function renderMermaid() {
+            try {
+                // Render HLD graph
+                const hldCanvas = document.getElementById('hldCanvas');
+                if (backendData.hld_graph && backendData.hld_graph.status === 'ok' && backendData.hld_graph.graph && backendData.hld_graph.graph.mermaid_code) {
+                    hldCanvas.innerHTML = `
+                        <div class="mermaid-container">
+                            <div class="mermaid">${backendData.hld_graph.graph.mermaid_code}</div>
+                        </div>
+                    `;
+                    await mermaid.run({ querySelector: '#hldCanvas .mermaid' });
+                } else {
+                    const message = backendData.hld_graph?.message || 'No High-Level Design data available.';
+                    hldCanvas.innerHTML = `<div class="graph-message">${message}</div>`;
+                }
+
+                // Render LLD graph
+                const lldCanvas = document.getElementById('lldCanvas');
+                if (backendData.lld_graph && backendData.lld_graph.status === 'ok' && backendData.lld_graph.graph && backendData.lld_graph.graph.mermaid_code) {
+                    lldCanvas.innerHTML = `
+                        <div class="mermaid-container">
+                            <div class="mermaid">${backendData.lld_graph.graph.mermaid_code}</div>
+                        </div>
+                    `;
+                    await mermaid.run({ querySelector: '#lldCanvas .mermaid' });
+                } else {
+                    const message = backendData.lld_graph?.message || 'No Low-Level Design data available.';
+                    lldCanvas.innerHTML = `<div class="graph-message">${message}</div>`;
+                }
+            } catch (error) {
+                console.error('Mermaid rendering error:', error);
+                document.getElementById('hldCanvas').innerHTML = `<div class="graph-message error">Error rendering graph: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render documentation immediately
+            renderDocumentation();
+
+            // Tab switching
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
+            
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
                     
-                    // Render Mermaid when graph tab is activated
+                    tab.classList.add('active');
+                    const targetTab = document.getElementById(tab.dataset.tab);
+                    targetTab.classList.add('active');
+                    
+                    // Render graphs when graph tab is activated
                     if (tab.dataset.tab === 'graph') {
                         renderMermaid();
                     }
                 });
             });
 
-            // --- Graph Sub-tab Switching Logic ---
+            // Graph sub-tab switching
             const graphSubtabs = document.querySelectorAll('.graph-subtab');
+            const graphCanvases = document.querySelectorAll('.graph-canvas');
+            
             graphSubtabs.forEach(subtab => {
                 subtab.addEventListener('click', () => {
-                    // Remove active class from all subtabs
                     graphSubtabs.forEach(st => st.classList.remove('active'));
+                    graphCanvases.forEach(gc => gc.classList.remove('active'));
                     
-                    // Hide all diagrams
-                    document.querySelectorAll('.mermaid').forEach(diagram => {
-                        diagram.style.display = 'none';
-                    });
-                    
-                    // Activate clicked subtab and show corresponding diagram
                     subtab.classList.add('active');
-                    const diagramType = subtab.dataset.diagram;
-                    document.querySelector(`.mermaid.${diagramType}-diagram`).style.display = 'block';
-                    
-                    // Re-render Mermaid for the visible diagram
-                    renderMermaid();
+                    const canvasId = subtab.dataset.diagram + 'Canvas';
+                    document.getElementById(canvasId).classList.add('active');
                 });
-            });
-
-            // --- Pan functionality for diagrams ---
-            let isPanning = false;
-            let startX, startY;
-
-            document.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.mermaid-container')) {
-                    isPanning = true;
-                    startX = e.clientX - currentPanX;
-                    startY = e.clientY - currentPanY;
-                }
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (isPanning) {
-                    currentPanX = e.clientX - startX;
-                    currentPanY = e.clientY - startY;
-                    applyTransform();
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                isPanning = false;
-            });
-
-            // Touch support for mobile
-            document.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.mermaid-container')) {
-                    isPanning = true;
-                    startX = e.touches[0].clientX - currentPanX;
-                    startY = e.touches[0].clientY - currentPanY;
-                }
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                if (isPanning) {
-                    currentPanX = e.touches[0].clientX - startX;
-                    currentPanY = e.touches[0].clientY - startY;
-                    applyTransform();
-                }
-            });
-
-            document.addEventListener('touchend', () => {
-                isPanning = false;
             });
         });
     </script>
