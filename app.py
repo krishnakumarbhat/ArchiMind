@@ -17,6 +17,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from datetime import datetime
+from oauth_utils import (
+    init_oauth, init_redis, oauth_bp, get_user_repository_history,
+    get_repository_details, save_repository_to_history
+)
 
 
 # Load environment variables from .env file
@@ -39,6 +43,8 @@ class ApplicationConfig:
         self.DATA_PATH = os.path.abspath('./data')
         self.STATUS_FILE_PATH = os.path.join(self.DATA_PATH, 'status.json')
         self.ANONYMOUS_GENERATION_LIMIT = 5
+        self.GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+        self.GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 
 # Database instance
@@ -101,6 +107,13 @@ class ArchiMindApplication:
         """Initializes Flask extensions."""
         db.init_app(self.app)
         
+        # Initialize OAuth
+        init_oauth(self.app)
+        self.app.register_blueprint(oauth_bp)
+        
+        # Initialize Redis
+        init_redis()
+        
         self.login_manager = LoginManager()
         self.login_manager.login_view = 'login'
         self.login_manager.init_app(self.app)
@@ -131,6 +144,8 @@ class ArchiMindApplication:
         self.app.route('/api/analyze', methods=['POST'])(self._api_analyze)
         self.app.route('/api/status')(self._api_status)
         self.app.route('/api/check-limit')(self._api_check_limit)
+        self.app.route('/api/history')(self._logout_required(self._api_get_history))
+        self.app.route('/api/history/<int:repo_id>')(self._logout_required(self._api_get_repository_details))
         
         # Authentication routes
         self.app.route('/login', methods=['GET', 'POST'])(self._login)
@@ -241,6 +256,25 @@ class ArchiMindApplication:
                 'limit': limit,
                 'authenticated': False
             })
+    
+    def _api_get_history(self):
+        """API endpoint to get user's repository history (requires authentication)."""
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        history = get_user_repository_history(current_user.id, use_cache=True)
+        return jsonify({'history': history})
+    
+    def _api_get_repository_details(self, repo_id):
+        """API endpoint to get specific repository details (requires authentication)."""
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        details = get_repository_details(current_user.id, repo_id)
+        if not details:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        return jsonify(details)
     
     # ============ Authentication Routes ============
     

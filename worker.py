@@ -10,7 +10,6 @@ import sys
 import time
 from datetime import datetime
 from typing import Dict, Optional
-
 # Ensure project root is on PYTHONPATH
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
@@ -18,6 +17,7 @@ if PROJECT_ROOT not in sys.path:
 
 import config
 from services import DocumentationService, RepositoryService, VectorStoreService
+from oauth_utils import save_repository_to_history
 
 
 logging.basicConfig(
@@ -183,6 +183,44 @@ class AnalysisWorker:
                 "raw_preview": (raw_value or "")[:400],
             }
 
+    def _save_to_history(
+        self, 
+        analysis_log_id: int, 
+        repo_url: str, 
+        repo_name: str,
+        documentation: str,
+        hld_result: dict,
+        lld_result: dict
+    ) -> None:
+        """Save completed analysis to user's repository history."""
+        try:
+            from flask import Flask
+            from app import AnalysisLog
+            
+            app = Flask(__name__)
+            app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+                "DATABASE_URL", "postgresql://localhost/archimind"
+            )
+            app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+            from models import db
+            db.init_app(app)
+            
+            with app.app_context():
+                log_entry = AnalysisLog.query.get(analysis_log_id)
+                if log_entry and log_entry.user_id:
+                    # Only save for authenticated users
+                    save_repository_to_history(
+                        user_id=log_entry.user_id,
+                        repo_url=repo_url,
+                        repo_name=repo_name,
+                        documentation=documentation,
+                        hld_graph=hld_result,
+                        lld_graph=lld_result
+                    )
+                    self.logger.info(f"Saved repository {repo_name} to user history")
+        except Exception as exc:
+            self.logger.warning(f"Failed to save to history: {exc}")
+    
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -241,6 +279,18 @@ class AnalysisWorker:
             }
 
             self._update_database_log(analysis_log_id, "completed")
+            
+            # Save to repository history for authenticated users
+            if analysis_log_id:
+                self._save_to_history(
+                    analysis_log_id, 
+                    repo_url, 
+                    repo_name,
+                    docs.get("documentation"),
+                    hld_result,
+                    lld_result
+                )
+            
             self.logger.info("Analysis completed successfully")
 
         except Exception as exc:  # pragma: no cover - mainline error logging
