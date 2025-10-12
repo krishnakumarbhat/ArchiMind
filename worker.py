@@ -190,7 +190,8 @@ class AnalysisWorker:
         repo_name: str,
         documentation: str,
         hld_result: dict,
-        lld_result: dict
+        lld_result: dict,
+        chat_summary: Optional[str]
     ) -> None:
         """Save completed analysis to user's repository history."""
         try:
@@ -215,7 +216,8 @@ class AnalysisWorker:
                         repo_name=repo_name,
                         documentation=documentation,
                         hld_graph=hld_result,
-                        lld_graph=lld_result
+                        lld_graph=lld_result,
+                        chat_summary=chat_summary
                     )
                     self.logger.info(f"Saved repository {repo_name} to user history")
         except Exception as exc:
@@ -265,6 +267,7 @@ class AnalysisWorker:
             doc_service = DocumentationService(
                 api_key=config.GEMINI_API_KEY,
                 model_name=config.GENERATION_MODEL,
+                chat_model_name=getattr(config, 'CHAT_MODEL', None),
             )
             docs = doc_service.generate_all_documentation(context, repo_name)
 
@@ -276,6 +279,9 @@ class AnalysisWorker:
                 "chat_response": docs.get("documentation"),
                 "hld_graph": hld_result,
                 "lld_graph": lld_result,
+                "chat_summary": docs.get("chat_summary"),
+                "repo_name": repo_name,
+                "repo_url": repo_url,
             }
 
             self._update_database_log(analysis_log_id, "completed")
@@ -284,13 +290,13 @@ class AnalysisWorker:
             if analysis_log_id:
                 self._save_to_history(
                     analysis_log_id, 
-                    repo_url, 
+                    repo_url,
                     repo_name,
                     docs.get("documentation"),
                     hld_result,
-                    lld_result
+                    lld_result,
+                    docs.get("chat_summary")
                 )
-            
             self.logger.info("Analysis completed successfully")
 
         except Exception as exc:  # pragma: no cover - mainline error logging

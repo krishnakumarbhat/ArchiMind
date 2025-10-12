@@ -67,6 +67,7 @@ class RepositoryHistory(db.Model):
     documentation = db.Column(db.Text, nullable=True)  # Gemini-generated documentation
     hld_graph = db.Column(db.Text, nullable=True)  # HLD JSON
     lld_graph = db.Column(db.Text, nullable=True)  # LLD JSON
+    chat_summary = db.Column(db.Text, nullable=True)  # Chat summary using Gemini Flash
     last_accessed = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     
@@ -74,7 +75,7 @@ class RepositoryHistory(db.Model):
         return f'<RepositoryHistory {self.repo_name} - User {self.user_id}>'
     
     @classmethod
-    def add_or_update(cls, user_id, repo_url, repo_name, documentation=None, hld_graph=None, lld_graph=None):
+    def add_or_update(cls, user_id, repo_url, repo_name, documentation=None, hld_graph=None, lld_graph=None, chat_summary=None):
         """Add or update repository history, maintaining top 5 limit per user."""
         # Check if repository already exists for this user
         existing = cls.query.filter_by(user_id=user_id, repo_url=repo_url).first()
@@ -84,6 +85,7 @@ class RepositoryHistory(db.Model):
             existing.documentation = documentation
             existing.hld_graph = hld_graph
             existing.lld_graph = lld_graph
+            existing.chat_summary = chat_summary
             existing.last_accessed = datetime.utcnow()
         else:
             # Create new record
@@ -93,7 +95,8 @@ class RepositoryHistory(db.Model):
                 repo_name=repo_name,
                 documentation=documentation,
                 hld_graph=hld_graph,
-                lld_graph=lld_graph
+                lld_graph=lld_graph,
+                chat_summary=chat_summary
             )
             db.session.add(new_history)
             
