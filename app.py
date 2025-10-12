@@ -156,7 +156,7 @@ class ArchiMindApplication:
             if status.get('status') == 'completed':
                 return render_template('doc.html', data=status.get('result'), user=current_user)
             else:
-                return "Analysis not complete or failed. Please check the status.", 404
+                return "Analysis not complete. Please wait.", 404
         except (FileNotFoundError, json.JSONDecodeError):
             return "Analysis has not been run yet.", 404
     

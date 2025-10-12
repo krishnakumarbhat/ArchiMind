@@ -88,28 +88,36 @@ class DocGenerator:
         """Generates and returns the High-Level Design graph definition."""
         prompt = f"""
         You are a senior software architect. From the supplied context of '{repo_name}', craft a JSON
-        specification for a force-directed architecture graph that will be rendered with D3.js.
+        specification for a Mermaid system-context diagram. The output will be rendered with Mermaid.js.
 
         Output a single JSON object with the exact shape below (no Markdown code fences):
         {{
           "title": "<short name>",
           "description": "<one sentence summary>",
-          "nodes": [
-            {{"id": "string", "label": "string", "type": "client|service|datastore|external", "group": "string", "layer": integer}},
-            ...
-          ],
-          "links": [
-            {{"source": "node_id", "target": "node_id", "label": "string", "channel": "REST|gRPC|Event|DB|Queue|Other"}},
-            ...
-          ]
+          "mermaid_code": "graph TD; ..."
         }}
 
-        Rules:
-        - Include between 6 and 12 nodes.
-        - Assign every node a `layer` number (0 for clients, higher numbers as depth increases).
-        - Ensure all nodes referenced by links exist.
-        - Use precise labels derived from the provided context only.
-        - Prefer short `group` names (e.g., "API", "Services", "Data").
+        Rules for `mermaid_code`:
+        - Use `graph TD` layout.
+        - Include 6-12 nodes covering clients, services, databases, and external systems.
+        - Node IDs MUST follow these strict rules:
+          * Use only alphanumeric characters (a-z, A-Z, 0-9)
+          * Use camelCase format (e.g., webClient, flaskAPI, mysqlDB)
+          * NO underscores, hyphens, or special characters in IDs
+          * Start with lowercase letter
+          * Examples: webClient[Web Client], flaskAPI[Flask API], neo4jDB[Neo4j Database]
+        - Represent interactions with directional edges using `-->` and add `|labels|` where helpful.
+        - Group related nodes with Mermaid subgraphs when appropriate (e.g., `subgraph Services`).
+        - Derive all names strictly from the provided context. Do not invent technologies.
+        - Keep node labels (in square brackets) concise and clear.
+
+        Example of valid syntax:
+        graph TD
+            webClient[Web Client]
+            flaskAPI[Flask API]
+            neo4jDB[Neo4j Database]
+            webClient -->|HTTP Request| flaskAPI
+            flaskAPI -->|Query| neo4jDB
 
         --- RELEVANT CONTEXT ---
         {context}
@@ -123,28 +131,22 @@ class DocGenerator:
         """Generates and returns the Low-Level Design graph definition."""
         prompt = f"""
         You are a staff-level engineer. Using the provided context for '{repo_name}', produce a JSON
-        workflow model for D3.js that captures the primary runtime path end-to-end.
+        Mermaid sequence diagram that captures the primary runtime path end-to-end.
 
         Output a single JSON object with this structure (no Markdown fences):
         {{
           "title": "<short workflow name>",
           "description": "<one sentence summary>",
-          "nodes": [
-            {{"id": "string", "label": "string", "type": "start|end|action|process|decision|async|data", "layer": integer, "notes": "short detail"}},
-            ...
-          ],
-          "links": [
-            {{"source": "node_id", "target": "node_id", "label": "string", "path": "success|failure|async|default"}},
-            ...
-          ]
+          "mermaid_code": "sequenceDiagram\n  participant ..."
         }}
 
-        Rules:
-        - Use between 8 and 14 nodes to cover the main happy path plus error handling.
-        - Ensure `layer` increases as the workflow progresses (top-to-bottom rendering).
-        - Include at least one `decision` node with explicit labelled branches in `links`.
-        - Mark asynchronous steps with `type": "async"`.
-        - Derive all labels from the given context; no hallucinations.
+        Rules for `mermaid_code`:
+        - Use `sequenceDiagram` syntax.
+        - Include 6-10 participants covering clients, services, databases, workers, and external APIs.
+        - Describe the main happy path plus at least one error or alternate branch using `alt`/`opt` blocks.
+        - Use concise arrow labels that map directly to operations found in the supplied context.
+        - Do not use `activate` or `deactivate` directives; rely on simple message arrows to show lifelines.
+        - Derive every participant and message from the repository context only; do not hallucinate.
 
         --- RELEVANT CONTEXT ---
         {context}
