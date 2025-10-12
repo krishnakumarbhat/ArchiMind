@@ -187,7 +187,7 @@ def get_user_repository_history(user_id, use_cache=True):
     
     return history_data
 
-def save_repository_to_history(user_id, repo_url, repo_name, documentation=None, hld_graph=None, lld_graph=None):
+def save_repository_to_history(user_id, repo_url, repo_name, documentation=None, hld_graph=None, lld_graph=None, chat_summary=None):
     """
     Save or update repository in user's history and invalidate cache.
     
@@ -212,7 +212,8 @@ def save_repository_to_history(user_id, repo_url, repo_name, documentation=None,
         repo_name=repo_name,
         documentation=documentation,
         hld_graph=hld_graph,
-        lld_graph=lld_graph
+        lld_graph=lld_graph,
+        chat_summary=chat_summary
     )
     
     # Invalidate cache

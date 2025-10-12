@@ -214,8 +214,9 @@ class DocumentationService:
     Implements Factory pattern for different documentation types.
     """
     
-    def __init__(self, api_key: str, model_name: str = "gemini-2.5-pro"):
+    def __init__(self, api_key: str, model_name: str = "gemini-2.5-pro", chat_model_name: Optional[str] = None):
         self.model_name = model_name
+        self.chat_model_name = chat_model_name or model_name
         self.logger = logging.getLogger(self.__class__.__name__)
         self._initialize_client(api_key)
     
@@ -228,7 +229,7 @@ class DocumentationService:
             self.logger.error(f"Failed to configure Gemini API: {e}")
             raise ConfigurationError(f"Gemini API initialization failed: {e}")
     
-    def _generate_content(self, prompt: str) -> str:
+    def _generate_content(self, prompt: str, model_override: Optional[str] = None) -> str:
         """
         Helper method to generate content from a prompt.
         
@@ -240,15 +241,51 @@ class DocumentationService:
         """
         self.logger.info("Sending context to Gemini API...")
         time.sleep(2)  # Rate limiting
+        target_model = model_override or self.model_name
         try:
             response = self.client.models.generate_content(
-                model=self.model_name,
+                model=target_model,
                 contents=prompt
             )
             return response.text
         except Exception as e:
-            self.logger.error(f"Error calling Gemini API: {e}")
+            self.logger.error(f"Error calling Gemini API ({target_model}): {e}")
             return ""
+
+    def generate_chat_summary(self, context: str, repo_name: str) -> str:
+        """
+        Generates a conversational summary of the repository for chat onboarding.
+        """
+        prompt = f"""
+        You are an enthusiastic architecture assistant helping engineers explore the repository '{repo_name}'.
+        Using strictly the provided repository context, craft a concise conversational summary (3-4 short paragraphs or bullet groups)
+        highlighting the project's purpose, key components, architecture style, and any standout integrations.
+        Avoid filler phrases and stay factual to the context.
+
+        --- RELEVANT CONTEXT ---
+        {context}
+        ---
+        """
+        return self._generate_content(prompt, model_override=self.chat_model_name)
+
+    def generate_chat_response(self, context: str, repo_name: str, question: str) -> str:
+        """
+        Generates a contextual response for chat interactions.
+        """
+        prompt = f"""
+        You are an architecture copilot for '{repo_name}'.
+        Answer the user's question using ONLY the supplied context. Be specific about services, data flow, and technologies mentioned.
+        If the context lacks the necessary information, clearly state that and suggest where the answer might live in the codebase.
+
+        --- USER QUESTION ---
+        {question}
+        ---
+
+        --- RELEVANT CONTEXT ---
+        {context}
+        ---
+        """
+        return self._generate_content(prompt, model_override=self.chat_model_name)
     
     def generate_documentation(self, context: str, repo_name: str) -> str:
         """
@@ -401,5 +438,6 @@ class DocumentationService:
         return {
             'documentation': self.generate_documentation(context, repo_name),
             'hld': self.generate_high_level_design(context, repo_name),
-            'lld': self.generate_low_level_design(context, repo_name)
+            'lld': self.generate_low_level_design(context, repo_name),
+            'chat_summary': self.generate_chat_summary(context, repo_name)
         }

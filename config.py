@@ -19,6 +19,7 @@ if not GEMINI_API_KEY:
 # --- Models ---
 EMBEDDING_MODEL = 'nomic-embed-text'
 GENERATION_MODEL = 'gemini-2.5-pro' # Using a more recent model
+CHAT_MODEL = 'gemini-2.5-flash'
 
 # --- File and Directory Settings ---
 ALLOWED_EXTENSIONS = {

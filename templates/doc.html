@@ -234,6 +234,12 @@
         }
         
         /* Graph Styles */
+        .graph-chat-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
         .graph-container {
             background-color: var(--surface);
             padding: 2rem;
@@ -312,6 +318,72 @@
             padding: 2rem;
             overflow: auto;
         }
+        .chat-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-height: 100%;
+        }
+        .gemini-tab {
+            display: flex;
+            justify-content: center;
+        }
+        .gemini-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 820px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+        .gemini-panel > p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+        .chat-panel-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .chat-panel-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        .chat-panel-header span {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .chat-summary {
+            flex: 1;
+            background: rgba(17, 24, 39, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-y: auto;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .chat-summary p {
+            margin-bottom: 0.9rem;
+        }
+        .chat-summary strong {
+            color: var(--primary);
+        }
+        .chat-summary.empty {
+            color: var(--text-secondary);
+            display: grid;
+            place-items: center;
+            text-align: center;
+        }
         
         @media (max-width: 1024px) {
             .documentation-layout {
@@ -321,6 +393,9 @@
                 position: static;
                 max-height: none;
             }
+            .graph-chat-layout {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -329,6 +404,7 @@
         <div class="tabs">
             <button class="tab active" data-tab="documentation">Documentation</button>
             <button class="tab" data-tab="graph">Architecture Graphs</button>
+            <button class="tab" data-tab="gemini">Gemini 2.5 Flash</button>
         </div>
 
         <!-- Documentation Tab -->
@@ -348,21 +424,39 @@
 
         <!-- Graph Tab -->
         <div id="graph" class="tab-content">
-            <div class="graph-container">
-                <div class="graph-subtabs">
-                    <button class="graph-subtab active" data-diagram="hld">High-Level Design (HLD)</button>
-                    <button class="graph-subtab" data-diagram="lld">Low-Level Design (LLD)</button>
-                </div>
-                <div class="graph-meta">
-                    <h3>Architecture Graph</h3>
-                    <p>Switch tabs to explore the generated system views.</p>
-                </div>
-                <div class="graph-stage">
-                    <div class="graph-canvas active" id="hldCanvas">
-                        <div class="graph-message">Loading High-Level Design...</div>
+            <div class="graph-chat-layout">
+                <div class="graph-container">
+                    <div class="graph-subtabs">
+                        <button class="graph-subtab active" data-diagram="hld">High-Level Design (HLD)</button>
+                        <button class="graph-subtab" data-diagram="lld">Low-Level Design (LLD)</button>
                     </div>
-                    <div class="graph-canvas" id="lldCanvas">
-                        <div class="graph-message">Loading Low-Level Design...</div>
+                    <div class="graph-meta">
+                        <h3>Architecture Graph</h3>
+                        <p>Switch tabs to explore the generated system views.</p>
+                    </div>
+                    <div class="graph-stage">
+                        <div class="graph-canvas active" id="hldCanvas">
+                            <div class="graph-message">Loading High-Level Design...</div>
+                        </div>
+                        <div class="graph-canvas" id="lldCanvas">
+                            <div class="graph-message">Loading Low-Level Design...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gemini Tab -->
+        <div id="gemini" class="tab-content">
+            <div class="gemini-tab">
+                <div class="gemini-panel">
+                    <div class="chat-panel-header">
+                        <h3>Gemini 2.5 Flash</h3>
+                        <span>Insights powered by gemini-python analysis.</span>
+                    </div>
+                    <p>Explore AI-generated highlights, recommendations, and contextual notes derived from the repository analysis.</p>
+                    <div id="chatSummary" class="chat-summary empty">
+                        <div>Generating conversational summary...</div>
                     </div>
                 </div>
             </div>
@@ -403,26 +497,46 @@
         const backendData = {
             chat_response: {{ data.chat_response | tojson | safe }},
             hld_graph: {{ data.hld_graph | tojson | safe }},
-            lld_graph: {{ data.lld_graph | tojson | safe }}
+            lld_graph: {{ data.lld_graph | tojson | safe }},
+            chat_summary: {{ data.chat_summary | tojson | safe }},
+            repo_name: {{ data.repo_name | tojson | safe }},
+            repo_url: {{ data.repo_url | tojson | safe }}
         };
 
         console.log('Backend data loaded:', backendData);
+
+        function renderMarkdown(markdown, enableHeaders) {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: enableHeaders,
+                mangle: false
+            });
+            return marked.parse(markdown);
+        }
+
+        function renderChatSummary() {
+            const summaryContainer = document.getElementById('chatSummary');
+
+            if (!summaryContainer) {
+                return;
+            }
+
+            if (backendData.chat_summary) {
+                summaryContainer.classList.remove('empty');
+                summaryContainer.innerHTML = renderMarkdown(backendData.chat_summary, false);
+            } else {
+                summaryContainer.classList.add('empty');
+                summaryContainer.innerHTML = '<div>No conversational summary available yet.</div>';
+            }
+        }
 
         // Render Markdown documentation
         function renderDocumentation() {
             const docContent = document.getElementById('documentationContent');
             
             if (backendData.chat_response) {
-                // Configure marked for GFM (GitHub Flavored Markdown)
-                marked.setOptions({
-                    breaks: true,
-                    gfm: true,
-                    headerIds: true,
-                    mangle: false
-                });
-                
-                const htmlContent = marked.parse(backendData.chat_response);
-                docContent.innerHTML = htmlContent;
+                docContent.innerHTML = renderMarkdown(backendData.chat_response, true);
                 
                 // Build table of contents
                 buildTableOfContents();
@@ -520,6 +634,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Render documentation immediately
             renderDocumentation();
+            renderChatSummary();
 
             // Tab switching
             const tabs = document.querySelectorAll('.tab');
