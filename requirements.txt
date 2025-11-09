@@ -21,6 +21,9 @@ GitPython==3.1.40
 # Configuration
 python-dotenv==1.0.0
 
+# Deployment
+gunicorn==21.2.0
+
 # Testing (dev dependencies)
 pytest==7.4.3
 pytest-cov==4.1.0

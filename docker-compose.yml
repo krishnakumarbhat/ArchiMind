@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: archimind_web
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+    command: ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "300"]
+
+  db:
+    image: postgres:15-alpine
+    container_name: archimind_db
+    environment:
+      POSTGRES_DB: archimind
+      POSTGRES_USER: archimind_user
+      POSTGRES_PASSWORD: change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: archimind_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

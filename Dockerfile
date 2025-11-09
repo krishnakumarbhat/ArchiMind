@@ -30,6 +30,7 @@ RUN groupadd -r archimind && useradd -r -g archimind archimind
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -41,6 +42,9 @@ COPY --from=builder /root/.local /home/archimind/.local
 # Copy application code
 COPY . .
 
+# Ensure data directory exists for persistent artifacts
+RUN mkdir -p /app/data
+
 # Set ownership
 RUN chown -R archimind:archimind /app
 
@@ -49,6 +53,7 @@ USER archimind
 
 # Add local bin to PATH
 ENV PATH=/home/archimind/.local/bin:$PATH
+ENV HOME=/home/archimind
 
 # Expose port
 EXPOSE 5000
@@ -57,5 +62,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
-# Run the application
-CMD ["python", "main.py"]
+# Run the application with Gunicorn (factory pattern in app.py)
+CMD ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "300"]

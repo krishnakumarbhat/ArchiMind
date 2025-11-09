@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environments
+.env
+venv/
+
+# Version control
+.git
+.gitignore
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# Data artifacts
+/data/
+/tmp/
+
+# Logs
+*.log
+
+# Jupyter notebooks
+*.ipynb_checkpoints
