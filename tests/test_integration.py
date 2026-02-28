@@ -3,7 +3,6 @@
 import os
 from unittest.mock import patch
 
-os.environ.setdefault("GEMINI_API_KEY", "test-api-key")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("DATABASE_URL", "sqlite:///data/test_integration.db")
 

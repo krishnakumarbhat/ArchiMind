@@ -5,8 +5,6 @@ import os
 import tempfile
 from unittest.mock import Mock, patch
 
-os.environ.setdefault("GEMINI_API_KEY", "test-api-key")
-
 from worker import AnalysisWorker
 
 
@@ -30,8 +28,7 @@ def test_run_analysis_success(mock_repo_cls, mock_vector_cls, mock_doc_cls):
         status_file = os.path.join(temp_dir, "status.json")
 
         repo_service = Mock()
-        repo_service.clone_repository.return_value = True
-        repo_service.read_repository_files.return_value = {"app.py": "print('hello')"}
+        repo_service.collect_repository_files.return_value = {"app.py": "print('hello')"}
         mock_repo_cls.return_value = repo_service
 
         vector_service = Mock()
@@ -54,8 +51,6 @@ def test_run_analysis_success(mock_repo_cls, mock_vector_cls, mock_doc_cls):
              patch("worker.config.LOCAL_CLONE_PATH", os.path.join(temp_dir, "repo")), \
              patch("worker.config.CHROMA_DB_PATH", os.path.join(temp_dir, "chroma")), \
              patch("worker.config.EMBEDDING_MODEL", "models/gemini-embedding-001"), \
-             patch("worker.config.GEMINI_API_KEY", "test-api-key"), \
-             patch("worker.config.GENERATION_MODEL", "gemini-2.5-pro"), \
              patch("worker.config.ALLOWED_EXTENSIONS", {".py"}), \
              patch("worker.config.IGNORED_DIRECTORIES", {".git"}), \
              patch.object(worker, "_update_database_log"), \

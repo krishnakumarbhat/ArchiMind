@@ -1,26 +1,14 @@
 # config.py
-"""
-Central configuration file for the RAG Documentation Generator.
-Loads sensitive data from environment variables.
-"""
+"""Central configuration for ArchiMind runtime and indexing."""
 import os
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file (optional)
 load_dotenv()
 
-# --- API Keys ---
-# It is highly recommended to use environment variables for API keys.
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable not set.")
-
-# --- Models ---
-# Use Gemini for embeddings (no Ollama needed)
-EMBEDDING_MODEL = 'models/gemini-embedding-001'  # Gemini embedding model
-GENERATION_MODEL = 'gemini-2.5-pro'  # Latest Gemini Pro model
-CHAT_MODEL = 'gemini-2.5-flash'
+# --- Local model/indexing settings ---
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'chroma-default')
+SMALL_SUMMARY_MODEL = os.getenv('SMALL_SUMMARY_MODEL', 'heuristic')
 
 # --- File and Directory Settings ---
 ALLOWED_EXTENSIONS = {
@@ -36,4 +24,6 @@ IGNORED_DIRECTORIES = {
 DATA_PATH = os.path.abspath('./data')
 LOCAL_CLONE_PATH = os.path.join(DATA_PATH, 'temp_repo')
 CHROMA_DB_PATH = os.path.join(DATA_PATH, 'chroma_db')
+SQLITE_DB_PATH = os.path.join(DATA_PATH, 'archimind_dev.db')
+SQLITE_URL = f"sqlite:///{SQLITE_DB_PATH}"
 STATUS_FILE_PATH = os.path.join(DATA_PATH, 'status.json')

@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generateButton');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsLinkContainer = document.getElementById('resultsLinkContainer');
+    const resultsLink = document.getElementById('resultsLink');
     const repoInput = document.getElementById('repoInput');
 
     if (!generateButton || !loadingIndicator || !repoInput) {
@@ -24,10 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         generateButton.disabled = false;
     };
 
-    const pollStatus = () => {
+    const pollStatus = (analysisId) => {
         const interval = setInterval(async () => {
             try {
-                const response = await fetch('/api/status');
+                const response = await fetch(`/api/status?analysis_id=${analysisId}`);
                 const data = await response.json();
 
                 if (data.status === 'completed') {
@@ -72,7 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.status === 202) {
-                pollStatus();
+                const data = await response.json();
+                const analysisId = data.analysis_id;
+                if (resultsLink && data.doc_url) {
+                    resultsLink.setAttribute('href', data.doc_url);
+                }
+                pollStatus(analysisId);
             } else if (response.status === 403) {
                 // Rate limit reached - show login modal
                 const data = await response.json();

@@ -7,29 +7,31 @@ ArchiMind analyzes a GitHub repository and produces:
 - conversational project summary,
 - persistent history for authenticated users.
 
-It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB vector search, and a Flask web UI.
+It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplitter`, ChromaDB vector search, and SQLite-backed app storage.
 
 ## Table of Contents
 
 1. [What You Can Do](#what-you-can-do)
 2. [Architecture at a Glance](#architecture-at-a-glance)
-3. [Quick Start (No venv)](#quick-start-no-venv)
-4. [Configuration](#configuration)
-5. [Run Modes](#run-modes)
-6. [API Reference](#api-reference)
-7. [Use Cases & Capabilities](#use-cases--capabilities)
-8. [Project Structure](#project-structure)
-9. [Quality, Testing & Security](#quality-testing--security)
-10. [Troubleshooting](#troubleshooting)
-11. [Diagrams (DOT files)](#diagrams-dot-files)
-12. [Raspberry Pi Deployment](#raspberry-pi-deployment)
+3. [Block Diagram](#block-diagram)
+4. [How It Works](#how-it-works)
+5. [Quick Start (No venv)](#quick-start-no-venv)
+6. [Configuration](#configuration)
+7. [Run Modes](#run-modes)
+8. [API Reference](#api-reference)
+9. [Use Cases & Capabilities](#use-cases--capabilities)
+10. [Project Structure](#project-structure)
+11. [Quality, Testing & Security](#quality-testing--security)
+12. [Troubleshooting](#troubleshooting)
+13. [Diagrams (DOT files)](#diagrams-dot-files)
+14. [Raspberry Pi Deployment](#raspberry-pi-deployment)
 
 ## What You Can Do
 
 ### Core Capabilities
 
 - Analyze a public GitHub repository from URL.
-- Build semantic embeddings for repository files.
+- Build hierarchical retrieval index (file summaries + AST code chunks).
 - Generate a multi-chapter architecture handbook.
 - Generate HLD and LLD Mermaid graph payloads.
 - View output in a tabbed documentation + graph viewer.
@@ -39,7 +41,7 @@ It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB ve
 - Anonymous mode with per-session limit (default 5 analyses).
 - Authenticated mode with unlimited usage and saved history.
 - OAuth (Google) optional; classic email/password supported.
-- Repository history API with caching support (Redis optional).
+- Repository history API stored in SQLite.
 
 ## Architecture at a Glance
 
@@ -49,9 +51,9 @@ It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB ve
 - `worker.py`: Background execution pipeline that performs repository analysis.
 - `services.py`:
     - `RepositoryService` (clone + file extraction)
-    - `VectorStoreService` (Gemini embeddings + ChromaDB)
-    - `DocumentationService` (Gemini generation for docs/HLD/LLD/summary/chat)
-- `oauth_utils.py`: OAuth + Redis-backed history caching helpers.
+    - `VectorStoreService` (LlamaIndex AST chunking + ChromaDB + metadata-rich indexing)
+    - `DocumentationService` (local context-driven docs/HLD/LLD/summary/chat)
+- `oauth_utils.py`: OAuth + lightweight in-process cache helpers.
 
 ### End-to-End Flow
 
@@ -59,9 +61,58 @@ It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB ve
 2. App validates request and rate limits.
 3. App records `AnalysisLog` entry and spawns `worker.py` subprocess.
 4. Worker clones repo (or reuses local clone), reads selected files.
-5. Worker generates embeddings and stores/query context in ChromaDB.
-6. Worker asks Gemini for documentation + diagram JSON payloads.
+5. Worker builds tier-1 file summaries and tier-2 AST chunks in ChromaDB.
+6. LangGraph retrieves relevant files first, then precise code chunks with metadata.
 7. Worker writes status/result to `data/status.json` and updates DB log.
+
+## Block Diagram
+
+```mermaid
+flowchart TD
+        U[User / API Client] --> A[Flask API]
+        A --> W[Worker Process]
+
+        W --> R{Repository Ingestion Strategy}
+        R -->|Fast path| G[GitHub API + Raw Content Scraping]
+        R -->|Fallback| C[Selective Local Clone]
+
+        G --> I[Index Builder]
+        C --> I
+
+        I --> S[Tier 1: File Summaries in ChromaDB]
+        I --> K[Tier 2: AST Code Chunks in ChromaDB]
+
+        Q[LangGraph Query Orchestrator] --> S
+        Q --> K
+        S --> Q
+        K --> Q
+
+        Q --> D[Documentation + HLD + LLD Generation]
+        D --> J[(SQLite + status.json)]
+        D --> U
+```
+
+## How It Works
+
+### 1) Ingestion strategy (speed first)
+
+- For GitHub URLs, the worker first uses GitHub API + raw file endpoints to **scrape important repository files**.
+- It prioritizes files such as `README*`, `docs/*`, architecture/design files, and core source entry points (`app`, `api`, `service`, `worker`, etc.).
+- For very large repositories, it fetches a scored subset instead of cloning everything.
+- If remote scraping is unavailable or insufficient, it falls back to local clone + filesystem scan.
+
+### 2) Hierarchical index
+
+- **Tier 1 (File summaries):** each file gets a compact summary for coarse retrieval.
+- **Tier 2 (Code chunks):** source is chunked by AST blocks (functions/classes/methods) where possible using LlamaIndex `CodeSplitter`.
+- Every chunk stores metadata: `file_path`, `language`, `function_name`, `github_url`, line range.
+
+### 3) Query pipeline
+
+- LangGraph runs a 2-step retrieval graph:
+    1. query summary collection to find relevant files,
+    2. query chunk collection scoped to those files.
+- Returned context is assembled with metadata-rich headers so downstream HLD/LLD generation stays grounded.
 
 ## Quick Start (No venv)
 
@@ -69,7 +120,7 @@ It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB ve
 
 - Python 3.10+ (3.11 recommended)
 - Git
-- A Gemini API key
+- No external LLM key required for local mode
 
 ### 1) Install dependencies
 
@@ -85,7 +136,6 @@ cp .env.example .env
 
 Set at least:
 
-- `GEMINI_API_KEY=...`
 - `SECRET_KEY=...`
 - `DATABASE_URL=sqlite:///data/archimind_dev.db`
 
@@ -122,7 +172,6 @@ Primary configuration lives in `.env` and `config.py`.
 
 | Variable | Required | Description |
 |---|---|---|
-| `GEMINI_API_KEY` | Yes | API key used for Gemini embedding + generation |
 | `SECRET_KEY` | Yes | Flask session/signing key |
 | `DATABASE_URL` | No | Defaults to local SQLite path if omitted |
 
@@ -134,17 +183,14 @@ Primary configuration lives in `.env` and `config.py`.
 | `FLASK_HOST` | Bind host (default `127.0.0.1`) |
 | `FLASK_PORT` | Bind port (default `5000`) |
 | `ANONYMOUS_GENERATION_LIMIT` | Free analyses per anonymous session |
-| `REDIS_URL` | Optional cache backend for history |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login |
 | `OAUTHLIB_INSECURE_TRANSPORT` | Local HTTP OAuth testing toggle |
 
-### Model Configuration (`config.py`)
+### Retrieval Configuration (`config.py`)
 
-- Embeddings: `models/gemini-embedding-001`
-- Documentation generation: `gemini-2.5-pro`
-- Chat summary/response model: `gemini-2.5-flash`
-
-> Note: model access and quota depend on your Google account/project.
+- Tier 1: file-level summaries stored in ChromaDB
+- Tier 2: AST-based code chunks stored in ChromaDB
+- Query orchestration: LangGraph summary-first retrieval pipeline
 
 ## Run Modes
 
@@ -305,10 +351,10 @@ bandit -r .
 - Anonymous session hit configured cap.
 - Sign in or clear browser session data.
 
-### Gemini errors (`429`, quota/model access)
+### Empty or weak retrieval context
 
-- Verify key/project quota in Google AI Studio/Cloud.
-- Switch to a model your key can access.
+- Re-run analysis to rebuild summary + chunk collections.
+- Verify target repository has supported text/code files.
 
 ### OAuth issues in local dev
 
