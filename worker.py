@@ -38,11 +38,22 @@ class AnalysisWorker:
     # Helper utilities
     # ------------------------------------------------------------------
 
-    def _update_status(self, status: Dict[str, Optional[dict]]) -> None:
+    def _status_file_for_analysis(self, analysis_log_id: Optional[int]) -> str:
+        if analysis_log_id:
+            return os.path.join(config.DATA_PATH, f"status_{analysis_log_id}.json")
+        return self.status_file
+
+    def _update_status(self, status: Dict[str, Optional[dict]], status_file_path: Optional[str] = None) -> None:
         """Persist the current analysis status to disk."""
-        os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
-        with open(self.status_file, "w", encoding="utf-8") as handle:
+        target_path = status_file_path or self.status_file
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        with open(target_path, "w", encoding="utf-8") as handle:
             json.dump(status, handle, indent=2)
+
+        if target_path != self.status_file:
+            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+            with open(self.status_file, "w", encoding="utf-8") as handle:
+                json.dump(status, handle, indent=2)
 
     def _update_database_log(self, analysis_log_id: Optional[int], status: str) -> None:
         """Record status transitions in the `AnalysisLog` table."""
@@ -231,31 +242,36 @@ class AnalysisWorker:
         """Execute the full repository analysis pipeline."""
 
         status: Dict[str, Optional[dict]] = {"status": "processing", "result": None, "error": None}
-        self._update_status(status)
+        status["analysis_id"] = analysis_log_id
+        status_file_path = self._status_file_for_analysis(analysis_log_id)
+        self._update_status(status, status_file_path)
 
         try:
             self._update_database_log(analysis_log_id, "processing")
 
             repo_name = repo_url.rstrip("/").split("/")[-1]
             self.logger.info("Starting analysis for repository: %s", repo_name)
-
-            if not self.repo_service.clone_repository(repo_url, config.LOCAL_CLONE_PATH):
-                raise RuntimeError("Failed to clone repository")
+            repo_local_path = os.path.join(
+                config.LOCAL_CLONE_PATH,
+                f"{repo_name}_{analysis_log_id or int(time.time())}",
+            )
 
             vector_service = VectorStoreService(
                 db_path=config.CHROMA_DB_PATH,
                 collection_name=repo_name,
                 embedding_model=config.EMBEDDING_MODEL,
+                repo_url=repo_url,
             )
 
             if vector_service.is_empty():
-                file_contents = self.repo_service.read_repository_files(
-                    config.LOCAL_CLONE_PATH,
+                file_contents = self.repo_service.collect_repository_files(
+                    repo_url,
+                    repo_local_path,
                     config.ALLOWED_EXTENSIONS,
                     config.IGNORED_DIRECTORIES,
                 )
                 if not file_contents:
-                    raise RuntimeError("No processable files found in repository")
+                    raise RuntimeError("No processable files found from remote ingestion or local clone")
 
                 vector_service.generate_embeddings(file_contents)
 
@@ -265,9 +281,8 @@ class AnalysisWorker:
                 raise RuntimeError("Failed to retrieve context from vector store")
 
             doc_service = DocumentationService(
-                api_key=config.GEMINI_API_KEY,
-                model_name=config.GENERATION_MODEL,
-                chat_model_name=getattr(config, 'CHAT_MODEL', None),
+                model_name="local",
+                chat_model_name="local",
             )
             docs = doc_service.generate_all_documentation(context, repo_name)
 
@@ -307,7 +322,7 @@ class AnalysisWorker:
 
         finally:
             status["timestamp"] = int(time.time())
-            self._update_status(status)
+            self._update_status(status, status_file_path)
 
 
 def main() -> None:

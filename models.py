@@ -1,6 +1,6 @@
 """
 Database models for ArchiMind.
-Uses PostgreSQL for production-grade authentication and rate limiting.
+Uses SQLite for authentication, history, and rate limiting.
 """
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin

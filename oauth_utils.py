@@ -1,10 +1,9 @@
 """
-OAuth2 and Redis caching utilities for ArchiMind.
-Handles Google OAuth2 authentication with 2FA support and Redis caching for repository history.
+OAuth2 and lightweight caching utilities for ArchiMind.
+Handles Google OAuth2 authentication and in-process cache for repository history.
 """
 import os
 import json
-import redis
 from functools import wraps
 from flask import Blueprint, redirect, url_for, session, request, flash
 from flask_login import login_user, current_user
@@ -14,24 +13,12 @@ from models import User, db, RepositoryHistory
 # Initialize OAuth
 oauth = OAuth()
 
-# Initialize Redis client
-redis_client = None
+# Lightweight in-process cache (SQLite remains the only persistent store)
+history_cache = {}
 
 def init_redis():
-    """Initialize Redis connection. Gracefully skips if Redis is unavailable."""
-    global redis_client
-    redis_url = os.getenv('REDIS_URL', '')
-    if not redis_url:
-        print("REDIS_URL not set — running without Redis cache (OK for dev).")
-        redis_client = None
-        return
-    try:
-        redis_client = redis.from_url(redis_url, decode_responses=True)
-        redis_client.ping()
-        print(f"Redis connected successfully at {redis_url}")
-    except Exception as e:
-        print(f"Redis connection failed (continuing without cache): {e}")
-        redis_client = None
+    """Backward-compatible hook retained as a no-op for lightweight deployments."""
+    return
 
 def init_oauth(app):
     """Initialize OAuth with Flask app."""
@@ -104,56 +91,30 @@ def google_callback():
         return redirect(url_for('_index'))
 
 
-# ============ Redis Caching Functions ============
+# ============ Local Caching Functions ============
 
 def get_cached_history(user_id):
-    """Retrieve cached repository history from Redis."""
-    if not redis_client:
-        return None
-    
-    try:
-        cache_key = f'user:{user_id}:history'
-        cached_data = redis_client.get(cache_key)
-        if cached_data:
-            return json.loads(cached_data)
-    except Exception as e:
-        print(f"Redis get error: {e}")
-    
-    return None
+    """Retrieve cached repository history from in-process memory cache."""
+    return history_cache.get(f'user:{user_id}:history')
 
 def set_cached_history(user_id, history_data, expiry=3600):
-    """Cache repository history in Redis with expiry (default 1 hour)."""
-    if not redis_client:
-        return False
-    
-    try:
-        cache_key = f'user:{user_id}:history'
-        redis_client.setex(cache_key, expiry, json.dumps(history_data))
-        return True
-    except Exception as e:
-        print(f"Redis set error: {e}")
-        return False
+    """Cache repository history in process memory."""
+    del expiry
+    history_cache[f'user:{user_id}:history'] = history_data
+    return True
 
 def invalidate_history_cache(user_id):
     """Invalidate cached history when new repository is added."""
-    if not redis_client:
-        return False
-    
-    try:
-        cache_key = f'user:{user_id}:history'
-        redis_client.delete(cache_key)
-        return True
-    except Exception as e:
-        print(f"Redis delete error: {e}")
-        return False
+    history_cache.pop(f'user:{user_id}:history', None)
+    return True
 
 def get_user_repository_history(user_id, use_cache=True):
     """
-    Get user's repository history with Redis caching.
+    Get user's repository history with optional in-process caching.
     
     Args:
         user_id: User's database ID
-        use_cache: Whether to use Redis cache (default True)
+        use_cache: Whether to use in-process cache (default True)
     
     Returns:
         List of repository history dictionaries

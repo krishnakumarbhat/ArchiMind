@@ -114,14 +114,12 @@ volumes:
 
 ```bash
 cat > .env << 'EOF'
-GEMINI_API_KEY=replace_with_real_key
 SECRET_KEY=replace_with_long_random_secret
 DATABASE_URL=sqlite:///data/archimind_dev.db
 FLASK_DEBUG=False
 FLASK_HOST=0.0.0.0
 FLASK_PORT=5000
 ANONYMOUS_GENERATION_LIMIT=5
-REDIS_URL=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 OAUTHLIB_INSECURE_TRANSPORT=0
@@ -203,6 +201,7 @@ Verify env + volume + DB file:
 ```bash
 docker exec -it archimind_web sh
 printenv | grep -E 'GEMINI_API_KEY|DATABASE_URL|FLASK_'
+printenv | grep -E 'DATABASE_URL|FLASK_'
 ls -lah /app/data
 ```
 
@@ -214,9 +213,9 @@ docker exec -it archimind_web python3 worker.py https://github.com/LearningCircu
 
 If worker fails:
 
-- check Gemini quota/model access (`429` indicates quota/limits)
 - check outbound network from Pi (`curl https://api.github.com`)
 - check `/app/data/status.json` updates and write permissions
+- check `/app/data/chroma_db` exists and is writable
 
 ---
 

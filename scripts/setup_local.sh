@@ -28,4 +28,4 @@ fi
 pip install -r requirements.txt
 
 echo "[ArchiMind] Setup complete."
-echo "[ArchiMind] Next: edit .env (GEMINI_API_KEY, SECRET_KEY), then run: bash scripts/run_local.sh"
+echo "[ArchiMind] Next: edit .env (SECRET_KEY), then run: bash scripts/run_local.sh"

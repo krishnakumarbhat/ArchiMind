@@ -129,7 +129,7 @@ class ArchiMindApplication:
         init_oauth(self.app)
         self.app.register_blueprint(oauth_bp)
         
-        # Initialize Redis
+        # Initialize lightweight cache hook
         init_redis()
         
         self.login_manager = LoginManager()
@@ -150,6 +150,22 @@ class ArchiMindApplication:
         if not os.path.exists(self.config.STATUS_FILE_PATH):
             with open(self.config.STATUS_FILE_PATH, 'w') as f:
                 json.dump({'status': 'idle'}, f)
+
+    def _status_file_for_analysis(self, analysis_id: int) -> str:
+        """Returns the filesystem path for a specific analysis status payload."""
+        return os.path.join(self.config.DATA_PATH, f"status_{analysis_id}.json")
+
+    def _resolve_actor_context(self):
+        """Returns actor context used for analysis ownership and rate limiting."""
+        if current_user.is_authenticated:
+            return {"user_id": current_user.id, "session_id": None, "authenticated": True}
+
+        session_id = session.get('session_id')
+        if not session_id:
+            session_id = str(uuid.uuid4())
+            session['session_id'] = session_id
+
+        return {"user_id": None, "session_id": session_id, "authenticated": False}
     
     def _register_routes(self):
         """Registers all application routes."""
@@ -181,6 +197,19 @@ class ArchiMindApplication:
     
     def _documentation(self):
         """Documentation viewer route."""
+        analysis_id = request.args.get('analysis_id', type=int)
+
+        if analysis_id:
+            status_file = self._status_file_for_analysis(analysis_id)
+            try:
+                with open(status_file, 'r') as f:
+                    status = json.load(f)
+                if status.get('status') == 'completed':
+                    return render_template('doc.html', data=status.get('result'), user=current_user)
+                return "Analysis not complete. Please wait.", 404
+            except (FileNotFoundError, json.JSONDecodeError):
+                return "Analysis data not found for this request.", 404
+
         try:
             with open(self.config.STATUS_FILE_PATH, 'r') as f:
                 status = json.load(f)
@@ -199,15 +228,12 @@ class ArchiMindApplication:
         repo_url = request.json.get('repo_url')
         if not repo_url:
             return jsonify({'error': 'Repository URL is required'}), 400
+
+        actor = self._resolve_actor_context()
         
         # Check rate limiting for anonymous users
-        if not current_user.is_authenticated:
-            session_id = session.get('session_id')
-            if not session_id:
-                session_id = str(uuid.uuid4())
-                session['session_id'] = session_id
-            
-            count = AnalysisLog.query.filter_by(session_id=session_id).count()
+        if not actor['authenticated']:
+            count = AnalysisLog.query.filter_by(session_id=actor['session_id']).count()
             if count >= self.config.ANONYMOUS_GENERATION_LIMIT:
                 return jsonify({
                     'error': 'Generation limit reached',
@@ -215,19 +241,10 @@ class ArchiMindApplication:
                     'limit_reached': True
                 }), 403
         
-        # Check if analysis is already running
-        try:
-            with open(self.config.STATUS_FILE_PATH, 'r') as f:
-                status = json.load(f)
-                if status.get('status') == 'processing':
-                    return jsonify({'error': 'An analysis is already in progress'}), 409
-        except (FileNotFoundError, json.JSONDecodeError):
-            pass
-        
         # Log the analysis request
         analysis_log = AnalysisLog(
-            user_id=current_user.id if current_user.is_authenticated else None,
-            session_id=session.get('session_id') if not current_user.is_authenticated else None,
+            user_id=actor['user_id'],
+            session_id=actor['session_id'],
             repo_url=repo_url,
             status='pending'
         )
@@ -237,10 +254,44 @@ class ArchiMindApplication:
         # Start worker as subprocess
         subprocess.Popen([sys.executable, 'worker.py', repo_url, str(analysis_log.id)])
         
-        return jsonify({'status': 'success', 'message': 'Analysis started'}), 202
+        return jsonify({
+            'status': 'success',
+            'message': 'Analysis started',
+            'analysis_id': analysis_log.id,
+            'status_url': f"/api/status?analysis_id={analysis_log.id}",
+            'doc_url': f"/doc?analysis_id={analysis_log.id}"
+        }), 202
     
     def _api_status(self):
         """API endpoint to check analysis status."""
+        analysis_id = request.args.get('analysis_id', type=int)
+
+        if analysis_id:
+            actor = self._resolve_actor_context()
+            query = AnalysisLog.query.filter_by(id=analysis_id)
+
+            if actor['authenticated']:
+                query = query.filter_by(user_id=actor['user_id'])
+            else:
+                query = query.filter_by(session_id=actor['session_id'])
+
+            analysis_log = query.first()
+            if not analysis_log:
+                return jsonify({'error': 'Analysis not found for this user/session.'}), 404
+
+            status_file = self._status_file_for_analysis(analysis_id)
+            try:
+                with open(status_file, 'r') as f:
+                    status = json.load(f)
+                return jsonify(status)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return jsonify({
+                    'status': analysis_log.status,
+                    'result': None,
+                    'error': None,
+                    'analysis_id': analysis_id
+                })
+
         try:
             with open(self.config.STATUS_FILE_PATH, 'r') as f:
                 status = json.load(f)
