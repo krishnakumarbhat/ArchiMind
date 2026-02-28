@@ -38,13 +38,30 @@ class ApplicationConfig:
     
     def __init__(self):
         self.SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-        self.DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://localhost/archimind')
-        self.SQLALCHEMY_TRACK_MODIFICATIONS = False
+
         self.DATA_PATH = os.path.abspath('./data')
         self.STATUS_FILE_PATH = os.path.join(self.DATA_PATH, 'status.json')
+
+        # If DATABASE_URL is not set, default to an absolute SQLite path under DATA_PATH.
+        default_sqlite = f"sqlite:///{os.path.join(self.DATA_PATH, 'archimind_dev.db')}"
+        raw_db_url = os.getenv('DATABASE_URL', default_sqlite)
+
+        # Normalize relative sqlite paths like sqlite:///data/foo.db to an absolute path.
+        if raw_db_url.startswith('sqlite:///') and not raw_db_url.startswith('sqlite:////'):
+            rel_path = raw_db_url[len('sqlite:///'):]
+            if not os.path.isabs(rel_path):
+                raw_db_url = f"sqlite:///{os.path.abspath(rel_path)}"
+
+        self.DATABASE_URL = raw_db_url
+
+        self.SQLALCHEMY_TRACK_MODIFICATIONS = False
         self.ANONYMOUS_GENERATION_LIMIT = 5
         self.GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
         self.GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+
+        logging.getLogger(self.__class__.__name__).info(
+            "Configured DATABASE_URL=%s (DATA_PATH=%s)", self.DATABASE_URL, self.DATA_PATH
+        )
 
 
 # Database instance
@@ -92,11 +109,12 @@ class ArchiMindApplication:
     def __init__(self):
         self.app = Flask(__name__)
         self.config = ApplicationConfig()
+        # Ensure filesystem paths exist before DB initialization (SQLite needs parent dir)
+        self._initialize_data_directory()
         self._configure_application()
         self._initialize_extensions()
         self._register_routes()
-        self._initialize_data_directory()
-    
+        
     def _configure_application(self):
         """Configures Flask application settings."""
         self.app.config['SECRET_KEY'] = self.config.SECRET_KEY
@@ -127,8 +145,7 @@ class ArchiMindApplication:
     
     def _initialize_data_directory(self):
         """Ensures data directory and status file are initialized."""
-        if not os.path.exists(self.config.DATA_PATH):
-            os.makedirs(self.config.DATA_PATH)
+        os.makedirs(self.config.DATA_PATH, exist_ok=True)
         
         if not os.path.exists(self.config.STATUS_FILE_PATH):
             with open(self.config.STATUS_FILE_PATH, 'w') as f:

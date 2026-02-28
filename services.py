@@ -5,10 +5,14 @@ Consolidated service classes with design patterns (Singleton, Factory, Service L
 import os
 import logging
 import time
+import json
+import math
 from typing import Dict, List, Set, Optional
 import git
-import chromadb
-import ollama
+try:
+    import chromadb
+except Exception:
+    chromadb = None
 from google import genai
 
 
@@ -95,9 +99,75 @@ class RepositoryService:
         return file_contents
 
 
+class _SimpleCollection:
+    """Minimal persistent collection used when ChromaDB is unavailable."""
+
+    def __init__(self, db_path: str, collection_name: str):
+        os.makedirs(db_path, exist_ok=True)
+        self._file_path = os.path.join(db_path, f"{collection_name}.json")
+        self._records: Dict[str, Dict[str, object]] = {}
+        self._load()
+
+    def _load(self) -> None:
+        if not os.path.exists(self._file_path):
+            return
+        try:
+            with open(self._file_path, "r", encoding="utf-8") as handle:
+                raw = json.load(handle)
+            if isinstance(raw, dict):
+                self._records = raw
+        except Exception:
+            self._records = {}
+
+    def _save(self) -> None:
+        with open(self._file_path, "w", encoding="utf-8") as handle:
+            json.dump(self._records, handle)
+
+    def count(self) -> int:
+        return len(self._records)
+
+    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str]) -> None:
+        for emb, doc, doc_id in zip(embeddings, documents, ids):
+            self._records[doc_id] = {
+                "embedding": emb,
+                "document": doc,
+            }
+        self._save()
+
+    @staticmethod
+    def _cosine_similarity(a: List[float], b: List[float]) -> float:
+        if not a or not b or len(a) != len(b):
+            return -1.0
+        dot = sum(x * y for x, y in zip(a, b))
+        norm_a = math.sqrt(sum(x * x for x in a))
+        norm_b = math.sqrt(sum(y * y for y in b))
+        if norm_a == 0 or norm_b == 0:
+            return -1.0
+        return dot / (norm_a * norm_b)
+
+    def query(self, query_embeddings: List[List[float]], n_results: int = 15) -> Dict[str, List[List[str]]]:
+        if not query_embeddings:
+            return {"documents": [[]], "ids": [[]]}
+
+        query_vector = query_embeddings[0]
+        ranked: List[tuple] = []
+
+        for doc_id, payload in self._records.items():
+            score = self._cosine_similarity(query_vector, payload.get("embedding", []))
+            ranked.append((score, doc_id, payload.get("document", "")))
+
+        ranked.sort(key=lambda item: item[0], reverse=True)
+        top = ranked[: max(1, n_results)]
+
+        return {
+            "documents": [[item[2] for item in top]],
+            "ids": [[item[1] for item in top]],
+        }
+
+
 class VectorStoreService:
     """
-    Vector database service using ChromaDB with Singleton pattern.
+    Vector database service using ChromaDB with Gemini embeddings (Singleton pattern).
     Manages embeddings generation and similarity search.
     """
     _instances: Dict[str, 'VectorStoreService'] = {}
@@ -121,12 +191,22 @@ class VectorStoreService:
     def _initialize_database(self):
         """Initializes ChromaDB client and collection."""
         try:
-            self.chroma_client = chromadb.PersistentClient(path=self.db_path)
-            self.collection = self.chroma_client.get_or_create_collection(
-                name=self.collection_name
+            if chromadb is not None:
+                self.chroma_client = chromadb.PersistentClient(path=self.db_path)
+                self.collection = self.chroma_client.get_or_create_collection(
+                    name=self.collection_name
+                )
+                backend = "ChromaDB"
+            else:
+                self.collection = _SimpleCollection(self.db_path, self.collection_name)
+                backend = "SimpleJSON"
+
+            # Initialize Gemini client for embeddings
+            from config import GEMINI_API_KEY
+            self.gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+            self.logger.info(
+                f"Vector store initialized: {self.collection_name} ({backend}, Gemini embeddings)"
             )
-            self.ollama_client = ollama.Client()
-            self.logger.info(f"Vector store initialized: {self.collection_name}")
         except Exception as e:
             self.logger.error(f"Failed to initialize vector store: {e}")
             raise ConfigurationError(f"Vector store initialization failed: {e}")
@@ -140,14 +220,27 @@ class VectorStoreService:
         """Checks if the collection is empty."""
         return self.collection.count() == 0
     
+    def _get_gemini_embedding(self, text: str) -> List[float]:
+        """Get embedding from Gemini API."""
+        # Truncate text to avoid token limits (Gemini embedding supports ~2048 tokens)
+        max_chars = 8000
+        if len(text) > max_chars:
+            text = text[:max_chars]
+        
+        response = self.gemini_client.models.embed_content(
+            model=self.embedding_model,
+            contents=text,
+        )
+        return response.embeddings[0].values
+    
     def generate_embeddings(self, file_contents: Dict[str, str]) -> None:
         """
-        Generates and stores embeddings for the given file contents.
+        Generates and stores embeddings for the given file contents using Gemini.
         
         Args:
             file_contents: Dictionary mapping file paths to their contents
         """
-        self.logger.info(f"Generating embeddings with '{self.embedding_model}'...")
+        self.logger.info(f"Generating embeddings with Gemini '{self.embedding_model}'...")
         total_files = len(file_contents)
         
         for i, (path, content) in enumerate(file_contents.items(), 1):
@@ -157,16 +250,14 @@ class VectorStoreService:
                 continue
             
             try:
-                response = self.ollama_client.embeddings(
-                    model=self.embedding_model,
-                    prompt=content
-                )
+                embedding = self._get_gemini_embedding(content)
                 self.collection.add(
-                    embeddings=[response['embedding']],
+                    embeddings=[embedding],
                     documents=[content],
                     ids=[path]
                 )
                 self.logger.info(f"{progress} Embedded and stored: {path}")
+                time.sleep(0.3)  # Rate limiting for Gemini API
             except Exception as e:
                 self.logger.error(f"{progress} Failed to embed {path}: {e}")
         
@@ -185,14 +276,11 @@ class VectorStoreService:
         """
         self.logger.info("Retrieving relevant files from vector database...")
         try:
-            query_embedding = self.ollama_client.embeddings(
-                model=self.embedding_model,
-                prompt=query_text
-            )['embedding']
+            query_embedding = self._get_gemini_embedding(query_text)
             
             results = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=n_results
+                n_results=min(n_results, self.collection.count())
             )
             retrieved_docs = results['documents'][0]
             retrieved_ids = results['ids'][0]

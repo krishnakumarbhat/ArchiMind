@@ -1,0 +1,47 @@
+digraph ArchiMind_LLD {
+  rankdir=TB;
+  graph [label="ArchiMind Low-Level Runtime Flow", labelloc=t, fontsize=20, fontname="Inter"];
+  node [shape=box, style="rounded,filled", fillcolor="#f7fbff", color="#53789c", fontname="Inter"];
+  edge [color="#4a6484", fontname="Inter"];
+
+  Start [shape=circle, label="Start", fillcolor="#e8fff1"];
+  Submit [label="POST /api/analyze\n(repo_url)"];
+  Validate [label="Validate payload +\nrate-limit checks"];
+  LogPending [label="Insert AnalysisLog\nstatus=pending"];
+  Spawn [label="subprocess.Popen(worker.py)"];
+  Processing [label="Worker sets status=processing\nin status.json + DB"];
+
+  Clone [label="RepositoryService.clone_repository()"];
+  ReadFiles [label="read_repository_files()\nallowed extensions + ignored dirs"];
+  InitVector [label="VectorStoreService init\n(collection per repo)"];
+  Embed [label="generate_embeddings()\nif collection empty"];
+  Query [label="query_similar_documents()\nfor context"];
+
+  InitDoc [label="DocumentationService init"];
+  GenDocs [label="generate_all_documentation()\nhandbook + HLD + LLD + chat_summary"];
+  ParseGraphs [label="_parse_graph_data()\n+ sanitize Mermaid code"];
+
+  SaveResult [label="Write completed result\ninto status.json"];
+  UpdateLog [label="Update AnalysisLog\nstatus=completed"];
+  SaveHistory [label="save_repository_to_history()\n(authenticated users)"];
+
+  Error [label="On exception:\nstatus=error + error message", fillcolor="#ffecec", color="#b65a5a"];
+  End [shape=doublecircle, label="End", fillcolor="#e8fff1"];
+
+  Start -> Submit -> Validate -> LogPending -> Spawn -> Processing;
+
+  Processing -> Clone -> InitVector;
+  Clone -> ReadFiles;
+  ReadFiles -> Embed;
+  InitVector -> Embed;
+  Embed -> Query -> InitDoc -> GenDocs -> ParseGraphs -> SaveResult -> UpdateLog -> SaveHistory -> End;
+
+  Validate -> Error [label="invalid/limit/conflict", style=dashed];
+  Clone -> Error [style=dashed];
+  ReadFiles -> Error [label="no files", style=dashed];
+  Embed -> Error [style=dashed];
+  Query -> Error [style=dashed];
+  GenDocs -> Error [style=dashed];
+  ParseGraphs -> Error [style=dashed];
+  Error -> End;
+}

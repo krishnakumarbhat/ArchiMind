@@ -1,9 +1,6 @@
 services:
   web:
-    image: ${ARCHIMIND_IMAGE:-archimind:latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${ARCHIMIND_IMAGE:?Set ARCHIMIND_IMAGE in .env or shell}
     container_name: archimind_web
     env_file: .env
     restart: always
@@ -13,6 +10,9 @@ services:
       - archimind_data:/app/data
     environment:
       - DATABASE_URL=sqlite:///data/archimind_dev.db
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - FLASK_DEBUG=False
     command: ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "300", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:5000/api/status"]

@@ -1,0 +1,32 @@
+digraph ArchiMind_CodeFlow {
+  rankdir=LR;
+  graph [label="ArchiMind Code-Level Module Flow", labelloc=t, fontsize=20, fontname="Inter"];
+  node [shape=box, style="rounded,filled", fillcolor="#f5faff", color="#607d9b", fontname="Inter"];
+  edge [color="#4a6484", fontname="Inter"];
+
+  AppPy [label="app.py\nFlask routes + auth + DB init"];
+  OAuthUtils [label="oauth_utils.py\nOAuth + Redis cache utilities"];
+  WorkerPy [label="worker.py\nAnalysisWorker pipeline"];
+  Services [label="services.py\nRepositoryService\nVectorStoreService\nDocumentationService"];
+  Config [label="config.py\nmodels, paths, settings"];
+  Models [label="models.py\nshared SQLAlchemy models"];
+  Templates [label="templates/*.html\nUI + doc viewer"];
+  ScriptJS [label="static/script.js\nfrontend API polling"];
+  Tests [label="tests/*.py"];
+
+  AppPy -> OAuthUtils [label="init_oauth/init_redis/history APIs"];
+  AppPy -> WorkerPy [label="launch worker subprocess"];
+  AppPy -> Templates [label="render index/doc/login/sign-up"];
+  AppPy -> ScriptJS [label="UI calls /api/analyze,/api/status"];
+
+  WorkerPy -> Config [label="load env/config"];
+  WorkerPy -> Services [label="run analysis services"];
+  WorkerPy -> OAuthUtils [label="save_repository_to_history"];
+  WorkerPy -> Models [label="DB write path via models.db"];
+
+  Services -> Config [label="GEMINI_API_KEY / model names"];
+
+  Tests -> AppPy [label="route/model tests"];
+  Tests -> WorkerPy [label="pipeline/unit tests"];
+  Tests -> Services [label="service behavior tests"];
+}

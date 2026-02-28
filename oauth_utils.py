@@ -18,15 +18,19 @@ oauth = OAuth()
 redis_client = None
 
 def init_redis():
-    """Initialize Redis connection."""
+    """Initialize Redis connection. Gracefully skips if Redis is unavailable."""
     global redis_client
-    redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    redis_url = os.getenv('REDIS_URL', '')
+    if not redis_url:
+        print("REDIS_URL not set — running without Redis cache (OK for dev).")
+        redis_client = None
+        return
     try:
         redis_client = redis.from_url(redis_url, decode_responses=True)
         redis_client.ping()
         print(f"Redis connected successfully at {redis_url}")
     except Exception as e:
-        print(f"Redis connection failed: {e}")
+        print(f"Redis connection failed (continuing without cache): {e}")
         redis_client = None
 
 def init_oauth(app):
