@@ -1,36 +1,25 @@
-version: "3.9"
-
 services:
   web:
-    build: .
+    image: ${ARCHIMIND_IMAGE:-archimind:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: archimind_web
     env_file: .env
-    depends_on:
-      - db
-      - redis
+    restart: always
     ports:
-      - "5000:5000"
+      - "80:5000"
     volumes:
-      - ./data:/app/data
-    command: ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "300"]
-
-  db:
-    image: postgres:15-alpine
-    container_name: archimind_db
+      - archimind_data:/app/data
     environment:
-      POSTGRES_DB: archimind
-      POSTGRES_USER: archimind_user
-      POSTGRES_PASSWORD: change_me
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  redis:
-    image: redis:7-alpine
-    container_name: archimind_redis
-    ports:
-      - "6379:6379"
+      - DATABASE_URL=sqlite:///data/archimind_dev.db
+    command: ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "300", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:5000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
 
 volumes:
-  postgres_data:
+  archimind_data:

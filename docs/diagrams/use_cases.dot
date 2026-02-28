@@ -1,0 +1,41 @@
+digraph ArchiMind_UseCases {
+  rankdir=LR;
+  graph [label="ArchiMind Use Cases & Capabilities", labelloc=t, fontsize=20, fontname="Inter"];
+  node [shape=ellipse, style="filled", fillcolor="#f3f9ff", color="#6687ab", fontname="Inter"];
+  edge [color="#4a6484", fontname="Inter"];
+
+  Anonymous [label="Anonymous User", shape=box, fillcolor="#fff7e6"];
+  AuthUser [label="Authenticated User", shape=box, fillcolor="#fff7e6"];
+  Admin [label="Developer / Operator", shape=box, fillcolor="#fff7e6"];
+
+  Analyze [label="Analyze GitHub Repository"];
+  ViewDocs [label="View Architecture Handbook"];
+  ViewGraphs [label="View HLD + LLD Graphs"];
+  ChatSummary [label="Read Chat Summary"];
+  LimitCheck [label="Check Generation Limit"];
+  SignIn [label="Sign up / Login / OAuth"];
+  History [label="View Repository History"];
+  RepoDetails [label="Load Saved Repository Artifacts"];
+  RunWorker [label="Run Worker via CLI"];
+  RunTests [label="Run Test Suite"];
+  ConfigureEnv [label="Configure .env and runtime"];
+
+  Anonymous -> Analyze;
+  Anonymous -> ViewDocs;
+  Anonymous -> ViewGraphs;
+  Anonymous -> ChatSummary;
+  Anonymous -> LimitCheck;
+  Anonymous -> SignIn;
+
+  AuthUser -> Analyze;
+  AuthUser -> ViewDocs;
+  AuthUser -> ViewGraphs;
+  AuthUser -> ChatSummary;
+  AuthUser -> History;
+  AuthUser -> RepoDetails;
+
+  Admin -> ConfigureEnv;
+  Admin -> RunWorker;
+  Admin -> RunTests;
+  Admin -> Analyze;
+}

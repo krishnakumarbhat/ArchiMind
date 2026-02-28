@@ -1,66 +1,60 @@
-# Multi-stage build for ArchiMind
-FROM python:3.11-slim as builder
+# ArchiMind production image (ARM64-compatible)
+FROM python:3.11-slim-bullseye AS builder
 
-# Set build arguments
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN set -eux; \
+        ARCH="$(dpkg --print-architecture)"; \
+        cp requirements.txt requirements.resolved.txt; \
+        if [ "$ARCH" = "armhf" ] || [ "$ARCH" = "armel" ]; then \
+            echo "[Docker build] ARM 32-bit detected ($ARCH): removing chromadb dependency"; \
+            grep -v -E '^chromadb==' requirements.resolved.txt > requirements.tmp && mv requirements.tmp requirements.resolved.txt; \
+        fi; \
+        pip install --upgrade pip && pip install --no-cache-dir --user -r requirements.resolved.txt
 
-# Production stage
-FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+FROM python:3.11-slim-bullseye
 
-# Create non-root user
-RUN groupadd -r archimind && useradd -r -g archimind archimind
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH=/home/archimind/.local/bin:$PATH \
+    HOME=/home/archimind
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    build-essential \
+    python3-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+RUN groupadd -r archimind && useradd -r -g archimind archimind
+
 WORKDIR /app
 
-# Copy installed packages from builder stage
 COPY --from=builder /root/.local /home/archimind/.local
-
-# Copy application code
 COPY . .
 
-# Ensure data directory exists for persistent artifacts
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data && chown -R archimind:archimind /app
 
-# Set ownership
-RUN chown -R archimind:archimind /app
-
-# Switch to non-root user
 USER archimind
 
-# Add local bin to PATH
-ENV PATH=/home/archimind/.local/bin:$PATH
-ENV HOME=/home/archimind
-
-# Expose port
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=5 \
+    CMD curl -fsS http://127.0.0.1:5000/api/status || exit 1
 
-# Run the application with Gunicorn (factory pattern in app.py)
-CMD ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "300"]
+CMD ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "300", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]

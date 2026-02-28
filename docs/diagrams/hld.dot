@@ -1,0 +1,44 @@
+digraph ArchiMind_HLD {
+  rankdir=LR;
+  graph [label="ArchiMind High-Level Design", labelloc=t, fontsize=20, fontname="Inter"];
+  node [shape=box, style="rounded,filled", fillcolor="#eef6ff", color="#6b8bb6", fontname="Inter"];
+  edge [color="#4a6484", fontname="Inter"];
+
+  User [label="User (Browser)"];
+  UI [label="Flask UI\nindex.html / doc.html"];
+  API [label="Flask API\napp.py"];
+  Worker [label="Background Worker\nworker.py"];
+
+  RepoSvc [label="RepositoryService\nclone + read files"];
+  VectorSvc [label="VectorStoreService\nGemini embeddings + ChromaDB"];
+  DocSvc [label="DocumentationService\nGemini generation"];
+
+  SQLite [label="SQLite\nusers, analysis_logs, repository_history", shape=cylinder, fillcolor="#fff7e6"];
+  Chroma [label="ChromaDB\nvector index", shape=cylinder, fillcolor="#fff7e6"];
+  Status [label="status.json\nanalysis state/result", shape=note, fillcolor="#fff7e6"];
+
+  Gemini [label="Google Gemini API\nembedding + generation", shape=component, fillcolor="#e8fff1"];
+  GitHub [label="GitHub Repository", shape=component, fillcolor="#e8fff1"];
+  Redis [label="Redis (Optional)\nhistory cache", shape=cylinder, fillcolor="#fff7e6"];
+
+  User -> UI [label="open app"];
+  UI -> API [label="/api/analyze, /api/status"];
+  API -> SQLite [label="log requests / auth data"];
+  API -> Worker [label="spawn subprocess"];
+
+  Worker -> RepoSvc [label="analyze repo"];
+  RepoSvc -> GitHub [label="git clone"];
+
+  Worker -> VectorSvc [label="embed + retrieve context"];
+  VectorSvc -> Gemini [label="embed_content"];
+  VectorSvc -> Chroma [label="store/query vectors"];
+
+  Worker -> DocSvc [label="generate artifacts"];
+  DocSvc -> Gemini [label="generate_content"];
+
+  Worker -> Status [label="write status + result"];
+  Worker -> SQLite [label="update AnalysisLog/history"];
+
+  API -> Redis [label="read/write cached history"];
+  Redis -> API [label="cached response"];
+}

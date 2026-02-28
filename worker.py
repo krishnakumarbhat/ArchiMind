@@ -56,7 +56,7 @@ class AnalysisWorker:
 
             app = Flask(__name__)
             app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-                "DATABASE_URL", "postgresql://localhost/archimind"
+                "DATABASE_URL", "sqlite:///data/archimind_dev.db"
             )
             app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
             db.init_app(app)
@@ -200,7 +200,7 @@ class AnalysisWorker:
             
             app = Flask(__name__)
             app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-                "DATABASE_URL", "postgresql://localhost/archimind"
+                "DATABASE_URL", "sqlite:///data/archimind_dev.db"
             )
             app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
             from models import db

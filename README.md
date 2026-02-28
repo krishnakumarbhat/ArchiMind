@@ -1,315 +1,341 @@
-ArchiMind 🏗️🧠
-ArchiMind is an intelligent system that automatically analyzes GitHub repositories, extracts architectural insights, and generates comprehensive technical documentation with interactive visualizations. Powered by RAG (Retrieval-Augmented Generation), vector embeddings, and Google's Gemini AI.
+# ArchiMind 🏗️🧠
 
-<div align="center">
+ArchiMind analyzes a GitHub repository and produces:
 
-⭐ Star us on GitHub | 🐛 Report a Bug | ✨ Request a Feature
+- chapter-wise architecture documentation,
+- high-level and low-level Mermaid diagrams,
+- conversational project summary,
+- persistent history for authenticated users.
 
-</div>
+It uses a RAG-style flow with Gemini embeddings + Gemini generation, ChromaDB vector search, and a Flask web UI.
 
-Table of Contents
-Features
+## Table of Contents
 
-Architecture & Design
+1. [What You Can Do](#what-you-can-do)
+2. [Architecture at a Glance](#architecture-at-a-glance)
+3. [Quick Start (No venv)](#quick-start-no-venv)
+4. [Configuration](#configuration)
+5. [Run Modes](#run-modes)
+6. [API Reference](#api-reference)
+7. [Use Cases & Capabilities](#use-cases--capabilities)
+8. [Project Structure](#project-structure)
+9. [Quality, Testing & Security](#quality-testing--security)
+10. [Troubleshooting](#troubleshooting)
+11. [Diagrams (DOT files)](#diagrams-dot-files)
+12. [Raspberry Pi Deployment](#raspberry-pi-deployment)
 
-Getting Started
+## What You Can Do
 
-Project Structure
+### Core Capabilities
 
-API Documentation
+- Analyze a public GitHub repository from URL.
+- Build semantic embeddings for repository files.
+- Generate a multi-chapter architecture handbook.
+- Generate HLD and LLD Mermaid graph payloads.
+- View output in a tabbed documentation + graph viewer.
 
-Testing
+### User Experience Features
 
-Docker Deployment
+- Anonymous mode with per-session limit (default 5 analyses).
+- Authenticated mode with unlimited usage and saved history.
+- OAuth (Google) optional; classic email/password supported.
+- Repository history API with caching support (Redis optional).
 
-Configuration
+## Architecture at a Glance
 
-Security
+### Main Runtime Components
 
-Troubleshooting
+- `app.py`: Flask web app, routes, auth, SQLAlchemy models, analysis dispatch.
+- `worker.py`: Background execution pipeline that performs repository analysis.
+- `services.py`:
+    - `RepositoryService` (clone + file extraction)
+    - `VectorStoreService` (Gemini embeddings + ChromaDB)
+    - `DocumentationService` (Gemini generation for docs/HLD/LLD/summary/chat)
+- `oauth_utils.py`: OAuth + Redis-backed history caching helpers.
 
-Roadmap
+### End-to-End Flow
 
-Contributing
+1. User submits repository URL (`POST /api/analyze`).
+2. App validates request and rate limits.
+3. App records `AnalysisLog` entry and spawns `worker.py` subprocess.
+4. Worker clones repo (or reuses local clone), reads selected files.
+5. Worker generates embeddings and stores/query context in ChromaDB.
+6. Worker asks Gemini for documentation + diagram JSON payloads.
+7. Worker writes status/result to `data/status.json` and updates DB log.
 
-License
+## Quick Start (No venv)
 
-Acknowledgments
+### Prerequisites
 
-✨ Features
-🎯 Core Capabilities
-Automatic Repository Analysis: Clone and analyze any public GitHub repository.
+- Python 3.10+ (3.11 recommended)
+- Git
+- A Gemini API key
 
-RAG-Powered Documentation: Generate chapter-wise technical handbooks using context-aware AI.
+### 1) Install dependencies
 
-Architecture Visualization: Create interactive High-Level Design (HLD) and Low-Level Design (LLD) graphs.
-
-Vector Search: Utilize efficient semantic search with ChromaDB and Ollama embeddings.
-
-Async Processing: Leverage background workers for non-blocking analysis tasks.
-
-Modern UI: A responsive, user-friendly interface with a dark theme.
-
-🔐 Authentication & Rate Limiting
-Anonymous Access: Users get 5 free repository analyses without an account, tracked per browser session.
-
-Authenticated Access: Signed-in users enjoy unlimited analyses and a persistent history of their work.
-
-Secure Authentication: Passwords are securely hashed using the industry-standard PBKDF2-SHA256 algorithm.
-
-Smart Login Prompt: After 5 free generations, anonymous users are greeted with a modal inviting them to sign up or log in.
-
-🏛️ Architecture & Design
-ArchiMind is built on a clean, service-oriented architecture that emphasizes modularity and maintainability.
-
-Design Patterns
-Singleton Pattern: Used in RepositoryService and VectorStoreService to ensure a single, shared instance, reducing memory overhead and maintaining a consistent state.
-
-Factory Pattern: Implemented in DocumentationService to generate various types of documentation (handbook, HLD, LLD) through a unified method.
-
-Service Layer: Decouples the web interface (Flask) from the core business logic, making the system easier to test, maintain, and scale.
-
-Data Flow
-A user submits a repository URL through the web interface.
-
-The Flask application (app.py) validates the request and dispatches a job to the background Worker Process.
-
-The worker utilizes the Service Layer (services.py):
-
-RepositoryService clones the repo and reads relevant files.
-
-VectorStoreService generates embeddings from the code and stores them in ChromaDB.
-
-DocumentationService queries the vector store for context and uses the Gemini API to generate documentation and diagrams.
-
-The final result is saved, and the status is updated for the user to view.
-
-Code snippet
-
-graph TD
-    A[User Request] --> B{Flask App};
-    B --> C[Background Worker];
-    C --> D[RepositoryService: Clone Repo];
-    D --> E[VectorStoreService: Create Embeddings];
-    E --> F[DocumentationService: Generate Docs];
-    F --> G[Save Results];
-    G --> B;
-🚀 Getting Started
-Follow these steps to get a local instance of ArchiMind up and running.
-
-Prerequisites
-Python 3.11+
-
-PostgreSQL 15+
-
-Ollama: For local model embeddings.
-
-Google Gemini API Key
-
-Installation Guide
-Clone the Repository
-
-Bash
-
-git clone https://github.com/krishnakumarbhat/ArchiMind.git
-cd ArchiMind
-Set Up a Virtual Environment
-
-Bash
-
-python3 -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-Install Dependencies
-
-Bash
-
+```bash
 pip install -r requirements.txt
-Set Up PostgreSQL Database
-Connect to PostgreSQL and create a database and user.
+```
 
-SQL
+### 2) Create environment file
 
--- Connect using psql
--- sudo -u postgres psql
-
-CREATE DATABASE archimind;
-CREATE USER archimind_user WITH PASSWORD 'your_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE archimind TO archimind_user;
-\q
-Install and Run Ollama
-Ollama is used for generating vector embeddings locally.
-
-Bash
-
-# Install Ollama (see https://ollama.ai for details)
-curl -fsSL https://ollama.ai/install.sh | sh
-
-# Pull the required embedding model
-ollama pull nomic-embed-text
-Ensure the Ollama server is running before starting the application.
-
-Configure Environment Variables
-Copy the example .env file and fill in your credentials.
-
-Bash
-
+```bash
 cp .env.example .env
-Now, edit the .env file:
+```
 
-Code snippet
+Set at least:
 
-GEMINI_API_KEY="your_gemini_api_key_here"
-DATABASE_URL="postgresql://archimind_user:your_secure_password@localhost/archimind"
-SECRET_KEY="your_super_secret_flask_key"
-Tip: Generate a secure SECRET_KEY with this command:
+- `GEMINI_API_KEY=...`
+- `SECRET_KEY=...`
+- `DATABASE_URL=sqlite:///data/archimind_dev.db`
 
-Bash
+### 3) One-command setup + run
 
-python3 -c "import secrets; print(secrets.token_hex(32))"
-Run the Application
-The database tables will be created automatically on the first run.
+```bash
+bash scripts/setup_local.sh
+bash scripts/run_local.sh
+```
 
-Bash
+Open `http://127.0.0.1:5000`.
 
-python app.py
-Access ArchiMind
-Open your browser and navigate to http://localhost:5000.
+### 4) Run a sample analysis
 
-📁 Project Structure
-ArchiMind/
-├── app.py              # Main Flask app, routes, auth, & DB models
-├── services.py         # Core business logic (Singleton & Factory patterns)
-├── worker.py           # Background analysis worker
-├── config.py           # Application configuration
-├── requirements.txt    # Python dependencies
-├── .env.example        # Environment variable template
-├── tests/              # Test suite (unit & integration tests)
-├── templates/          # HTML files
-├── static/             # CSS, JS, and image assets
-└── README.md           # This file
-📖 API Documentation
-Analysis Endpoints
-POST /api/analyze
-Starts a new repository analysis. Rate-limited for anonymous users.
+Use this sample repository URL in the UI:
 
-Body: { "repo_url": "https://github.com/username/repository" }
+`https://github.com/LearningCircuit/local-deep-research`
+
+Or via API:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/analyze \
+    -H "Content-Type: application/json" \
+    -d '{"repo_url":"https://github.com/LearningCircuit/local-deep-research"}'
+
+curl http://127.0.0.1:5000/api/status
+```
+
+## Configuration
+
+Primary configuration lives in `.env` and `config.py`.
+
+### Required Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | Yes | API key used for Gemini embedding + generation |
+| `SECRET_KEY` | Yes | Flask session/signing key |
+| `DATABASE_URL` | No | Defaults to local SQLite path if omitted |
+
+### Optional Environment Variables
+
+| Variable | Description |
+|---|---|
+| `FLASK_DEBUG` | `True/False` for local debugging |
+| `FLASK_HOST` | Bind host (default `127.0.0.1`) |
+| `FLASK_PORT` | Bind port (default `5000`) |
+| `ANONYMOUS_GENERATION_LIMIT` | Free analyses per anonymous session |
+| `REDIS_URL` | Optional cache backend for history |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login |
+| `OAUTHLIB_INSECURE_TRANSPORT` | Local HTTP OAuth testing toggle |
+
+### Model Configuration (`config.py`)
+
+- Embeddings: `models/gemini-embedding-001`
+- Documentation generation: `gemini-2.5-pro`
+- Chat summary/response model: `gemini-2.5-flash`
+
+> Note: model access and quota depend on your Google account/project.
+
+## Run Modes
+
+### Web App
+
+```bash
+bash scripts/run_local.sh
+```
+
+### Worker only (manual)
+
+```bash
+bash scripts/run_worker.sh https://github.com/owner/repo
+```
+
+### Tests
+
+```bash
+bash scripts/test_local.sh
+```
+
+### Docker
+
+```bash
+docker compose up --build
+```
+
+## API Reference
+
+### `POST /api/analyze`
+
+Starts asynchronous analysis.
+
+Request:
+
+```json
+{
+    "repo_url": "https://github.com/owner/repo"
+}
+```
 
 Responses:
 
-202 Accepted: Analysis has been successfully started.
+- `202`: started
+- `400`: missing/invalid input
+- `403`: anonymous limit reached
+- `409`: existing analysis still processing
 
-400 Bad Request: The repo_url is missing or invalid.
+### `GET /api/status`
 
-403 Forbidden: Rate limit reached for anonymous user.
+Returns analysis status and result payload.
 
-409 Conflict: An analysis is already in progress.
+Common statuses:
 
-GET /api/status
-Checks the status of the current analysis.
+- `idle`
+- `processing`
+- `completed`
+- `error`
 
-Response: A JSON object with the current status (pending, processing, completed, failed) and results.
+### `GET /api/check-limit`
 
-GET /api/check-limit
-Checks the current generation count for the user's session.
+Returns whether current actor can submit analysis.
 
-Response: { "can_generate": true, "count": 2, "limit": 5, "authenticated": false }
+### `GET /api/history` (authenticated)
 
-Authentication Endpoints
-GET/POST /login: Handles user login.
+Returns cached/history list for logged-in user.
 
-GET/POST /sign-up: Handles new user registration.
+### `GET /api/history/<repo_id>` (authenticated)
 
-GET /logout: Logs the current user out.
+Returns full stored artifacts (docs/HLD/LLD) for one repository.
 
-🧪 Testing
-The project maintains over 80% test coverage to ensure code quality and stability.
+## Use Cases & Capabilities
 
-Bash
+### 1) Architecture Discovery
 
-# Run all tests with verbose output and coverage report
+- Input: unfamiliar repository URL
+- Output: chapter-wise architecture handbook
+- Benefit: fast onboarding for new developers
+
+### 2) Design Review Preparation
+
+- Input: actively developed service repo
+- Output: HLD + LLD diagrams and narrative summary
+- Benefit: reusable artifact for review/ADR conversations
+
+### 3) Team Knowledge Retention
+
+- Input: recurring analyses for authenticated users
+- Output: repository history with latest generated artifacts
+- Benefit: centralized memory of architecture snapshots
+
+### 4) Portfolio / Due Diligence Analysis
+
+- Input: external OSS repos
+- Output: standardized architecture summaries across projects
+- Benefit: compare technical shape quickly
+
+## Project Structure
+
+```text
+ArchiMind/
+├── app.py
+├── worker.py
+├── services.py
+├── oauth_utils.py
+├── config.py
+├── requirements.txt
+├── .env.example
+├── scripts/
+│   ├── setup_local.sh
+│   ├── run_local.sh
+│   ├── run_worker.sh
+│   └── test_local.sh
+├── docs/
+│   └── diagrams/
+│       ├── hld.dot
+│       ├── lld.dot
+│       ├── flow.dot
+│       └── use_cases.dot
+├── static/
+├── templates/
+└── tests/
+```
+
+## Quality, Testing & Security
+
+### Testing
+
+```bash
 pytest tests/ -v --cov=.
+```
 
-# Generate an HTML coverage report
-pytest tests/ --cov=. --cov-report=html
-Code Quality
-We use black for formatting, isort for import sorting, flake8 for linting, and bandit for security analysis. These checks are integrated into our CI/CD pipeline.
+### Linting / Formatting
 
-🐳 Docker Deployment
-A docker-compose.yml file is provided for easy containerized deployment.
+```bash
+black .
+isort .
+flake8 .
+bandit -r .
+```
 
-Build and Run Containers
+### Security Notes
 
-Bash
+- Passwords use `pbkdf2:sha256` hashing.
+- Avoid committing `.env` and generated data.
+- Rotate exposed API keys immediately.
 
-docker-compose up -d --build
-This will start the web application and a PostgreSQL database service.
+## Troubleshooting
 
-View Logs
+### SQLite `unable to open database file`
 
-Bash
+- Ensure `data/` exists and is writable.
+- Use absolute or normalized SQLite path in `DATABASE_URL`.
+- Run `bash scripts/setup_local.sh` to bootstrap required folders.
 
-docker-compose logs -f
-⚙️ Configuration
-Key configuration options can be adjusted in config.py and the .env file.
+### `403` limit reached
 
-Environment Variables (.env)
-Variable	Description	Default Value
-GEMINI_API_KEY	Required. Your API key for Google Gemini.	""
-DATABASE_URL	Required. Connection string for PostgreSQL.	postgresql://...
-SECRET_KEY	Required. A secret key for Flask sessions.	""
+- Anonymous session hit configured cap.
+- Sign in or clear browser session data.
 
-Export to Sheets
-Application Settings (config.py)
-ALLOWED_EXTENSIONS: A set of file extensions to be included in the analysis.
+### Gemini errors (`429`, quota/model access)
 
-IGNORED_DIRECTORIES: A set of directories to exclude (e.g., .git, node_modules).
+- Verify key/project quota in Google AI Studio/Cloud.
+- Switch to a model your key can access.
 
-EMBEDDING_MODEL: The Ollama model used for embeddings (nomic-embed-text).
+### OAuth issues in local dev
 
-🔒 Security
-Password Hashing: Uses PBKDF2-SHA256 with a salt to protect user passwords.
+- Set callback URLs correctly in Google Console.
+- Keep `OAUTHLIB_INSECURE_TRANSPORT=1` only for local HTTP.
 
-SQL Injection: The use of SQLAlchemy ORM prevents SQL injection vulnerabilities.
+## Diagrams (DOT files)
 
-CSRF Protection: Flask's secret key provides a basic level of CSRF protection.
+Generated architecture/use-case Graphviz files are included:
 
-Session Management: Secure, server-side sessions are managed by Flask-Login.
+- `docs/diagrams/hld.dot`
+- `docs/diagrams/lld.dot`
+- `docs/diagrams/flow.dot`
+- `docs/diagrams/use_cases.dot`
 
-Secret Management: All sensitive keys and credentials are loaded from an untracked .env file.
+Render any DOT file:
 
-🔧 Troubleshooting
-"Generation limit reached" error: This is expected for anonymous users after 5 analyses. Try clearing your browser cookies or signing up for an account.
+```bash
+dot -Tpng docs/diagrams/hld.dot -o hld.png
+```
 
-PostgreSQL Connection Error: Ensure the PostgreSQL service is running and that the DATABASE_URL in your .env file is correct.
+## Raspberry Pi Deployment
 
-Ollama Embedding Error: Make sure the Ollama application is running and that you have pulled the nomic-embed-text model.
+For ARM64 production deployment with Docker Buildx + Docker Compose, see:
 
-Modal doesn't appear: Check the browser's developer console for JavaScript errors and ensure script.js is loaded correctly.
+- `docs/RASPBERRY_PI_DEPLOYMENT.md`
 
-🗺️ Roadmap
-Planned Features
-[ ] Multi-repository comparison tool
+## License
 
-[ ] Export documentation to PDF and Markdown
-
-[ ] Support for additional LLM providers (OpenAI, Anthropic)
-
-[ ] Real-time collaboration on generated documents
-
-[ ] Advanced code quality metrics and analysis
-
-[ ] Integration with project management tools like Jira
-
-[]mcp for with github change with go
-🤝 Contributing
-Contributions are welcome! Please fork the repository, create a feature branch, and open a pull request. Ensure your code adheres to our quality standards and that all tests pass.
-
-📝 License
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
-🙏 Acknowledgments
-Google Gemini for its powerful generative AI capabilities.
-
-Ollama & ChromaDB for enabling efficient, local vector search.
-
-The developers of Flask and SQLAlchemy for their exceptional open-source tools.
+MIT (see `LICENSE` if present in your distribution).
