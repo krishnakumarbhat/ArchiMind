@@ -1,5 +1,7 @@
 # ArchiMind 🏗️🧠
 
+[![CI](https://github.com/krishnakumarbhat/ArchiMind/actions/workflows/test.yml/badge.svg)](https://github.com/krishnakumarbhat/ArchiMind/actions/workflows/test.yml)
+
 ArchiMind analyzes a GitHub repository and produces:
 
 - chapter-wise architecture documentation,
@@ -50,9 +52,9 @@ It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplit
 - `app.py`: Flask web app, routes, auth, SQLAlchemy models, analysis dispatch.
 - `worker.py`: Background execution pipeline that performs repository analysis.
 - `services.py`:
-    - `RepositoryService` (clone + file extraction)
-    - `VectorStoreService` (LlamaIndex AST chunking + ChromaDB + metadata-rich indexing)
-    - `DocumentationService` (local context-driven docs/HLD/LLD/summary/chat)
+  - `RepositoryService` (clone + file extraction)
+  - `VectorStoreService` (LlamaIndex AST chunking + ChromaDB + metadata-rich indexing)
+  - `DocumentationService` (local context-driven docs/HLD/LLD/summary/chat)
 - `oauth_utils.py`: OAuth + lightweight in-process cache helpers.
 
 ### End-to-End Flow
@@ -110,8 +112,8 @@ flowchart TD
 ### 3) Query pipeline
 
 - LangGraph runs a 2-step retrieval graph:
-    1. query summary collection to find relevant files,
-    2. query chunk collection scoped to those files.
+  1. query summary collection to find relevant files,
+  2. query chunk collection scoped to those files.
 - Returned context is assembled with metadata-rich headers so downstream HLD/LLD generation stays grounded.
 
 ## Quick Start (No venv)
@@ -170,21 +172,21 @@ Primary configuration lives in `.env` and `config.py`.
 
 ### Required Environment Variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `SECRET_KEY` | Yes | Flask session/signing key |
-| `DATABASE_URL` | No | Defaults to local SQLite path if omitted |
+| Variable       | Required | Description                              |
+| -------------- | -------- | ---------------------------------------- |
+| `SECRET_KEY`   | Yes      | Flask session/signing key                |
+| `DATABASE_URL` | No       | Defaults to local SQLite path if omitted |
 
 ### Optional Environment Variables
 
-| Variable | Description |
-|---|---|
-| `FLASK_DEBUG` | `True/False` for local debugging |
-| `FLASK_HOST` | Bind host (default `127.0.0.1`) |
-| `FLASK_PORT` | Bind port (default `5000`) |
-| `ANONYMOUS_GENERATION_LIMIT` | Free analyses per anonymous session |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login |
-| `OAUTHLIB_INSECURE_TRANSPORT` | Local HTTP OAuth testing toggle |
+| Variable                                    | Description                         |
+| ------------------------------------------- | ----------------------------------- |
+| `FLASK_DEBUG`                               | `True/False` for local debugging    |
+| `FLASK_HOST`                                | Bind host (default `127.0.0.1`)     |
+| `FLASK_PORT`                                | Bind port (default `5000`)          |
+| `ANONYMOUS_GENERATION_LIMIT`                | Free analyses per anonymous session |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login         |
+| `OAUTHLIB_INSECURE_TRANSPORT`               | Local HTTP OAuth testing toggle     |
 
 ### Retrieval Configuration (`config.py`)
 
@@ -228,7 +230,7 @@ Request:
 
 ```json
 {
-    "repo_url": "https://github.com/owner/repo"
+  "repo_url": "https://github.com/owner/repo"
 }
 ```
 
