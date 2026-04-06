@@ -1,0 +1,59 @@
+<mxfile host="app.diagrams.net" modified="2026-04-05" agent="ArchiMind" version="24.7">
+    <diagram name="Use Cases" id="use-cases">
+        <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="1">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="&lt;b&gt;ArchiMind — Use Case Diagram&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;" vertex="1" parent="1"><mxGeometry x="550" y="10" width="350" height="30" as="geometry"/></mxCell>
+                <!-- System boundary -->
+                <mxCell id="sys" value="&lt;b&gt;ArchiMind System&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;strokeWidth=2;dashed=1;verticalAlign=top;fontSize=12;arcSize=4;" vertex="1" parent="1"><mxGeometry x="300" y="50" width="900" height="800" as="geometry"/></mxCell>
+                <!-- Actors -->
+                <mxCell id="anon" value="&lt;b&gt;Anonymous User&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="60" y="200" width="80" height="90" as="geometry"/></mxCell>
+                <mxCell id="auth" value="&lt;b&gt;Authenticated&lt;br&gt;User&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="60" y="450" width="80" height="90" as="geometry"/></mxCell>
+                <mxCell id="ext_gh" value="&lt;b&gt;GitHub API&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1340" y="100" width="80" height="80" as="geometry"/></mxCell>
+                <mxCell id="ext_gem" value="&lt;b&gt;Google Gemini&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1340" y="300" width="80" height="80" as="geometry"/></mxCell>
+                <mxCell id="ext_pine" value="&lt;b&gt;Pinecone&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1340" y="500" width="80" height="80" as="geometry"/></mxCell>
+                <mxCell id="ext_supa" value="&lt;b&gt;Supabase&lt;/b&gt;" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1340" y="680" width="80" height="80" as="geometry"/></mxCell>
+                <!-- Use cases -->
+                <mxCell id="uc1" value="Submit GitHub repo URL&lt;br&gt;for analysis" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="100" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc2" value="View analysis progress&lt;br&gt;(status polling)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="200" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc3" value="View generated documentation&lt;br&gt;(Markdown handbook)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="300" width="200" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc4" value="View architecture diagrams&lt;br&gt;(HLD / LLD / Flow Mermaid)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="400" width="200" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc5" value="Ask follow-up questions&lt;br&gt;(RAG chat)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="500" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc6" value="Sign up / Login&lt;br&gt;(email or Google OAuth)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="600" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc7" value="View repository history&lt;br&gt;(top 5 recent)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="700" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc8" value="Preview GitHub repo&lt;br&gt;(metadata card)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="790" width="180" height="60" as="geometry"/></mxCell>
+                <!-- Internal use cases -->
+                <mxCell id="uc10" value="Fetch repository tree&lt;br&gt;+ raw file content" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="100" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc11" value="Generate embeddings&lt;br&gt;(AST chunk + embed)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="220" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc12" value="RAG retrieval&lt;br&gt;(LangGraph 2-step)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="340" width="180" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc13" value="Generate docs + diagrams&lt;br&gt;(Gemini or local fallback)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="460" width="200" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc14" value="Persist analysis artifacts&lt;br&gt;(5NF Supabase schema)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="580" width="200" height="60" as="geometry"/></mxCell>
+                <mxCell id="uc15" value="Rate limit enforcement&lt;br&gt;(anonymous session cap)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="740" y="700" width="200" height="60" as="geometry"/></mxCell>
+                <!-- Actor → Use case edges -->
+                <mxCell style="strokeColor=#82b366;" edge="1" source="anon" target="uc1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="anon" target="uc2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="anon" target="uc3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="anon" target="uc4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#6c8ebf;" edge="1" source="auth" target="uc5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#6c8ebf;" edge="1" source="auth" target="uc6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#6c8ebf;" edge="1" source="auth" target="uc7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="anon" target="uc8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <!-- include relationships -->
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc13" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc14" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell value="«include»" style="dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" source="uc1" target="uc15" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <!-- External system edges -->
+                <mxCell style="strokeColor=#666;" edge="1" source="uc10" target="ext_gh" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#b85450;" edge="1" source="uc13" target="ext_gem" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#d6b656;" edge="1" source="uc11" target="ext_pine" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#d6b656;" edge="1" source="uc12" target="ext_pine" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="uc14" target="ext_supa" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell style="strokeColor=#82b366;" edge="1" source="uc15" target="ext_supa" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

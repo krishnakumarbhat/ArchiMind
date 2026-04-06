@@ -25,7 +25,8 @@ else
   echo "[ArchiMind] .env already exists; keeping your values"
 fi
 
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 echo "[ArchiMind] Setup complete."
-echo "[ArchiMind] Next: edit .env (SECRET_KEY), then run: bash scripts/run_local.sh"
+echo "[ArchiMind] Next: edit .env (SECRET_KEY and API keys), then run: bash scripts/run_local.sh"
+echo "[ArchiMind] Local runs use SQLite by default. To test a remote DATABASE_URL locally: ARCHIMIND_USE_REMOTE_DB=1 bash scripts/run_local.sh"

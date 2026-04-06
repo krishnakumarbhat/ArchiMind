@@ -9,7 +9,14 @@ build/
 
 # Environments
 .env
+.venv/
 venv/
+bin/
+include/
+lib/
+lib64/
+pyvenv.cfg
+instance/
 
 # Version control
 .git
@@ -26,6 +33,11 @@ venv/
 
 # Logs
 *.log
+
+# Test and local tooling artifacts
+.coverage
+.coverage.*
+.pytest_cache/
 
 # Jupyter notebooks
 *.ipynb_checkpoints

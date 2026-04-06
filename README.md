@@ -9,7 +9,12 @@ ArchiMind analyzes a GitHub repository and produces:
 - conversational project summary,
 - persistent history for authenticated users.
 
-It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplitter`, ChromaDB vector search, and SQLite-backed app storage.
+It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplitter`, a pluggable vector layer with Pinecone support, and SQLAlchemy-backed relational storage for local or hosted databases.
+
+Operational documentation now lives under `docs/`:
+
+- `docs/README.md`: architecture, runtime, Docker workflow, and validation guide
+- `docs/RASPBERRY_PI_DEPLOYMENT.md`: Raspberry Pi pull/run procedure using Docker Hub
 
 ## Table of Contents
 
@@ -25,7 +30,7 @@ It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplit
 10. [Project Structure](#project-structure)
 11. [Quality, Testing & Security](#quality-testing--security)
 12. [Troubleshooting](#troubleshooting)
-13. [Diagrams (DOT files)](#diagrams-dot-files)
+13. [Diagrams](#diagrams)
 14. [Raspberry Pi Deployment](#raspberry-pi-deployment)
 
 ## What You Can Do
@@ -43,7 +48,7 @@ It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplit
 - Anonymous mode with per-session limit (default 5 analyses).
 - Authenticated mode with unlimited usage and saved history.
 - OAuth (Google) optional; classic email/password supported.
-- Repository history API stored in SQLite.
+- Repository history API stored in the configured relational database.
 
 ## Architecture at a Glance
 
@@ -52,9 +57,9 @@ It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplit
 - `app.py`: Flask web app, routes, auth, SQLAlchemy models, analysis dispatch.
 - `worker.py`: Background execution pipeline that performs repository analysis.
 - `services.py`:
-  - `RepositoryService` (clone + file extraction)
-  - `VectorStoreService` (LlamaIndex AST chunking + ChromaDB + metadata-rich indexing)
-  - `DocumentationService` (local context-driven docs/HLD/LLD/summary/chat)
+  - `RepositoryService` (preview + clone + file extraction)
+  - `VectorStoreService` (LlamaIndex AST chunking + Pinecone/local vector indexing)
+  - `DocumentationService` (context-driven docs/HLD/LLD/summary/chat)
 - `oauth_utils.py`: OAuth + lightweight in-process cache helpers.
 
 ### End-to-End Flow
@@ -63,9 +68,9 @@ It uses a RAG-style flow with LangGraph orchestration, LlamaIndex AST `CodeSplit
 2. App validates request and rate limits.
 3. App records `AnalysisLog` entry and spawns `worker.py` subprocess.
 4. Worker clones repo (or reuses local clone), reads selected files.
-5. Worker builds tier-1 file summaries and tier-2 AST chunks in ChromaDB.
+5. Worker builds tier-1 file summaries and tier-2 AST chunks in the configured vector backend.
 6. LangGraph retrieves relevant files first, then precise code chunks with metadata.
-7. Worker writes status/result to `data/status.json` and updates DB log.
+7. Worker writes status/result to `data/status_<analysis_id>.json` and updates the DB log.
 
 ## Block Diagram
 
@@ -81,8 +86,8 @@ flowchart TD
         G --> I[Index Builder]
         C --> I
 
-        I --> S[Tier 1: File Summaries in ChromaDB]
-        I --> K[Tier 2: AST Code Chunks in ChromaDB]
+        I --> S[Tier 1: File Summaries in Vector Store]
+        I --> K[Tier 2: AST Code Chunks in Vector Store]
 
         Q[LangGraph Query Orchestrator] --> S
         Q --> K
@@ -90,7 +95,7 @@ flowchart TD
         K --> Q
 
         Q --> D[Documentation + HLD + LLD Generation]
-        D --> J[(SQLite + status.json)]
+        D --> J[(Relational DB + status.json)]
         D --> U
 ```
 
@@ -108,6 +113,7 @@ flowchart TD
 - **Tier 1 (File summaries):** each file gets a compact summary for coarse retrieval.
 - **Tier 2 (Code chunks):** source is chunked by AST blocks (functions/classes/methods) where possible using LlamaIndex `CodeSplitter`.
 - Every chunk stores metadata: `file_path`, `language`, `function_name`, `github_url`, line range.
+- Production deployments can persist vectors in Pinecone and relational data in PostgreSQL.
 
 ### 3) Query pipeline
 
@@ -122,13 +128,15 @@ flowchart TD
 
 - Python 3.10+ (3.11 recommended)
 - Git
-- No external LLM key required for local mode
+- Gemini API key for production-quality documentation generation
 
 ### 1) Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
+
+For local development, tests, and linting, use `bash scripts/setup_local.sh`, which installs the additional packages from `requirements-dev.txt`.
 
 ### 2) Create environment file
 
@@ -139,7 +147,8 @@ cp .env.example .env
 Set at least:
 
 - `SECRET_KEY=...`
-- `DATABASE_URL=sqlite:///data/archimind_dev.db`
+- `GEMINI_API_KEY=...`
+- `DATABASE_URL=postgresql+psycopg://user:password@host:5432/postgres`
 
 ### 3) One-command setup + run
 
@@ -175,7 +184,9 @@ Primary configuration lives in `.env` and `config.py`.
 | Variable       | Required | Description                              |
 | -------------- | -------- | ---------------------------------------- |
 | `SECRET_KEY`   | Yes      | Flask session/signing key                |
-| `DATABASE_URL` | No       | Defaults to local SQLite path if omitted |
+| `GEMINI_API_KEY` | Yes for Gemini mode | Google Gen AI SDK key for documentation generation |
+| `DATABASE_URL` | No       | Supports PostgreSQL/Supabase in production and SQLite locally |
+| `PINECONE_API_KEY` / `PINECONE_INDEX_NAME` | No | Enables Pinecone-backed vector persistence |
 
 ### Optional Environment Variables
 
@@ -184,14 +195,17 @@ Primary configuration lives in `.env` and `config.py`.
 | `FLASK_DEBUG`                               | `True/False` for local debugging    |
 | `FLASK_HOST`                                | Bind host (default `127.0.0.1`)     |
 | `FLASK_PORT`                                | Bind port (default `5000`)          |
+| `DOCUMENTATION_MODEL` / `CHAT_MODEL`        | Gemini model selection              |
+| `GEMINI_THINKING_LEVEL`                     | Thinking level for generation       |
+| `GEMINI_API_VERSION`                        | Gemini HTTP API version             |
 | `ANONYMOUS_GENERATION_LIMIT`                | Free analyses per anonymous session |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login         |
 | `OAUTHLIB_INSECURE_TRANSPORT`               | Local HTTP OAuth testing toggle     |
 
 ### Retrieval Configuration (`config.py`)
 
-- Tier 1: file-level summaries stored in ChromaDB
-- Tier 2: AST-based code chunks stored in ChromaDB
+- Tier 1: file-level summaries stored in the configured vector backend
+- Tier 2: AST-based code chunks stored in the configured vector backend
 - Query orchestration: LangGraph summary-first retrieval pipeline
 
 ## Run Modes
@@ -217,8 +231,13 @@ bash scripts/test_local.sh
 ### Docker
 
 ```bash
-docker compose up --build
+bash scripts/00_build_and_push_image.sh krishnah27/archimind latest
+bash scripts/01_smoke_test_container.sh
 ```
+
+The production image now installs runtime-only dependencies and uses a multi-stage build so test and lint tooling is not shipped in the container.
+
+For Raspberry Pi deployment instructions, see `docs/RASPBERRY_PI_DEPLOYMENT.md`.
 
 ## API Reference
 
@@ -255,6 +274,14 @@ Common statuses:
 ### `GET /api/check-limit`
 
 Returns whether current actor can submit analysis.
+
+### `GET /api/preview`
+
+Returns a lightweight GitHub repository preview before running a full analysis.
+
+### `POST /api/chat`
+
+Answers a repository-specific question using the stored vector index for that analyzed repository.
 
 ### `GET /api/history` (authenticated)
 
@@ -304,14 +331,19 @@ ArchiMind/
 ├── scripts/
 │   ├── setup_local.sh
 │   ├── run_local.sh
+│   ├── 00_build_and_push_image.sh
+│   ├── 01_smoke_test_container.sh
 │   ├── run_worker.sh
 │   └── test_local.sh
 ├── docs/
+│   ├── README.md
+│   ├── CONTRIBUTING.md
 │   └── diagrams/
-│       ├── hld.dot
-│       ├── lld.dot
-│       ├── flow.dot
-│       └── use_cases.dot
+│       ├── hld.drawio
+│       ├── lld.drawio
+│       ├── flow.drawio
+│       ├── uml.drawio
+│       └── use_cases.drawio
 ├── static/
 ├── templates/
 └── tests/
@@ -363,20 +395,20 @@ bandit -r .
 - Set callback URLs correctly in Google Console.
 - Keep `OAUTHLIB_INSECURE_TRANSPORT=1` only for local HTTP.
 
-## Diagrams (DOT files)
+## Diagrams
 
-Generated architecture/use-case Graphviz files are included:
+Detailed architecture and flow diagrams are maintained directly as draw.io sources:
 
-- `docs/diagrams/hld.dot`
-- `docs/diagrams/lld.dot`
-- `docs/diagrams/flow.dot`
-- `docs/diagrams/use_cases.dot`
+- `docs/diagrams/hld.drawio`
+- `docs/diagrams/lld.drawio`
+- `docs/diagrams/flow.drawio`
+- `docs/diagrams/uml.drawio`
+- `docs/diagrams/use_cases.drawio`
 
-Render any DOT file:
+Use diagrams.net or draw.io to open and edit them. The operational documentation and contribution workflow are described in:
 
-```bash
-dot -Tpng docs/diagrams/hld.dot -o hld.png
-```
+- `docs/README.md`
+- `docs/CONTRIBUTING.md`
 
 ## Raspberry Pi Deployment
 

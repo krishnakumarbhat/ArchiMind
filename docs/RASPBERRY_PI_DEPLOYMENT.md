@@ -1,243 +1,172 @@
-# ArchiMind Raspberry Pi (ARM64) Production Deployment Guide
+# ArchiMind Raspberry Pi Deployment
 
-This guide deploys ArchiMind on Raspberry Pi at `pi@192.168.0.65` using Docker + Docker Compose.
+This runbook assumes the Docker Hub repository is public and that the Raspberry Pi only needs to pull and run the published image.
 
-## 1) Prerequisites
+## 1. Prepare `.env` on the build machine
 
-- Raspberry Pi OS 64-bit (ARM64)
-- Docker Hub repository, e.g. `yourdockerhub/archimind`
-- Gemini API key
-- SSH access: `pi@192.168.0.65`
-
----
-
-## 2) Docker Buildx (on your PC)
-
-From project root:
+Start from `.env.example`, then set at least:
 
 ```bash
-docker login
-
-docker buildx create --name archimind-builder --use --bootstrap || docker buildx use archimind-builder
-
-# Build ARM64 image and push to Docker Hub
-docker buildx build \
-  --platform linux/arm64 \
-  -t yourdockerhub/archimind:latest \
-  -t yourdockerhub/archimind:$(date +%Y%m%d-%H%M%S) \
-  --push .
+SECRET_KEY=replace_with_a_long_random_secret
+GEMINI_API_KEY=replace_with_gemini_api_key
+ARCHIMIND_IMAGE=krishnah27/archimind:latest
+DOCKERHUB_REPO=krishnah27/archimind
+DOCKER_IMAGE_TAG=latest
+PI_USER=pi
+PI_HOST=192.168.0.65
+PI_DIR=/home/pi/archimind
 ```
 
-Optional verification:
+Notes:
+
+- `SECRET_KEY` must be a long random value.
+- `GEMINI_API_KEY` is required for actual Gemini generation.
+- `ARCHIMIND_IMAGE` is what the Pi compose file will pull.
+
+## 2. Build and push the multi-arch image
+
+From the project root on the development machine:
+
+Make sure Docker is actually running first:
 
 ```bash
-docker buildx imagetools inspect yourdockerhub/archimind:latest
+docker info
+sudo systemctl start docker
 ```
 
----
+Then run:
 
-## 3) Raspberry Pi setup over SSH
+```bash
+bash scripts/00_build_and_push_image.sh krishnah27/archimind latest
+```
 
-### 3.1 Connect
+What this does:
+
+- builds `linux/amd64` and `linux/arm64` images,
+- tags `latest` and a timestamp tag,
+- pushes both tags to Docker Hub.
+
+Important: this only works if the local Docker daemon is running and the local Docker CLI is already logged in to the target Docker Hub account.
+
+## 3. Smoke-test the container locally
+
+Before deploying to the Pi, verify the container starts cleanly:
+
+If `docker info` fails, start Docker on the build machine before running the smoke test.
+
+```bash
+bash scripts/01_smoke_test_container.sh
+```
+
+This builds the image locally, starts it on port `5050`, and waits for `/api/status` to return successfully.
+
+## 4. Deploy to the Pi over SSH
+
+Run:
+
+```bash
+bash scripts/deploy_pi.sh
+```
+
+The script does the following:
+
+1. loads deployment defaults from `.env`,
+2. copies `docker-compose.pi.yml` to the Pi as `docker-compose.yml`,
+3. copies `.env` to the Pi,
+4. installs Docker if it is missing,
+5. pulls `ARCHIMIND_IMAGE`,
+6. starts the service with `docker compose up -d`.
+
+## 5. Manual pull/run commands on the Pi
+
+If you want to operate the Pi manually instead of using the helper script:
 
 ```bash
 ssh pi@192.168.0.65
+mkdir -p ~/archimind
+cd ~/archimind
 ```
 
-### 3.2 Install Docker + Compose plugin
+Copy `docker-compose.pi.yml` from this repository as `docker-compose.yml`, copy the prepared `.env`, then run:
 
 ```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg lsb-release
-
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker version
-docker compose version
-```
-
----
-
-## 4) Deploy ArchiMind on Pi
-
-### 4.1 Create deployment folder
-
-```bash
-mkdir -p ~/archimind && cd ~/archimind
-```
-
-### 4.2 Create `docker-compose.yml`
-
-Use the project’s `docker-compose.yml` (copy from repo) or create this minimal production compose:
-
-```yaml
-version: "3.9"
-
-services:
-  web:
-    image: yourdockerhub/archimind:latest
-    container_name: archimind_web
-    env_file: .env
-    restart: always
-    ports:
-      - "80:5000"
-    volumes:
-      - archimind_data:/app/data
-    environment:
-      - DATABASE_URL=sqlite:///data/archimind_dev.db
-    command: ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "300", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:5000/api/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
-
-volumes:
-  archimind_data:
-```
-
-### 4.3 Create `.env`
-
-```bash
-cat > .env << 'EOF'
-SECRET_KEY=replace_with_long_random_secret
-DATABASE_URL=sqlite:///data/archimind_dev.db
-FLASK_DEBUG=False
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5000
-ANONYMOUS_GENERATION_LIMIT=5
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-OAUTHLIB_INSECURE_TRANSPORT=0
-EOF
-```
-
-### 4.4 Pull and start
-
-```bash
-docker pull yourdockerhub/archimind:latest
-docker compose up -d
-```
-
-### 4.5 Verify
-
-```bash
+docker pull krishnah27/archimind:latest
+ARCHIMIND_IMAGE=krishnah27/archimind:latest docker compose up -d
 docker compose ps
-curl -sS http://127.0.0.1/api/status
+curl -fsS http://127.0.0.1/api/status
 ```
 
-From another machine on LAN:
+Because the compose file publishes `80:5000`, the service is also reachable on the Pi LAN IP at:
 
-```bash
-curl -sS http://192.168.0.65/api/status
+```text
+http://<pi-ip>/api/status
 ```
 
-Open browser: `http://192.168.0.65`
+## 6. Verify Gemini-backed generation
 
----
+Once the container is up:
 
-## 5) Update to latest release
+1. submit an analysis through the UI or `POST /api/analyze`,
+2. poll `GET /api/status?analysis_id=<id>`,
+3. check the `generation_backend` field in the response.
 
-On Pi:
+Expected values:
+
+- `gemini:gemini-3.1-flash-lite-preview` when Gemini is active,
+- `local` if the app had to fall back because `GEMINI_API_KEY` or Gemini access was unavailable.
+
+## 7. Updating the Pi to a newer image
+
+After pushing a new image:
 
 ```bash
-cd ~/archimind
-docker pull yourdockerhub/archimind:latest
-docker compose up -d
+ssh pi@192.168.0.65 'cd ~/archimind && docker compose pull && docker compose up -d && docker compose ps'
 ```
 
----
+If you changed tags, update `ARCHIMIND_IMAGE` in `.env` on the Pi first.
 
-## 6) Production debugging techniques
+## 8. Troubleshooting
 
-## A) Debugging on your PC before push
+### Container does not become healthy
+
+Run:
 
 ```bash
-# Build amd64 for local quick test
-docker build -t archimind:local .
-
-docker run --rm -p 5000:5000 --env-file .env archimind:local
-
-curl -sS http://127.0.0.1:5000/api/status
+docker compose logs --tail=100 web
+docker inspect --format='{{json .State.Health}}' archimind_web
 ```
 
-Useful checks:
+### Pi pulled the wrong image
+
+Confirm the active image reference:
 
 ```bash
-docker logs -f <container_id>
-docker exec -it <container_id> sh
-python3 -c "import chromadb, sqlite3; print('deps ok')"
+grep '^ARCHIMIND_IMAGE=' .env
+docker image ls | grep archimind
 ```
 
-## B) Debugging on Raspberry Pi
+### Gemini generation fell back to local mode
+
+Check inside the running container:
 
 ```bash
-cd ~/archimind
-docker compose logs -f web
+docker exec -it archimind_web sh -lc 'printenv | grep -E "GEMINI_API_KEY|DOCUMENTATION_MODEL|GEMINI_THINKING_LEVEL"'
 ```
 
-Check health/state:
+Then confirm the key is valid and the preview model is accessible from the account.
+
+### Worker cannot write status or SQLite files
+
+Inspect the app data volume:
 
 ```bash
-docker inspect --format='{{json .State.Health}}' archimind_web | jq
+docker exec -it archimind_web sh -lc 'ls -lah /app/data'
 ```
 
-Verify env + volume + DB file:
+### Need to roll back quickly
+
+If you know the previous timestamp tag, set it explicitly and restart:
 
 ```bash
-docker exec -it archimind_web sh
-printenv | grep -E 'GEMINI_API_KEY|DATABASE_URL|FLASK_'
-printenv | grep -E 'DATABASE_URL|FLASK_'
-ls -lah /app/data
-```
-
-Test worker path inside container (important because app spawns `worker.py`):
-
-```bash
-docker exec -it archimind_web python3 worker.py https://github.com/LearningCircuit/local-deep-research
-```
-
-If worker fails:
-
-- check outbound network from Pi (`curl https://api.github.com`)
-- check `/app/data/status.json` updates and write permissions
-- check `/app/data/chroma_db` exists and is writable
-
----
-
-## 7) Reliability hardening (recommended)
-
-- Keep `restart: always` (already set).
-- Use long random `SECRET_KEY`.
-- Do not commit `.env`.
-- Rotate exposed API keys immediately.
-- Consider Nginx/Caddy reverse proxy with TLS if exposed beyond LAN.
-- Back up Docker volume:
-
-```bash
-docker run --rm -v archimind_data:/data -v $PWD:/backup busybox tar czf /backup/archimind_data_backup.tgz /data
-```
-
----
-
-## 8) One-command remote rollout pattern (optional)
-
-From your PC (if compose + env already present on Pi):
-
-```bash
-ssh pi@192.168.0.65 'cd ~/archimind && docker pull yourdockerhub/archimind:latest && docker compose up -d && docker compose ps'
+ARCHIMIND_IMAGE=krishnah27/archimind:20260331-120000 docker compose up -d
 ```
