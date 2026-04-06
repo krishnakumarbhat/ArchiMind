@@ -6,6 +6,7 @@
 secrets.txt
 secret.txt
 *.secret
+.env.example
 
 # Python
 __pycache__/
@@ -32,10 +33,17 @@ MANIFEST
 
 # Virtual environments
 venv/
+.venv/
 env/
 ENV/
 env.bak/
 venv.bak/
+bin/
+include/
+lib/
+lib64/
+pyvenv.cfg
+instance/
 
 # IDE
 .vscode/

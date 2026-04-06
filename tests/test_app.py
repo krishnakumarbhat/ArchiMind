@@ -31,6 +31,53 @@ def test_api_analyze_requires_repo_url():
     assert "error" in response.get_json()
 
 
+@patch("app.RepositoryService.get_repository_preview")
+def test_api_preview_returns_repository_metadata(mock_preview):
+    mock_preview.return_value = {
+        "full_name": "example/repo",
+        "description": "Previewed repository",
+        "language": "Python",
+        "stars": 42,
+        "updated_at": "2026-03-31T00:00:00Z",
+        "html_url": "https://github.com/example/repo",
+        "topics": ["ai", "docs"],
+    }
+
+    _, client = _make_client()
+    response = client.get("/api/preview", query_string={"repo_url": "https://github.com/example/repo"})
+
+    assert response.status_code == 200
+    assert response.get_json()["full_name"] == "example/repo"
+
+
+@patch("app.DocumentationService")
+@patch("app.VectorStoreService")
+def test_api_chat_returns_grounded_answer(mock_vector_cls, mock_doc_cls):
+    vector_service = mock_vector_cls.return_value
+    vector_service.is_empty.return_value = False
+    vector_service.query_similar_documents.return_value = "--- File: app.py ---\n\ndef create_app(): pass"
+
+    doc_service = mock_doc_cls.return_value
+    doc_service.generate_chat_answer.return_value = "The app factory creates the Flask application."
+    doc_service.describe_backend.return_value = "local"
+
+    _, client = _make_client()
+    response = client.post(
+        "/api/chat",
+        json={
+            "repo_url": "https://github.com/example/repo",
+            "repo_name": "repo",
+            "question": "How is the app created?",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["answer"] == "The app factory creates the Flask application."
+    assert payload["backend"] == "local"
+    assert mock_vector_cls.call_args.kwargs["collection_name"] == "example__repo"
+
+
 @patch("subprocess.Popen")
 def test_api_analyze_success(mock_popen):
     app, client = _make_client()
@@ -72,5 +119,5 @@ def test_user_model_analysis_count():
             )
         db.session.commit()
 
-        refreshed = User.query.get(user.id)
+        refreshed = db.session.get(User, user.id)
         assert refreshed.get_analysis_count() == 2

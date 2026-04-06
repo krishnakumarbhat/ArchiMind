@@ -39,21 +39,47 @@ class AnalysisWorker:
     # ------------------------------------------------------------------
 
     def _status_file_for_analysis(self, analysis_log_id: Optional[int]) -> str:
-        if analysis_log_id:
-            return os.path.join(config.DATA_PATH, f"status_{analysis_log_id}.json")
-        return self.status_file
+        if not analysis_log_id:
+            return self.status_file
+
+        directory = os.path.dirname(self.status_file) or config.DATA_PATH
+        file_name = os.path.basename(self.status_file)
+        stem, extension = os.path.splitext(file_name)
+        if not stem:
+            stem = "status"
+        if stem.startswith("status_"):
+            stem = "status"
+        return os.path.join(directory, f"{stem}_{analysis_log_id}{extension or '.json'}")
 
     def _update_status(self, status: Dict[str, Optional[dict]], status_file_path: Optional[str] = None) -> None:
-        """Persist the current analysis status to disk."""
+        """Persist the current analysis status to disk (per-analysis file only)."""
         target_path = status_file_path or self.status_file
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         with open(target_path, "w", encoding="utf-8") as handle:
             json.dump(status, handle, indent=2)
 
-        if target_path != self.status_file:
-            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
-            with open(self.status_file, "w", encoding="utf-8") as handle:
-                json.dump(status, handle, indent=2)
+    def _set_stage(
+        self,
+        status: Dict[str, Optional[dict]],
+        *,
+        stage: str,
+        message: str,
+        progress: int,
+        status_file_path: str,
+    ) -> None:
+        status["stage"] = stage
+        status["message"] = message
+        status["progress"] = progress
+        self._update_status(status, status_file_path)
+
+    @staticmethod
+    def _derive_repo_name(repo_url: str) -> str:
+        cleaned = repo_url.rstrip("/")
+        repo_name = cleaned.split("/")[-1]
+        return repo_name.removesuffix(".git")
+
+    def _derive_repo_collection(self, repo_url: str) -> str:
+        return self.repo_service.build_collection_name(repo_url)
 
     def _update_database_log(self, analysis_log_id: Optional[int], status: str) -> None:
         """Record status transitions in the `AnalysisLog` table."""
@@ -61,24 +87,18 @@ class AnalysisWorker:
             return
 
         try:
-            from flask import Flask
+            from app import create_app
+            from models import AnalysisLog, db
 
-            from app import AnalysisLog, db
-
-            app = Flask(__name__)
-            app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-                "DATABASE_URL", "sqlite:///data/archimind_dev.db"
-            )
-            app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-            db.init_app(app)
+            app = create_app()
 
             with app.app_context():
-                log_entry = AnalysisLog.query.get(analysis_log_id)
+                log_entry = db.session.get(AnalysisLog, analysis_log_id)
                 if not log_entry:
                     return
 
                 log_entry.status = status
-                if status == "completed":
+                if status in {"completed", "failed"}:
                     log_entry.completed_at = datetime.utcnow()
 
                 db.session.commit()
@@ -206,19 +226,13 @@ class AnalysisWorker:
     ) -> None:
         """Save completed analysis to user's repository history."""
         try:
-            from flask import Flask
-            from app import AnalysisLog
-            
-            app = Flask(__name__)
-            app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-                "DATABASE_URL", "sqlite:///data/archimind_dev.db"
-            )
-            app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-            from models import db
-            db.init_app(app)
+            from app import create_app
+            from models import AnalysisLog, db
+
+            app = create_app()
             
             with app.app_context():
-                log_entry = AnalysisLog.query.get(analysis_log_id)
+                log_entry = db.session.get(AnalysisLog, analysis_log_id)
                 if log_entry and log_entry.user_id:
                     # Only save for authenticated users
                     save_repository_to_history(
@@ -241,62 +255,121 @@ class AnalysisWorker:
     def run_analysis(self, repo_url: str, analysis_log_id: Optional[int] = None) -> None:
         """Execute the full repository analysis pipeline."""
 
-        status: Dict[str, Optional[dict]] = {"status": "processing", "result": None, "error": None}
-        status["analysis_id"] = analysis_log_id
+        status: Dict[str, Optional[dict]] = {
+            "status": "processing",
+            "result": None,
+            "error": None,
+            "analysis_id": analysis_log_id,
+            "stage": "queued",
+            "message": "Analysis queued.",
+            "progress": 0,
+        }
         status_file_path = self._status_file_for_analysis(analysis_log_id)
         self._update_status(status, status_file_path)
 
         try:
             self._update_database_log(analysis_log_id, "processing")
 
-            repo_name = repo_url.rstrip("/").split("/")[-1]
+            repo_name = self._derive_repo_name(repo_url)
+            repo_collection = self._derive_repo_collection(repo_url)
             self.logger.info("Starting analysis for repository: %s", repo_name)
             repo_local_path = os.path.join(
                 config.LOCAL_CLONE_PATH,
                 f"{repo_name}_{analysis_log_id or int(time.time())}",
             )
 
+            self._set_stage(
+                status,
+                stage="preparing",
+                message="Preparing repository analysis.",
+                progress=8,
+                status_file_path=status_file_path,
+            )
+
             vector_service = VectorStoreService(
                 db_path=config.CHROMA_DB_PATH,
-                collection_name=repo_name,
+                collection_name=repo_collection,
                 embedding_model=config.EMBEDDING_MODEL,
                 repo_url=repo_url,
             )
 
-            if vector_service.is_empty():
-                file_contents = self.repo_service.collect_repository_files(
-                    repo_url,
-                    repo_local_path,
-                    config.ALLOWED_EXTENSIONS,
-                    config.IGNORED_DIRECTORIES,
-                )
-                if not file_contents:
-                    raise RuntimeError("No processable files found from remote ingestion or local clone")
+            had_existing_index = not vector_service.is_empty()
 
-                vector_service.generate_embeddings(file_contents)
+            self._set_stage(
+                status,
+                stage="ingestion",
+                message="Collecting repository files.",
+                progress=22,
+                status_file_path=status_file_path,
+            )
+            file_contents = self.repo_service.collect_repository_files(
+                repo_url,
+                repo_local_path,
+                config.ALLOWED_EXTENSIONS,
+                config.IGNORED_DIRECTORIES,
+            )
+            if not file_contents:
+                raise RuntimeError("No processable files found from remote ingestion or local clone")
+
+            self._set_stage(
+                status,
+                stage="indexing",
+                message="Refreshing repository index." if had_existing_index else "Building repository index.",
+                progress=46,
+                status_file_path=status_file_path,
+            )
+            vector_service.reset()
+            vector_service.generate_embeddings(file_contents)
 
             context_query = "Generate a complete technical documentation for this software project."
+            self._set_stage(
+                status,
+                stage="retrieval",
+                message="Retrieving relevant architectural context.",
+                progress=64,
+                status_file_path=status_file_path,
+            )
             context = vector_service.query_similar_documents(context_query)
             if not context:
                 raise RuntimeError("Failed to retrieve context from vector store")
 
             doc_service = DocumentationService(
-                model_name="local",
-                chat_model_name="local",
+                api_key=config.GEMINI_API_KEY,
+                model_name=config.DOCUMENTATION_MODEL,
+                chat_model_name=config.CHAT_MODEL,
+                thinking_level=config.GEMINI_THINKING_LEVEL,
+                api_version=config.GEMINI_API_VERSION,
+                context_char_limit=config.DOCUMENTATION_CONTEXT_CHAR_LIMIT,
+            )
+            self.logger.info("Documentation backend selected: %s", doc_service.describe_backend())
+
+            self._set_stage(
+                status,
+                stage="generation",
+                message="Generating handbook, diagrams, and summary.",
+                progress=82,
+                status_file_path=status_file_path,
             )
             docs = doc_service.generate_all_documentation(context, repo_name)
 
             hld_result = self._parse_graph_data(docs.get("hld"), "HLD")
             lld_result = self._parse_graph_data(docs.get("lld"), "LLD")
+            flow_result = self._parse_graph_data(docs.get("flow"), "Flow")
 
             status["status"] = "completed"
+            status["stage"] = "completed"
+            status["message"] = "Analysis complete."
+            status["progress"] = 100
             status["result"] = {
                 "chat_response": docs.get("documentation"),
                 "hld_graph": hld_result,
                 "lld_graph": lld_result,
+                "flow_graph": flow_result,
                 "chat_summary": docs.get("chat_summary"),
                 "repo_name": repo_name,
                 "repo_url": repo_url,
+                "repo_collection": repo_collection,
+                "generation_backend": doc_service.describe_backend(),
             }
 
             self._update_database_log(analysis_log_id, "completed")
@@ -317,6 +390,8 @@ class AnalysisWorker:
         except Exception as exc:  # pragma: no cover - mainline error logging
             self.logger.error("Analysis failed: %s", exc)
             status["status"] = "error"
+            status["stage"] = "error"
+            status["message"] = "Analysis failed."
             status["error"] = str(exc)
             self._update_database_log(analysis_log_id, "failed")
 
