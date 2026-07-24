@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Results - ArchiMind</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #111827;
+            --surface: #1F2937;
+            --primary: #10B981;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+            --danger: #FCA5A5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .analysis-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(16, 185, 129, 0.28);
+            border-radius: 14px;
+        }
+        .analysis-meta h1 {
+            margin: 0.35rem 0 0.5rem;
+            font-size: 2rem;
+            line-height: 1.15;
+        }
+        .analysis-meta p,
+        .analysis-meta a {
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+        .analysis-meta a {
+            text-decoration: none;
+            border-bottom: 1px solid rgba(249, 250, 251, 0.25);
+        }
+        .analysis-meta a:hover {
+            border-bottom-color: var(--primary);
+        }
+        .analysis-eyebrow {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .analysis-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: flex-end;
+        }
+        .analysis-badge {
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(156, 163, 175, 0.22);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab:hover {
+            color: var(--text-primary);
+            background: rgba(31, 41, 55, 0.5);
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .documentation-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .toc-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+        .toc-panel h3 {
+            margin: 0 0 1rem 0;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .chapter-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .chapter-link {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-decoration: none;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            display: block;
+        }
+        .chapter-link:hover {
+            color: var(--text-primary);
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .chapter-link.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.15);
+            font-weight: 600;
+        }
+        .documentation-content,
+        .graph-container,
+        .assistant-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .documentation-content {
+            padding: 3rem;
+        }
+        .documentation-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 0.75rem;
+        }
+        .documentation-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding: 1.25rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.12));
+            border-left: 4px solid var(--primary);
+            font-size: 1.75rem;
+            color: var(--text-primary);
+        }
+        .documentation-content h3 {
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            font-size: 1.35rem;
+        }
+        .documentation-content h4 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1.15rem;
+        }
+        .documentation-content p {
+            margin: 1rem 0;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+        .documentation-content ul,
+        .documentation-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .documentation-content li {
+            margin: 0.5rem 0;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        .documentation-content strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .documentation-content table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2rem 0;
+            background: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .documentation-content thead {
+            background: rgba(16, 185, 129, 0.2);
+        }
+        .documentation-content th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary);
+            white-space: nowrap;
+        }
+        .documentation-content td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            vertical-align: top;
+        }
+        .documentation-content tr:last-child td {
+            border-bottom: none;
+        }
+        .documentation-content tbody tr:hover {
+            background: rgba(16, 185, 129, 0.08);
+        }
+        .documentation-content blockquote {
+            margin: 1.5rem 0;
+            padding: 1rem 1.5rem;
+            border-left: 4px solid var(--primary);
+            background: rgba(17, 24, 39, 0.5);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+        }
+        .documentation-content code {
+            background: rgba(55, 65, 81, 0.8);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: #60a5fa;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .documentation-content pre {
+            background: rgba(17, 24, 39, 0.9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 1.5rem 0;
+        }
+        .documentation-content pre code {
+            background: none;
+            padding: 0;
+            color: #e5e7eb;
+        }
+        .graph-chat-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+        .graph-container {
+            padding: 2rem;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .graph-subtabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .graph-subtab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        .graph-subtab:hover {
+            color: var(--text-primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .graph-subtab.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .graph-meta h3 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: var(--text-primary);
+        }
+        .graph-meta p {
+            margin: 0.5rem 0 0 0;
+            color: var(--text-secondary);
+        }
+        .graph-stage {
+            position: relative;
+            flex: 1;
+            min-height: 500px;
+        }
+        .graph-canvas {
+            position: absolute;
+            inset: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(17, 24, 39, 0.95);
+            display: none;
+            overflow: auto;
+        }
+        .graph-canvas.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .graph-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+        .graph-message.error {
+            color: var(--danger);
+        }
+        .mermaid-container {
+            width: 100%;
+            padding: 2rem;
+            overflow: auto;
+        }
+        .assistant-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+        .assistant-panel {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .assistant-panel > p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+        .chat-panel-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .chat-panel-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        .chat-panel-header span {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .chat-summary,
+        .assistant-thread {
+            background: rgba(17, 24, 39, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-y: auto;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .chat-summary {
+            min-height: 260px;
+        }
+        .assistant-thread {
+            min-height: 320px;
+            max-height: 520px;
+        }
+        .chat-summary p,
+        .assistant-message-body p {
+            margin-bottom: 0.9rem;
+        }
+        .chat-summary strong,
+        .assistant-message-body strong {
+            color: var(--primary);
+        }
+        .chat-summary.empty,
+        .assistant-empty {
+            color: var(--text-secondary);
+            display: grid;
+            place-items: center;
+            text-align: center;
+            min-height: 100%;
+        }
+        .assistant-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+        .assistant-input {
+            width: 100%;
+            min-height: 110px;
+            resize: vertical;
+            background: rgba(17, 24, 39, 0.82);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+            padding: 1rem;
+            font: inherit;
+        }
+        .assistant-input:focus {
+            outline: 2px solid rgba(16, 185, 129, 0.35);
+            border-color: var(--primary);
+        }
+        .assistant-button {
+            align-self: flex-start;
+            padding: 0.8rem 1.3rem;
+            border-radius: 999px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .assistant-button:hover {
+            transform: translateY(-2px);
+            background: rgba(16, 185, 129, 0.24);
+        }
+        .assistant-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .assistant-status {
+            color: var(--text-secondary);
+            min-height: 1.4rem;
+            font-size: 0.92rem;
+        }
+        .assistant-message {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .assistant-message.user {
+            background: rgba(59, 130, 246, 0.12);
+        }
+        .assistant-message.assistant {
+            background: rgba(16, 185, 129, 0.12);
+        }
+        .assistant-message-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 1024px) {
+            .analysis-meta {
+                flex-direction: column;
+            }
+            .analysis-badges {
+                justify-content: flex-start;
+            }
+            .documentation-layout,
+            .assistant-layout {
+                grid-template-columns: 1fr;
+            }
+            .toc-panel {
+                position: static;
+                max-height: none;
+            }
+            .graph-chat-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="analysis-meta">
+            <div>
+                <div class="analysis-eyebrow">Analyzed Repository</div>
+                <h1>{{ data.repo_name or 'Repository' }}</h1>
+                {% if data.repo_url %}
+                <p><a href="{{ data.repo_url }}" target="_blank" rel="noopener noreferrer">{{ data.repo_url }}</a></p>
+                {% endif %}
+            </div>
+            <div class="analysis-badges">
+                {% if data.repo_collection %}
+                <span class="analysis-badge">Index: {{ data.repo_collection }}</span>
+                {% endif %}
+                {% if data.generation_backend %}
+                <span class="analysis-badge">Backend: {{ data.generation_backend }}</span>
+                {% endif %}
+            </div>
+        </section>
+        <div class="tabs">
+            <button class="tab active" data-tab="documentation">Documentation</button>
+            <button class="tab" data-tab="graph">Architecture Graphs</button>
+            <button class="tab" data-tab="assistant">Repository Assistant</button>
+        </div>
+
+        <div id="documentation" class="tab-content active">
+            <div class="documentation-layout">
+                <aside class="toc-panel">
+                    <h3>Chapters</h3>
+                    <nav class="chapter-nav" id="chapterNav">
+                        <span style="color: var(--text-secondary); font-size: 0.875rem;">Loading chapters...</span>
+                    </nav>
+                </aside>
+                <div class="documentation-content" id="documentationContent">
+                    <p style="color: var(--text-secondary);">Loading documentation...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="graph" class="tab-content">
+            <div class="graph-chat-layout">
+                <div class="graph-container">
+                    <div class="graph-subtabs">
+                        <button class="graph-subtab active" data-diagram="hld">High-Level Design (HLD)</button>
+                        <button class="graph-subtab" data-diagram="lld">Low-Level Design (LLD)</button>
+                        <button class="graph-subtab" data-diagram="flow">Flow Diagram</button>
+                    </div>
+                    <div class="graph-meta">
+                        <h3>Architecture Graph</h3>
+                        <p>Switch tabs to explore the generated system views.</p>
+                    </div>
+                    <div class="graph-stage">
+                        <div class="graph-canvas active" id="hldCanvas">
+                            <div class="graph-message">Loading High-Level Design...</div>
+                        </div>
+                        <div class="graph-canvas" id="lldCanvas">
+                            <div class="graph-message">Loading Low-Level Design...</div>
+                        </div>
+                        <div class="graph-canvas" id="flowCanvas">
+                            <div class="graph-message">Loading Flow Diagram...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="assistant" class="tab-content">
+            <div class="assistant-layout">
+                <section class="assistant-panel">
+                    <div class="chat-panel-header">
+                        <h3>Repository Summary</h3>
+                        <span>Highlights generated from the current repository analysis.</span>
+                    </div>
+                    <p>Review the condensed architectural takeaways and then ask grounded follow-up questions against the indexed repository context.</p>
+                    <div id="chatSummary" class="chat-summary empty">
+                        <div>Generating repository summary...</div>
+                    </div>
+                </section>
+
+                <section class="assistant-panel">
+                    <div class="chat-panel-header">
+                        <h3>Ask the Repository</h3>
+                        <span>Questions are answered using retrieved vector context plus the current question.</span>
+                    </div>
+                    <form id="qaForm" class="assistant-form">
+                        <textarea id="qaInput" class="assistant-input" placeholder="Ask about routes, entry points, data flow, auth, storage, deployment, or specific files."></textarea>
+                        <button id="qaSubmit" type="submit" class="assistant-button">Ask Repository</button>
+                    </form>
+                    <div id="qaStatus" class="assistant-status" aria-live="polite"></div>
+                    <div id="qaThread" class="assistant-thread">
+                        <div class="assistant-empty">Ask a question to start the repository Q&amp;A.</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            themeVariables: {
+                fontSize: '16px',
+                primaryColor: '#10B981',
+                primaryTextColor: '#F9FAFB',
+                primaryBorderColor: '#10B981',
+                lineColor: '#10B981',
+                secondaryColor: '#1F2937',
+                tertiaryColor: '#374151',
+                background: '#111827',
+                mainBkg: '#1F2937',
+                textColor: '#F9FAFB'
+            }
+        });
+
+        const backendData = {
+            chat_response: {{ data.chat_response | tojson | safe }},
+            hld_graph: {{ data.hld_graph | tojson | safe }},
+            lld_graph: {{ data.lld_graph | tojson | safe }},
+            flow_graph: {{ data.flow_graph | tojson | safe }},
+            chat_summary: {{ data.chat_summary | tojson | safe }},
+            repo_name: {{ data.repo_name | tojson | safe }},
+            repo_url: {{ data.repo_url | tojson | safe }},
+            generation_backend: {{ data.generation_backend | tojson | safe }}
+        };
+
+        let graphsRendered = false;
+
+        function renderMarkdown(markdown, enableHeaders) {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: enableHeaders,
+                mangle: false
+            });
+            return DOMPurify.sanitize(marked.parse(markdown || ''));
+        }
+
+        function renderChatSummary() {
+            const summaryContainer = document.getElementById('chatSummary');
+
+            if (!summaryContainer) {
+                return;
+            }
+
+            if (backendData.chat_summary) {
+                summaryContainer.classList.remove('empty');
+                summaryContainer.innerHTML = renderMarkdown(backendData.chat_summary, false);
+            } else {
+                summaryContainer.classList.add('empty');
+                summaryContainer.innerHTML = '<div>No repository summary available yet.</div>';
+            }
+        }
+
+        function renderDocumentation() {
+            const docContent = document.getElementById('documentationContent');
+
+            if (backendData.chat_response) {
+                docContent.innerHTML = renderMarkdown(backendData.chat_response, true);
+                buildTableOfContents();
+            } else {
+                docContent.innerHTML = '<p style="color: var(--text-secondary);">No documentation available.</p>';
+            }
+        }
+
+        function buildTableOfContents() {
+            const docContent = document.getElementById('documentationContent');
+            const chapterNav = document.getElementById('chapterNav');
+
+            if (!docContent || !chapterNav) {
+                return;
+            }
+
+            const headings = Array.from(docContent.querySelectorAll('h2'));
+            chapterNav.innerHTML = '';
+
+            if (!headings.length) {
+                chapterNav.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.875rem;">No chapters detected.</span>';
+                return;
+            }
+
+            headings.forEach((heading, index) => {
+                const text = heading.textContent.trim();
+                const id = 'chapter-' + index;
+                heading.id = id;
+
+                const link = document.createElement('a');
+                link.href = '#' + id;
+                link.textContent = text;
+                link.className = 'chapter-link';
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    document.querySelectorAll('.chapter-link').forEach((node) => node.classList.remove('active'));
+                    link.classList.add('active');
+                });
+                chapterNav.appendChild(link);
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        document.querySelectorAll('.chapter-link').forEach((node) => node.classList.remove('active'));
+                        const activeLink = chapterNav.querySelector(`a[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, { rootMargin: '-20% 0px -70% 0px' });
+
+            headings.forEach((heading) => observer.observe(heading));
+        }
+
+        async function renderGraph(canvasId, graphData, fallbackMessage) {
+            const canvas = document.getElementById(canvasId);
+
+            if (!canvas) {
+                return;
+            }
+
+            if (graphData && graphData.status === 'ok' && graphData.graph && graphData.graph.mermaid_code) {
+                canvas.innerHTML = `
+                    <div class="mermaid-container">
+                        <div class="mermaid">${graphData.graph.mermaid_code}</div>
+                    </div>
+                `;
+
+                try {
+                    await mermaid.run({ querySelector: `#${canvasId} .mermaid` });
+                } catch (error) {
+                    canvas.innerHTML = `<div class="graph-message error">Error rendering graph: ${error.message}</div>`;
+                }
+            } else {
+                const message = graphData?.message || fallbackMessage;
+                canvas.innerHTML = `<div class="graph-message">${message}</div>`;
+            }
+        }
+
+        async function renderMermaidGraphs() {
+            if (graphsRendered) {
+                return;
+            }
+
+            graphsRendered = true;
+            await renderGraph('hldCanvas', backendData.hld_graph, 'No High-Level Design data available.');
+            await renderGraph('lldCanvas', backendData.lld_graph, 'No Low-Level Design data available.');
+            await renderGraph('flowCanvas', backendData.flow_graph, 'No flow diagram data available.');
+        }
+
+        function appendAssistantMessage(role, content, asMarkdown) {
+            const thread = document.getElementById('qaThread');
+            if (!thread) {
+                return;
+            }
+
+            const empty = thread.querySelector('.assistant-empty');
+            if (empty) {
+                empty.remove();
+            }
+
+            const message = document.createElement('article');
+            message.className = `assistant-message ${role}`;
+
+            const label = document.createElement('span');
+            label.className = 'assistant-message-label';
+            label.textContent = role === 'assistant' ? 'ArchiMind' : 'You';
+
+            const body = document.createElement('div');
+            body.className = 'assistant-message-body';
+            body.innerHTML = asMarkdown ? renderMarkdown(content, false) : DOMPurify.sanitize(content);
+
+            message.appendChild(label);
+            message.appendChild(body);
+            thread.appendChild(message);
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        async function askRepositoryQuestion(question) {
+            const statusNode = document.getElementById('qaStatus');
+            const submitButton = document.getElementById('qaSubmit');
+
+            appendAssistantMessage('user', question, false);
+            submitButton.disabled = true;
+            statusNode.textContent = 'Searching the vector index and sending grounded context to Gemini...';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        repo_url: backendData.repo_url,
+                        repo_name: backendData.repo_name,
+                        question,
+                    }),
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Question failed.');
+                }
+
+                appendAssistantMessage('assistant', data.answer, true);
+                statusNode.textContent = `Answered using ${data.backend || backendData.generation_backend || 'analysis'}.`;
+            } catch (error) {
+                appendAssistantMessage('assistant', error.message || 'Question failed.', false);
+                statusNode.textContent = 'Question failed. Try a narrower question.';
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDocumentation();
+            renderChatSummary();
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach((node) => node.classList.remove('active'));
+                    tabContents.forEach((node) => node.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const targetTab = document.getElementById(tab.dataset.tab);
+                    if (targetTab) {
+                        targetTab.classList.add('active');
+                    }
+
+                    if (tab.dataset.tab === 'graph') {
+                        renderMermaidGraphs();
+                    }
+                });
+            });
+
+            const graphSubtabs = document.querySelectorAll('.graph-subtab');
+            const graphCanvases = document.querySelectorAll('.graph-canvas');
+
+            graphSubtabs.forEach((subtab) => {
+                subtab.addEventListener('click', () => {
+                    graphSubtabs.forEach((node) => node.classList.remove('active'));
+                    graphCanvases.forEach((node) => node.classList.remove('active'));
+
+                    subtab.classList.add('active');
+                    const canvasId = `${subtab.dataset.diagram}Canvas`;
+                    const canvas = document.getElementById(canvasId);
+                    if (canvas) {
+                        canvas.classList.add('active');
+                    }
+                });
+            });
+
+            const qaForm = document.getElementById('qaForm');
+            const qaInput = document.getElementById('qaInput');
+
+            if (qaForm && qaInput) {
+                qaForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const question = qaInput.value.trim();
+                    if (!question) {
+                        return;
+                    }
+                    qaInput.value = '';
+                    await askRepositoryQuestion(question);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
