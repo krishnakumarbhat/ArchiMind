@@ -23,23 +23,12 @@ def _get_bool(name: str, default: bool) -> bool:
     return raw_value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-_KNOWN_DB_SCHEMES = {"sqlite", "postgresql", "postgres", "mysql", "mssql", "oracle"}
-
-
 def _normalize_database_url(raw_url: str) -> str:
-    # Reject values that are clearly not database URLs (e.g. raw tokens).
-    scheme_part = raw_url.split("://", 1)[0].split("+", 1)[0].lower() if "://" in raw_url else ""
-    if not scheme_part or scheme_part not in _KNOWN_DB_SCHEMES:
-        return ""
-
     if raw_url.startswith("postgres://"):
         return f"postgresql+psycopg://{raw_url[len('postgres://'):]}"
 
     if raw_url.startswith("postgresql://") and "+psycopg" not in raw_url:
         return f"postgresql+psycopg://{raw_url[len('postgresql://'):]}"
-
-    if raw_url in {"sqlite:///:memory:", "sqlite+pysqlite:///:memory:"}:
-        return raw_url
 
     if raw_url.startswith("sqlite:///") and not raw_url.startswith("sqlite:////"):
         relative_path = raw_url[len("sqlite:///"):]
@@ -60,15 +49,7 @@ STATUS_FILE_PATH = os.path.join(DATA_PATH, "status.json")
 
 
 def get_database_url() -> str:
-    raw = os.getenv("DATABASE_URL", SQLITE_URL)
-    normalized = _normalize_database_url(raw)
-    if not normalized:
-        import logging
-        logging.getLogger(__name__).warning(
-            "DATABASE_URL is not a recognized database URL; falling back to local SQLite."
-        )
-        return SQLITE_URL
-    return normalized
+    return _normalize_database_url(os.getenv("DATABASE_URL", SQLITE_URL))
 
 
 def uses_sqlite(database_url: str | None = None) -> bool:
@@ -76,11 +57,10 @@ def uses_sqlite(database_url: str | None = None) -> bool:
 
 
 # --- Local model/indexing settings ---
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
 VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "pinecone" if os.getenv("PINECONE_API_KEY") else "local")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "archimind")
-PINECONE_HOST = os.getenv("PINECONE_HOST")
 PINECONE_NAMESPACE = os.getenv("PINECONE_NAMESPACE", "default")
 PINECONE_CLOUD = os.getenv("PINECONE_CLOUD", "aws")
 PINECONE_REGION = os.getenv("PINECONE_REGION", "us-east-1")

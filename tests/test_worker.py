@@ -26,7 +26,6 @@ def test_parse_graph_data_returns_error_for_invalid_json():
 def test_run_analysis_success(mock_repo_cls, mock_vector_cls, mock_doc_cls):
     with tempfile.TemporaryDirectory() as temp_dir:
         status_file = os.path.join(temp_dir, "status.json")
-        analysis_status_file = os.path.join(temp_dir, "status_1.json")
 
         repo_service = Mock()
         repo_service.build_collection_name.return_value = "example__repo"
@@ -62,7 +61,7 @@ def test_run_analysis_success(mock_repo_cls, mock_vector_cls, mock_doc_cls):
             worker.status_file = status_file
             worker.run_analysis("https://github.com/example/repo", analysis_log_id=1)
 
-        with open(analysis_status_file, "r", encoding="utf-8") as handle:
+        with open(status_file, "r", encoding="utf-8") as handle:
             data = json.load(handle)
 
         assert data["status"] == "completed"

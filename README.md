@@ -30,7 +30,7 @@ Operational documentation now lives under `docs/`:
 10. [Project Structure](#project-structure)
 11. [Quality, Testing & Security](#quality-testing--security)
 12. [Troubleshooting](#troubleshooting)
-13. [Diagrams](#diagrams)
+13. [Diagrams (DOT files)](#diagrams-dot-files)
 14. [Raspberry Pi Deployment](#raspberry-pi-deployment)
 
 ## What You Can Do
@@ -70,7 +70,7 @@ Operational documentation now lives under `docs/`:
 4. Worker clones repo (or reuses local clone), reads selected files.
 5. Worker builds tier-1 file summaries and tier-2 AST chunks in the configured vector backend.
 6. LangGraph retrieves relevant files first, then precise code chunks with metadata.
-7. Worker writes status/result to `data/status_<analysis_id>.json` and updates the DB log.
+7. Worker writes status/result to `data/status.json` and updates DB log.
 
 ## Block Diagram
 
@@ -333,16 +333,20 @@ ArchiMind/
 │   ├── run_local.sh
 │   ├── 00_build_and_push_image.sh
 │   ├── 01_smoke_test_container.sh
+│   ├── 02_convert_dot_to_drawio.py
 │   ├── run_worker.sh
 │   └── test_local.sh
 ├── docs/
-│   ├── README.md
-│   ├── CONTRIBUTING.md
 │   └── diagrams/
+│       ├── hld.dot
 │       ├── hld.drawio
+│       ├── lld.dot
 │       ├── lld.drawio
+│       ├── flow.dot
 │       ├── flow.drawio
+│       ├── uml.dot
 │       ├── uml.drawio
+│       ├── use_cases.dot
 │       └── use_cases.drawio
 ├── static/
 ├── templates/
@@ -395,20 +399,32 @@ bandit -r .
 - Set callback URLs correctly in Google Console.
 - Keep `OAUTHLIB_INSECURE_TRANSPORT=1` only for local HTTP.
 
-## Diagrams
+## Diagrams (DOT files)
 
-Detailed architecture and flow diagrams are maintained directly as draw.io sources:
+Generated architecture/use-case Graphviz files are included:
 
+- `docs/diagrams/hld.dot`
 - `docs/diagrams/hld.drawio`
+- `docs/diagrams/lld.dot`
 - `docs/diagrams/lld.drawio`
+- `docs/diagrams/flow.dot`
 - `docs/diagrams/flow.drawio`
+- `docs/diagrams/uml.dot`
 - `docs/diagrams/uml.drawio`
+- `docs/diagrams/use_cases.dot`
 - `docs/diagrams/use_cases.drawio`
 
-Use diagrams.net or draw.io to open and edit them. The operational documentation and contribution workflow are described in:
+Render any DOT file:
 
-- `docs/README.md`
-- `docs/CONTRIBUTING.md`
+```bash
+dot -Tpng docs/diagrams/hld.dot -o hld.png
+```
+
+Regenerate all draw.io files from the DOT sources:
+
+```bash
+/usr/bin/python3 scripts/02_convert_dot_to_drawio.py
+```
 
 ## Raspberry Pi Deployment
 

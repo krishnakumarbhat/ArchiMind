@@ -6,7 +6,6 @@
 secrets.txt
 secret.txt
 *.secret
-.env.example
 
 # Python
 __pycache__/

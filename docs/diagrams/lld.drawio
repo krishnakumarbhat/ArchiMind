@@ -1,55 +1,99 @@
-<mxfile host="app.diagrams.net" modified="2026-04-05" agent="ArchiMind" version="24.7">
-    <diagram name="Low-Level Design" id="lld">
-        <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1200" math="0" shadow="1">
+<mxfile host="65bd71144e">
+    <diagram name="ArchiMind Low-Level Runtime Flow" id="0">
+        <mxGraphModel dx="1114" dy="707" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="title" value="&lt;b&gt;ArchiMind — Low-Level Design (Sequence)&lt;/b&gt;&lt;br&gt;Full Analysis Request Lifecycle" style="text;html=1;align=center;fontSize=14;" vertex="1" parent="1"><mxGeometry x="600" y="10" width="500" height="40" as="geometry"/></mxCell>
-                <!-- Participants -->
-                <mxCell id="browser" value="&lt;b&gt;Browser&lt;/b&gt;&lt;br&gt;script.js" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="80" y="70" width="100" height="50" as="geometry"/></mxCell>
-                <mxCell id="app" value="&lt;b&gt;app.py&lt;/b&gt;&lt;br&gt;Flask Routes" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="280" y="70" width="120" height="50" as="geometry"/></mxCell>
-                <mxCell id="db" value="&lt;b&gt;Supabase&lt;/b&gt;&lt;br&gt;PostgreSQL" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="480" y="70" width="110" height="50" as="geometry"/></mxCell>
-                <mxCell id="wk" value="&lt;b&gt;worker.py&lt;/b&gt;&lt;br&gt;Subprocess" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1"><mxGeometry x="670" y="70" width="120" height="50" as="geometry"/></mxCell>
-                <mxCell id="repo" value="&lt;b&gt;Repository&lt;/b&gt;&lt;br&gt;&lt;b&gt;Service&lt;/b&gt;" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="870" y="70" width="100" height="50" as="geometry"/></mxCell>
-                <mxCell id="ghapi" value="&lt;b&gt;GitHub&lt;/b&gt;&lt;br&gt;&lt;b&gt;API&lt;/b&gt;" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1050" y="70" width="80" height="50" as="geometry"/></mxCell>
-                <mxCell id="vec" value="&lt;b&gt;Vector&lt;/b&gt;&lt;br&gt;&lt;b&gt;Store&lt;/b&gt;" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1200" y="70" width="80" height="50" as="geometry"/></mxCell>
-                <mxCell id="doc" value="&lt;b&gt;Doc&lt;/b&gt;&lt;br&gt;&lt;b&gt;Service&lt;/b&gt;" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1360" y="70" width="80" height="50" as="geometry"/></mxCell>
-                <mxCell id="gem" value="&lt;b&gt;Gemini&lt;/b&gt;&lt;br&gt;&lt;b&gt;API&lt;/b&gt;" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="1520" y="70" width="80" height="50" as="geometry"/></mxCell>
-                <!-- Lifelines -->
-                <mxCell id="l1" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="130" y="120" as="sourcePoint"/><mxPoint x="130" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l2" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="120" as="sourcePoint"/><mxPoint x="340" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l3" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="535" y="120" as="sourcePoint"/><mxPoint x="535" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l4" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="120" as="sourcePoint"/><mxPoint x="730" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l5" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="920" y="120" as="sourcePoint"/><mxPoint x="920" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l6" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1090" y="120" as="sourcePoint"/><mxPoint x="1090" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l7" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1240" y="120" as="sourcePoint"/><mxPoint x="1240" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l8" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1400" y="120" as="sourcePoint"/><mxPoint x="1400" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="l9" style="endArrow=none;dashed=1;strokeColor=#999;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1560" y="120" as="sourcePoint"/><mxPoint x="1560" y="1050" as="targetPoint"/></mxGeometry></mxCell>
-                <!-- Sequence messages -->
-                <mxCell id="m1" value="POST /api/analyze {repo_url}" style="endArrow=block;strokeColor=#333;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="130" y="150" as="sourcePoint"/><mxPoint x="340" y="150" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m2" value="Validate URL + dedup check" style="endArrow=block;strokeColor=#333;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="180" as="sourcePoint"/><mxPoint x="535" y="180" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m3" value="INSERT AnalysisLog (pending)" style="endArrow=block;strokeColor=#82b366;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="210" as="sourcePoint"/><mxPoint x="535" y="210" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m4" value="202 {analysis_id, doc_url}" style="endArrow=block;strokeColor=#333;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="250" as="sourcePoint"/><mxPoint x="130" y="250" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m5" value="sessionStorage.setItem(analysis)" style="endArrow=block;strokeColor=#82b366;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="100" y="280" as="sourcePoint"/><mxPoint x="160" y="280" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m6" value="subprocess.Popen(worker.py, repo_url, id)" style="endArrow=block;strokeColor=#9673a6;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="310" as="sourcePoint"/><mxPoint x="730" y="310" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m7" value="collect_repository_files()" style="endArrow=block;strokeColor=#b85450;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="360" as="sourcePoint"/><mxPoint x="920" y="360" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m8" value="GET /repos/{owner}/{repo}/git/trees" style="endArrow=block;strokeColor=#6c8ebf;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="920" y="390" as="sourcePoint"/><mxPoint x="1090" y="390" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m9" value="tree entries[]" style="endArrow=block;strokeColor=#6c8ebf;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1090" y="420" as="sourcePoint"/><mxPoint x="920" y="420" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m10" value="ThreadPool: fetch raw content" style="endArrow=block;strokeColor=#6c8ebf;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="920" y="450" as="sourcePoint"/><mxPoint x="1090" y="450" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m11" value="file_contents{}" style="endArrow=block;strokeColor=#b85450;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="920" y="490" as="sourcePoint"/><mxPoint x="730" y="490" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m12" value="generate_embeddings(file_contents)" style="endArrow=block;strokeColor=#d6b656;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="530" as="sourcePoint"/><mxPoint x="1240" y="530" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m13" value="AST chunk → embed → upsert (Pinecone/ChromaDB)" style="endArrow=block;strokeColor=#d6b656;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1240" y="560" as="sourcePoint"/><mxPoint x="1240" y="590" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m14" value="query_similar_documents()" style="endArrow=block;strokeColor=#d6b656;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="630" as="sourcePoint"/><mxPoint x="1240" y="630" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m15" value="LangGraph: select_files → collect_chunks → render_context" style="endArrow=block;strokeColor=#d6b656;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1240" y="660" as="sourcePoint"/><mxPoint x="730" y="660" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m16" value="generate_all_documentation(context)" style="endArrow=block;strokeColor=#b85450;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="700" as="sourcePoint"/><mxPoint x="1400" y="700" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m17" value="generate_content(handbook + HLD + LLD + flow + summary)" style="endArrow=block;strokeColor=#b85450;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1400" y="730" as="sourcePoint"/><mxPoint x="1560" y="730" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m18" value="Markdown docs + Mermaid JSON" style="endArrow=block;strokeColor=#b85450;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1560" y="770" as="sourcePoint"/><mxPoint x="730" y="770" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m19" value="Write status_{id}.json (completed)" style="endArrow=block;strokeColor=#333;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="700" y="810" as="sourcePoint"/><mxPoint x="760" y="810" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m20" value="UPDATE AnalysisLog → completed" style="endArrow=block;strokeColor=#82b366;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="840" as="sourcePoint"/><mxPoint x="535" y="840" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m21" value="save_repository_to_history()" style="endArrow=block;strokeColor=#82b366;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="730" y="870" as="sourcePoint"/><mxPoint x="535" y="870" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m22" value="GET /api/status?analysis_id (polling)" style="endArrow=block;strokeColor=#333;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="130" y="910" as="sourcePoint"/><mxPoint x="340" y="910" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m23" value="{status: completed, result: {...}}" style="endArrow=block;strokeColor=#333;dashed=1;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="940" as="sourcePoint"/><mxPoint x="130" y="940" as="targetPoint"/></mxGeometry></mxCell>
-                <mxCell id="m24" value="Redirect to /doc?analysis_id (render docs + Mermaid)" style="endArrow=block;strokeColor=#82b366;fontSize=9;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="100" y="970" as="sourcePoint"/><mxPoint x="160" y="970" as="targetPoint"/></mxGeometry></mxCell>
+                <mxCell id="2" value="Start" style="ellipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#e8fff1;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="80" width="120" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="POST /api/analyze&lt;br&gt;(repo_url)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="84" y="750" width="172" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Validate payload +&lt;br&gt;rate-limit checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="860" width="180" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Insert AnalysisLog&lt;br&gt;status=pending" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="1050" width="180" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="subprocess.Popen(worker.py)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="1190" width="252" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="Worker sets status=processing&lt;br&gt;in status.json + DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="166" y="1360" width="268" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="RepositoryService.clone_repository()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1480" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="read_repository_files()&lt;br&gt;allowed extensions + ignored dirs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="200" width="300" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="VectorStoreService init&lt;br&gt;(collection per repo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1620" width="220" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="generate_embeddings()&lt;br&gt;if collection empty" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="360" width="204" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="query_similar_documents()&lt;br&gt;for context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1760" width="236" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="DocumentationService init" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1900" width="236" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="generate_all_documentation()&lt;br&gt;handbook + HLD + LLD + chat_summary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="2040" width="316" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="_parse_graph_data()&lt;br&gt;+ sanitize Mermaid code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="2180" width="220" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Write completed result&lt;br&gt;into status.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="2320" width="212" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="Update AnalysisLog&lt;br&gt;status=completed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="2460" width="180" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="save_repository_to_history()&lt;br&gt;(authenticated users)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fbff;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="2600" width="260" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="On exception:&lt;br&gt;status=error + error message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffecec;strokeColor=#b65a5a;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="540" width="260" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="End" style="shape=doubleEllipse;aspect=fixed;whiteSpace=wrap;html=1;fillColor=#e8fff1;strokeColor=#53789c;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry y="530" width="120" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="8" target="9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="9" target="11" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="10" target="11" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="invalid/limit/conflict" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="4" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="8" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="no files" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="9" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="11" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="12" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="14" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#4a6484;" parent="1" source="15" target="19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="19" target="20" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>

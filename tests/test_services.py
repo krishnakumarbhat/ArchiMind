@@ -1,7 +1,6 @@
 """Service layer tests for local-first runtime behavior."""
 
 import json
-import services
 import tempfile
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
@@ -22,33 +21,6 @@ def test_simple_collection_add_and_query():
         results = collection.query(query_texts=["alpha"], n_results=1)
         assert results["ids"][0][0] == "a.py"
         assert "alpha" in results["documents"][0][0]
-
-
-def test_pinecone_collection_clear_ignores_missing_namespace():
-    class MissingNamespaceIndex:
-        def delete(self, **_kwargs):
-            raise RuntimeError("Namespace not found")
-
-    collection = services._PineconeCollection.__new__(services._PineconeCollection)
-    collection._index = MissingNamespaceIndex()
-    collection._namespace = "prod:missing:test"
-
-    collection.clear()
-
-
-def test_pinecone_collection_query_returns_empty_for_missing_namespace():
-    class MissingNamespaceIndex:
-        def query(self, **_kwargs):
-            raise RuntimeError("Namespace not found")
-
-    collection = services._PineconeCollection.__new__(services._PineconeCollection)
-    collection._index = MissingNamespaceIndex()
-    collection._namespace = "prod:missing:test"
-    collection._dimension = 4
-
-    result = collection.query(query_embeddings=[[0.0, 0.0, 0.0, 0.0]], n_results=3)
-
-    assert result == {"ids": [[]], "documents": [[]], "metadatas": [[]]}
 
 
 def test_vector_service_query_similar_documents():

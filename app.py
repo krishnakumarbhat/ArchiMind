@@ -17,7 +17,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import config
-from models import AnalysisLog, Repository, User, db
+from models import AnalysisLog, User, db
 from oauth_utils import (
     get_repository_details,
     get_user_repository_history,
@@ -41,11 +41,6 @@ def _get_bool_env(name: str, default: bool) -> bool:
     if raw_value is None:
         return default
     return raw_value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _redact_url(url: str) -> str:
-    """Replace password segment in a database URL for safe logging."""
-    return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", url)
 
 
 def _build_csp_header() -> str:
@@ -96,7 +91,7 @@ class ApplicationConfig:
 
         logging.getLogger(self.__class__.__name__).info(
             "Configured DATABASE_URL=%s (DATA_PATH=%s)",
-            _redact_url(self.DATABASE_URL),
+            self.DATABASE_URL,
             self.DATA_PATH,
         )
 
@@ -171,8 +166,6 @@ class ArchiMindApplication:
             response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
             response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
             response.headers.setdefault("Content-Security-Policy", _build_csp_header())
-            response.headers.setdefault("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
-            response.headers.setdefault("Pragma", "no-cache")
 
             if self.config.SESSION_COOKIE_SECURE:
                 response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
@@ -248,27 +241,31 @@ class ArchiMindApplication:
         return login_required(func)
 
     def _index(self):
-        return render_template(
-            "index.html",
-            user=current_user,
-            anonymous_limit=self.config.ANONYMOUS_GENERATION_LIMIT,
-        )
+        return render_template("index.html", user=current_user)
 
     def _documentation(self):
         analysis_id = request.args.get("analysis_id", type=int)
 
-        if not analysis_id:
-            return "Missing analysis_id parameter.", 400
+        if analysis_id:
+            status_file = self._status_file_for_analysis(analysis_id)
+            try:
+                with open(status_file, "r", encoding="utf-8") as handle:
+                    status = json.load(handle)
+                if status.get("status") == "completed":
+                    return render_template("doc.html", data=status.get("result"), user=current_user)
+                return "Analysis not complete. Please wait.", 404
+            except (FileNotFoundError, json.JSONDecodeError):
+                return "Analysis data not found for this request.", 404
 
-        status_file = self._status_file_for_analysis(analysis_id)
         try:
-            with open(status_file, "r", encoding="utf-8") as handle:
+            with open(self.config.STATUS_FILE_PATH, "r", encoding="utf-8") as handle:
                 status = json.load(handle)
+
             if status.get("status") == "completed":
                 return render_template("doc.html", data=status.get("result"), user=current_user)
             return "Analysis not complete. Please wait.", 404
         except (FileNotFoundError, json.JSONDecodeError):
-            return "Analysis data not found for this request.", 404
+            return "Analysis has not been run yet.", 404
 
     def _api_analyze(self):
         payload = request.get_json(silent=True) or {}
@@ -291,37 +288,9 @@ class ArchiMindApplication:
                     }
                 ), 403
 
-        # Dedup: reuse a recent in-progress or completed analysis for the same URL
-        recent_query = AnalysisLog.query.filter_by(repo_url=repo_url).filter(
-            AnalysisLog.status.in_(["pending", "processing"])
-        )
-        if actor["authenticated"]:
-            recent_query = recent_query.filter_by(user_id=actor["user_id"])
-        else:
-            recent_query = recent_query.filter_by(session_id=actor["session_id"])
-        existing = recent_query.order_by(AnalysisLog.created_at.desc()).first()
-        if existing:
-            return jsonify(
-                {
-                    "status": "success",
-                    "message": "Analysis already in progress",
-                    "analysis_id": existing.id,
-                    "status_url": f"/api/status?analysis_id={existing.id}",
-                    "doc_url": f"/doc?analysis_id={existing.id}",
-                    "repo_name": self._extract_repo_name(repo_url),
-                    "reused": True,
-                }
-            ), 202
-
-        repo_name = self._extract_repo_name(repo_url)
-        parsed_repo = self.repo_service._parse_github_repo(repo_url)
-        repo_owner = parsed_repo[0] if parsed_repo else "unknown"
-        repository = Repository.get_or_create(url=repo_url, name=repo_name, owner=repo_owner)
-
         analysis_log = AnalysisLog()
         analysis_log.user_id = actor["user_id"]
         analysis_log.session_id = actor["session_id"]
-        analysis_log.repository_id = repository.id
         analysis_log.repo_url = repo_url
         analysis_log.status = "pending"
         db.session.add(analysis_log)
@@ -340,7 +309,7 @@ class ArchiMindApplication:
                 "analysis_id": analysis_log.id,
                 "status_url": f"/api/status?analysis_id={analysis_log.id}",
                 "doc_url": f"/doc?analysis_id={analysis_log.id}",
-                "repo_name": repo_name,
+                "repo_name": self._extract_repo_name(repo_url),
             }
         ), 202
 
@@ -375,7 +344,11 @@ class ArchiMindApplication:
                     }
                 )
 
-        return jsonify({"status": "idle", "result": None, "error": None, "analysis_id": None})
+        try:
+            with open(self.config.STATUS_FILE_PATH, "r", encoding="utf-8") as handle:
+                return jsonify(json.load(handle))
+        except (FileNotFoundError, json.JSONDecodeError):
+            return jsonify({"status": "idle", "result": None, "error": None})
 
     def _api_check_limit(self):
         if current_user.is_authenticated:
@@ -525,14 +498,4 @@ def create_app():
 
 if __name__ == "__main__":
     archimind = ArchiMindApplication()
-    raw_port = os.getenv("FLASK_PORT", "5000")
-    try:
-        flask_port = int(raw_port)
-    except ValueError:
-        flask_port = 5000
-
-    archimind.run(
-        debug=os.getenv("FLASK_DEBUG", "0").strip().lower() in {"1", "true", "yes", "on"},
-        host=os.getenv("FLASK_HOST", "127.0.0.1"),
-        port=flask_port,
-    )
+    archimind.run(debug=True)

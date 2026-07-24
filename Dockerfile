@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.11-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -16,9 +16,9 @@ WORKDIR /app
 RUN python -m venv /opt/venv
 
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 LABEL org.opencontainers.image.title="ArchiMind"
 
@@ -36,18 +36,13 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Remove pip and wheel from the runtime image to eliminate their CVEs.
-# All packages are already installed; pip is not needed at runtime.
 RUN groupadd -r archimind && useradd -r -g archimind -d /home/archimind archimind
 
 WORKDIR /app
 
 COPY --from=builder /opt/venv /opt/venv
 COPY . .
-RUN pip install --upgrade pip setuptools wheel \
-    && rm -rf /opt/venv/lib/python*/site-packages/pip /opt/venv/lib/python*/site-packages/setuptools \
-    && rm -f /opt/venv/bin/pip /opt/venv/bin/pip3 /opt/venv/bin/pip3.* \
-    && mkdir -p /app/data && chown -R archimind:archimind /app /opt/venv
+RUN mkdir -p /app/data && chown -R archimind:archimind /app /opt/venv
 
 USER archimind
 

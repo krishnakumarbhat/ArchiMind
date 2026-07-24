@@ -2,132 +2,175 @@
 OAuth2 and lightweight caching utilities for ArchiMind.
 Handles Google OAuth2 authentication and in-process cache for repository history.
 """
-import json
-import logging
 import os
-from flask import Blueprint, redirect, url_for, flash
-from flask_login import login_user
+import json
+from functools import wraps
+from flask import Blueprint, redirect, url_for, session, request, flash
+from flask_login import login_user, current_user
 from authlib.integrations.flask_client import OAuth
-from models import User, Repository, RepositoryHistory, AnalysisArtifact, db
+from models import User, db, RepositoryHistory
 
-logger = logging.getLogger(__name__)
-
+# Initialize OAuth
 oauth = OAuth()
 
+# Lightweight in-process cache (SQLite remains the only persistent store)
 history_cache = {}
-
 
 def init_redis():
     """Backward-compatible hook retained as a no-op for lightweight deployments."""
     return
 
-
 def init_oauth(app):
     """Initialize OAuth with Flask app."""
     oauth.init_app(app)
-
-    oauth.register(
+    
+    # Configure Google OAuth2
+    google = oauth.register(
         name='google',
         client_id=os.getenv('GOOGLE_CLIENT_ID'),
         client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
         server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-        client_kwargs={'scope': 'openid email profile'},
+        client_kwargs={
+            'scope': 'openid email profile',
+            # Google automatically handles 2FA if it's enabled on the account
+        }
     )
+    
+    return google
 
-
+# Create OAuth Blueprint
 oauth_bp = Blueprint('oauth', __name__)
-
 
 @oauth_bp.route('/login/google')
 def google_login():
+    """Initiate Google OAuth2 login flow."""
     redirect_uri = url_for('oauth.google_callback', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
-
 @oauth_bp.route('/login/google/callback')
 def google_callback():
+    """Handle Google OAuth2 callback."""
     try:
         token = oauth.google.authorize_access_token()
         user_info = token.get('userinfo')
-
+        
         if not user_info:
             flash('Failed to get user information from Google.', 'error')
             return redirect(url_for('_index'))
-
+        
+        # Check if user exists
         user = User.query.filter_by(oauth_id=user_info['sub']).first()
-
+        
         if not user:
+            # Check if email already exists (might be regular account)
             user = User.query.filter_by(email=user_info['email']).first()
             if user:
+                # Link OAuth to existing account
                 user.oauth_provider = 'google'
                 user.oauth_id = user_info['sub']
             else:
+                # Create new user with OAuth
                 user = User(
                     email=user_info['email'],
                     first_name=user_info.get('given_name', user_info['email'].split('@')[0]),
                     oauth_provider='google',
                     oauth_id=user_info['sub'],
-                    password=None,
+                    password=None  # No password for OAuth users
                 )
                 db.session.add(user)
-
+            
             db.session.commit()
-
+        
+        # Log in the user
         login_user(user, remember=True)
         flash('Logged in successfully with Google!', 'success')
         return redirect(url_for('_index'))
-
-    except Exception as exc:
-        logger.error("Google OAuth callback failed: %s", exc)
-        flash('Authentication failed. Please try again.', 'error')
+        
+    except Exception as e:
+        flash(f'Authentication failed: {str(e)}', 'error')
         return redirect(url_for('_index'))
 
 
-def invalidate_history_cache(user_id):
-    history_cache.pop(f'user:{user_id}:history', None)
+# ============ Local Caching Functions ============
 
+def get_cached_history(user_id):
+    """Retrieve cached repository history from in-process memory cache."""
+    return history_cache.get(f'user:{user_id}:history')
+
+def set_cached_history(user_id, history_data, expiry=3600):
+    """Cache repository history in process memory."""
+    del expiry
+    history_cache[f'user:{user_id}:history'] = history_data
+    return True
+
+def invalidate_history_cache(user_id):
+    """Invalidate cached history when new repository is added."""
+    history_cache.pop(f'user:{user_id}:history', None)
+    return True
 
 def get_user_repository_history(user_id, use_cache=True):
-    cache_key = f'user:{user_id}:history'
+    """
+    Get user's repository history with optional in-process caching.
+    
+    Args:
+        user_id: User's database ID
+        use_cache: Whether to use in-process cache (default True)
+    
+    Returns:
+        List of repository history dictionaries
+    """
+    # Try cache first
     if use_cache:
-        cached = history_cache.get(cache_key)
+        cached = get_cached_history(user_id)
         if cached:
             return cached
-
-    user = db.session.get(User, user_id)
+    
+    # Fetch from database
+    user = User.query.get(user_id)
     if not user:
         return []
-
-    entries = user.get_recent_repositories(limit=5)
-
-    history_data = []
-    for entry in entries:
-        repo = entry.repository
-        artifact_types = {a.artifact_type for a in entry.artifacts}
-        history_data.append({
-            'id': entry.id,
-            'repo_name': repo.name if repo else 'Unknown',
-            'repo_url': repo.url if repo else '',
-            'last_accessed': entry.last_accessed.isoformat(),
-            'has_documentation': 'documentation' in artifact_types,
-            'has_hld': 'hld_graph' in artifact_types,
-            'has_lld': 'lld_graph' in artifact_types,
-        })
-
+    
+    repositories = user.get_recent_repositories(limit=5)
+    
+    # Format data
+    history_data = [
+        {
+            'id': repo.id,
+            'repo_name': repo.repo_name,
+            'repo_url': repo.repo_url,
+            'last_accessed': repo.last_accessed.isoformat(),
+            'has_documentation': repo.documentation is not None,
+            'has_hld': repo.hld_graph is not None,
+            'has_lld': repo.lld_graph is not None
+        }
+        for repo in repositories
+    ]
+    
+    # Cache the result
     if use_cache:
-        history_cache[cache_key] = history_data
-
+        set_cached_history(user_id, history_data)
+    
     return history_data
 
-
-def save_repository_to_history(user_id, repo_url, repo_name,
-                               documentation=None, hld_graph=None,
-                               lld_graph=None, chat_summary=None):
+def save_repository_to_history(user_id, repo_url, repo_name, documentation=None, hld_graph=None, lld_graph=None, chat_summary=None):
+    """
+    Save or update repository in user's history and invalidate cache.
+    
+    Args:
+        user_id: User's database ID
+        repo_url: Repository URL
+        repo_name: Repository name
+        documentation: Gemini-generated documentation (optional)
+        hld_graph: HLD graph JSON (optional)
+        lld_graph: LLD graph JSON (optional)
+    """
+    # Convert JSON objects to strings if needed
     if isinstance(hld_graph, dict):
         hld_graph = json.dumps(hld_graph)
     if isinstance(lld_graph, dict):
         lld_graph = json.dumps(lld_graph)
-
+    
+    # Save to database
     RepositoryHistory.add_or_update(
         user_id=user_id,
         repo_url=repo_url,
@@ -135,28 +178,27 @@ def save_repository_to_history(user_id, repo_url, repo_name,
         documentation=documentation,
         hld_graph=hld_graph,
         lld_graph=lld_graph,
-        chat_summary=chat_summary,
+        chat_summary=chat_summary
     )
-
+    
+    # Invalidate cache
     invalidate_history_cache(user_id)
 
-
 def get_repository_details(user_id, repo_id):
-    history = RepositoryHistory.query.filter_by(user_id=user_id, id=repo_id).first()
+    """Get full repository details including Gemini outputs."""
+    history = RepositoryHistory.query.filter_by(
+        user_id=user_id, 
+        id=repo_id
+    ).first()
+    
     if not history:
         return None
-
-    repo = history.repository
-    artifacts = {a.artifact_type: a.content for a in history.artifacts}
-
-    hld_raw = artifacts.get('hld_graph')
-    lld_raw = artifacts.get('lld_graph')
-
+    
     return {
-        'repo_name': repo.name if repo else 'Unknown',
-        'repo_url': repo.url if repo else '',
-        'documentation': artifacts.get('documentation'),
-        'hld_graph': json.loads(hld_raw) if hld_raw else None,
-        'lld_graph': json.loads(lld_raw) if lld_raw else None,
-        'last_accessed': history.last_accessed.isoformat(),
+        'repo_name': history.repo_name,
+        'repo_url': history.repo_url,
+        'documentation': history.documentation,
+        'hld_graph': json.loads(history.hld_graph) if history.hld_graph else None,
+        'lld_graph': json.loads(history.lld_graph) if history.lld_graph else None,
+        'last_accessed': history.last_accessed.isoformat()
     }

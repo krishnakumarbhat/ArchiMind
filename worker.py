@@ -39,24 +39,21 @@ class AnalysisWorker:
     # ------------------------------------------------------------------
 
     def _status_file_for_analysis(self, analysis_log_id: Optional[int]) -> str:
-        if not analysis_log_id:
-            return self.status_file
-
-        directory = os.path.dirname(self.status_file) or config.DATA_PATH
-        file_name = os.path.basename(self.status_file)
-        stem, extension = os.path.splitext(file_name)
-        if not stem:
-            stem = "status"
-        if stem.startswith("status_"):
-            stem = "status"
-        return os.path.join(directory, f"{stem}_{analysis_log_id}{extension or '.json'}")
+        if analysis_log_id:
+            return os.path.join(config.DATA_PATH, f"status_{analysis_log_id}.json")
+        return self.status_file
 
     def _update_status(self, status: Dict[str, Optional[dict]], status_file_path: Optional[str] = None) -> None:
-        """Persist the current analysis status to disk (per-analysis file only)."""
+        """Persist the current analysis status to disk."""
         target_path = status_file_path or self.status_file
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         with open(target_path, "w", encoding="utf-8") as handle:
             json.dump(status, handle, indent=2)
+
+        if target_path != self.status_file:
+            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+            with open(self.status_file, "w", encoding="utf-8") as handle:
+                json.dump(status, handle, indent=2)
 
     def _set_stage(
         self,

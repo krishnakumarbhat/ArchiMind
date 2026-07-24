@@ -55,27 +55,6 @@ except Exception:
     StateGraph = None
 
 
-def _is_pinecone_namespace_missing_error(exc: Exception) -> bool:
-    return "namespace not found" in str(exc).lower()
-
-
-def _format_vector_backend_error(exc: Exception) -> str:
-    message = str(exc)
-    lowered = message.lower()
-    if "invalid api key" in lowered or "unauthorized" in lowered:
-        return (
-            "Pinecone authentication failed. Verify PINECONE_API_KEY, "
-            "PINECONE_INDEX_NAME, and PINECONE_HOST."
-        )
-    return message
-
-
-def _extract_index_attribute(index_info, name: str):
-    if isinstance(index_info, dict):
-        return index_info.get(name)
-    return getattr(index_info, name, None)
-
-
 class ConfigurationError(Exception):
     """Raised when configuration is invalid or missing."""
 
@@ -544,7 +523,6 @@ class _PineconeCollection:
         dimension: int,
         cloud: str,
         region: str,
-        host: Optional[str] = None,
     ):
         if Pinecone is None:
             raise ConfigurationError("Pinecone backend requested but pinecone package is unavailable")
@@ -553,16 +531,8 @@ class _PineconeCollection:
         self._dimension = dimension
         self._client = Pinecone(api_key=api_key)
         self._index_name = index_name
-        self._host = host
         self._ensure_index(cloud, region)
-        if self._host:
-            self._index = self._client.Index(host=self._host)
-        else:
-            self._index = self._client.Index(index_name)
-
-    @property
-    def dimension(self) -> int:
-        return self._dimension
+        self._index = self._client.Index(index_name)
 
     def _list_index_names(self) -> Set[str]:
         raw_indexes = self._client.list_indexes()
@@ -584,9 +554,6 @@ class _PineconeCollection:
 
     def _ensure_index(self, cloud: str, region: str) -> None:
         if self._index_name in self._list_index_names():
-            index_info = self._client.describe_index(self._index_name)
-            self._dimension = int(_extract_index_attribute(index_info, "dimension") or self._dimension)
-            self._host = self._host or _extract_index_attribute(index_info, "host")
             return
 
         if ServerlessSpec is None:
@@ -599,9 +566,6 @@ class _PineconeCollection:
             spec=ServerlessSpec(cloud=cloud, region=region),
         )
         time.sleep(2)
-        index_info = self._client.describe_index(self._index_name)
-        self._dimension = int(_extract_index_attribute(index_info, "dimension") or self._dimension)
-        self._host = self._host or _extract_index_attribute(index_info, "host")
 
     def count(self) -> int:
         stats = self._index.describe_index_stats()
@@ -623,16 +587,7 @@ class _PineconeCollection:
         try:
             delete_method(delete_all=True, namespace=self._namespace)
         except TypeError:
-            try:
-                delete_method(namespace=self._namespace, delete_all=True)
-            except Exception as exc:
-                if _is_pinecone_namespace_missing_error(exc):
-                    return
-                raise
-        except Exception as exc:
-            if _is_pinecone_namespace_missing_error(exc):
-                return
-            raise
+            delete_method(namespace=self._namespace, delete_all=True)
 
     def add(
         self,
@@ -663,18 +618,13 @@ class _PineconeCollection:
         del query_texts
 
         vector = (query_embeddings or [[0.0] * self._dimension])[0]
-        try:
-            result = self._index.query(
-                namespace=self._namespace,
-                vector=vector,
-                top_k=n_results,
-                include_metadata=True,
-                filter=where or None,
-            )
-        except Exception as exc:
-            if _is_pinecone_namespace_missing_error(exc):
-                return {"ids": [[]], "documents": [[]], "metadatas": [[]]}
-            raise
+        result = self._index.query(
+            namespace=self._namespace,
+            vector=vector,
+            top_k=n_results,
+            include_metadata=True,
+            filter=where or None,
+        )
 
         raw_matches = getattr(result, "matches", None)
         if raw_matches is None and isinstance(result, dict):
@@ -723,7 +673,6 @@ class VectorStoreService:
                     dimension=self.embedding_dimension,
                     cloud=config.PINECONE_CLOUD,
                     region=config.PINECONE_REGION,
-                    host=config.PINECONE_HOST,
                 )
                 self.chunk_collection = _PineconeCollection(
                     api_key=config.PINECONE_API_KEY,
@@ -732,7 +681,6 @@ class VectorStoreService:
                     dimension=self.embedding_dimension,
                     cloud=config.PINECONE_CLOUD,
                     region=config.PINECONE_REGION,
-                    host=config.PINECONE_HOST,
                 )
                 backend = "Pinecone"
             elif chromadb is not None and self.vector_backend == "chroma":
@@ -755,12 +703,9 @@ class VectorStoreService:
                 self.collection_name,
                 backend,
             )
-            if self.vector_backend == "pinecone":
-                self.embedding_dimension = getattr(self.chunk_collection, "dimension", self.embedding_dimension)
         except Exception as exc:
-            formatted_error = _format_vector_backend_error(exc)
-            self.logger.error("Failed to initialize vector store: %s", formatted_error)
-            raise ConfigurationError(f"Vector store initialization failed: {formatted_error}")
+            self.logger.error("Failed to initialize vector store: %s", exc)
+            raise ConfigurationError(f"Vector store initialization failed: {exc}")
 
     @staticmethod
     def _sanitize_collection_name(name: str) -> str:
@@ -803,22 +748,8 @@ class VectorStoreService:
         if config.GEMINI_API_VERSION and getattr(genai_types, "HttpOptions", None) is not None:
             client_kwargs["http_options"] = genai_types.HttpOptions(api_version=config.GEMINI_API_VERSION)
 
-        model_names = [self.embedding_model]
-        if self.embedding_model != "gemini-embedding-001":
-            model_names.append("gemini-embedding-001")
-
-        last_error = None
-        response = None
         with genai.Client(**client_kwargs) as client:
-            for model_name in model_names:
-                try:
-                    response = client.models.embed_content(model=model_name, contents=texts)
-                    break
-                except Exception as exc:
-                    last_error = exc
-
-        if response is None:
-            raise last_error or ConfigurationError("Gemini embeddings failed")
+            response = client.models.embed_content(model=self.embedding_model, contents=texts)
 
         response_embeddings = getattr(response, "embeddings", None)
         if response_embeddings is None and isinstance(response, dict):
@@ -837,7 +768,7 @@ class VectorStoreService:
         if not texts:
             return []
 
-        if config.GEMINI_API_KEY:
+        if self.embedding_model.startswith("models/") and config.GEMINI_API_KEY:
             try:
                 embeddings = self._embed_with_gemini(texts)
                 if len(embeddings) == len(texts):

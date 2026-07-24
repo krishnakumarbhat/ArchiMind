@@ -25,7 +25,7 @@ If `GEMINI_API_KEY` is missing or Gemini generation fails at runtime, the servic
 3. `worker.py` uses `RepositoryService` in `services.py` to fetch repository files by selective GitHub API ingestion first, then local clone fallback.
 4. `VectorStoreService` indexes file summaries and code chunks, then retrieves the context most relevant to documentation generation.
 5. `DocumentationService` generates the handbook, HLD, LLD, and chat summary. When Gemini is configured, this path uses the Google Gen AI SDK with the high-thinking config requested above.
-6. `worker.py` writes the result into `data/status_<analysis_id>.json`, updates `AnalysisLog`, and persists history for authenticated users.
+6. `worker.py` writes the result into `data/status_<analysis_id>.json`, mirrors the latest result to `data/status.json`, updates `AnalysisLog`, and persists history for authenticated users.
 
 ## Environment Variables
 
@@ -58,7 +58,7 @@ Deployment defaults:
 4. Start the app with `bash scripts/run_local.sh`.
 5. Run the test suite with `bash scripts/test_local.sh`.
 
-The status API is analysis-scoped. Poll `GET /api/status?analysis_id=<id>` for an active request. A no-argument call returns a neutral idle payload for liveness checks. After a completed analysis, the result includes `generation_backend`, which makes it obvious whether the run used Gemini or the local fallback.
+The status API returns the latest worker payload at `GET /api/status`. After a completed analysis, the result now includes `generation_backend`, which makes it obvious whether the run used Gemini or the local fallback.
 
 ## Docker Workflow
 
@@ -93,7 +93,7 @@ Important: pushing still requires that your local Docker daemon is running and y
 bash scripts/01_smoke_test_container.sh
 ```
 
-This builds the local image, starts it on port `5050`, and curls `/api/status` until the container becomes healthy. By default the smoke run overrides `DATABASE_URL` to an in-container SQLite file and `VECTOR_BACKEND` to `local`, so the health check does not depend on Supabase or Pinecone availability. If the Docker daemon is down, the script exits immediately with a targeted fix instead of failing later during the build.
+This builds the local image, starts it on port `5050`, and curls `/api/status` until the container becomes healthy. If the Docker daemon is down, the script now exits immediately with a targeted fix instead of failing later during the build.
 
 ## Raspberry Pi Deployment
 
@@ -110,15 +110,19 @@ The full Pi runbook is in `docs/RASPBERRY_PI_DEPLOYMENT.md`.
 
 ## Diagram Inventory
 
-Diagrams are maintained directly as draw.io sources:
+Source diagrams remain in Graphviz DOT so they are diffable in Git. Matching draw.io files are generated for editing in diagrams.net.
 
-- `docs/diagrams/flow.drawio`
-- `docs/diagrams/hld.drawio`
-- `docs/diagrams/lld.drawio`
-- `docs/diagrams/use_cases.drawio`
-- `docs/diagrams/uml.drawio`
+- `docs/diagrams/flow.dot` and `docs/diagrams/flow.drawio`
+- `docs/diagrams/hld.dot` and `docs/diagrams/hld.drawio`
+- `docs/diagrams/lld.dot` and `docs/diagrams/lld.drawio`
+- `docs/diagrams/use_cases.dot` and `docs/diagrams/use_cases.drawio`
+- `docs/diagrams/uml.dot` and `docs/diagrams/uml.drawio`
 
-Open them with diagrams.net or the draw.io desktop app. There is no generated DOT layer anymore.
+To regenerate the draw.io XML files after editing any DOT source:
+
+```bash
+/usr/bin/python3 scripts/02_convert_dot_to_drawio.py
+```
 
 ## Validation Checklist
 

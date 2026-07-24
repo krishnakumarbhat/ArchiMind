@@ -1,41 +1,72 @@
-<mxfile host="app.diagrams.net" modified="2026-04-05" agent="ArchiMind" version="24.7">
-    <diagram name="Execution Flow" id="flow">
-        <mxGraphModel dx="1800" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="1">
+<mxfile host="65bd71144e">
+    <diagram name="ArchiMind Code-Level Module Flow" id="0">
+        <mxGraphModel dx="1396" dy="744" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="title" value="&lt;b&gt;ArchiMind — Execution Flow&lt;/b&gt;&lt;br&gt;Module Interaction Chain (00 → app.py → worker.py → services.py)" style="text;html=1;align=center;fontSize=14;" vertex="1" parent="1"><mxGeometry x="500" y="10" width="600" height="40" as="geometry"/></mxCell>
-                <!-- Left column: Entry -->
-                <mxCell id="start" value="&lt;b&gt;User opens browser&lt;/b&gt;&lt;br&gt;http://localhost:5000" style="ellipse;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="80" width="180" height="60" as="geometry"/></mxCell>
-                <mxCell id="flask_init" value="&lt;b&gt;app.py&lt;/b&gt;&lt;br&gt;ArchiMindApplication.__init__()&lt;br&gt;• Load .env via dotenv&lt;br&gt;• Configure Flask (SQLAlchemy, CSP)&lt;br&gt;• db.create_all() → Supabase schema&lt;br&gt;• Register routes + OAuth blueprint" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="180" width="240" height="100" as="geometry"/></mxCell>
-                <mxCell id="index_route" value="&lt;b&gt;GET /&lt;/b&gt;&lt;br&gt;render index.html + current_user" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="320" width="200" height="50" as="geometry"/></mxCell>
-                <mxCell id="js_submit" value="&lt;b&gt;script.js&lt;/b&gt;&lt;br&gt;User pastes repo URL → click Generate&lt;br&gt;POST /api/analyze {repo_url}" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="40" y="410" width="240" height="60" as="geometry"/></mxCell>
-                <!-- Middle column: API + Worker -->
-                <mxCell id="api_analyze" value="&lt;b&gt;_api_analyze()&lt;/b&gt;&lt;br&gt;1. Validate URL regex&lt;br&gt;2. Dedup check (in-progress for same URL?)&lt;br&gt;3. Rate limit (anonymous cap)&lt;br&gt;4. INSERT AnalysisLog(pending)&lt;br&gt;5. subprocess.Popen(worker.py)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="180" width="260" height="110" as="geometry"/></mxCell>
-                <mxCell id="worker_run" value="&lt;b&gt;worker.py — run_analysis()&lt;/b&gt;&lt;br&gt;Separate process with own DB connection" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="330" width="260" height="50" as="geometry"/></mxCell>
-                <mxCell id="stage1" value="&lt;b&gt;Stage 1: Ingestion (22%)&lt;/b&gt;&lt;br&gt;RepositoryService.collect_repository_files()&lt;br&gt;→ GitHub API tree fetch (ThreadPoolExecutor)&lt;br&gt;→ Fallback: git clone --depth 1" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="420" width="300" height="80" as="geometry"/></mxCell>
-                <mxCell id="stage2" value="&lt;b&gt;Stage 2: Indexing (46%)&lt;/b&gt;&lt;br&gt;VectorStoreService.generate_embeddings()&lt;br&gt;→ Python AST extraction / LlamaIndex CodeSplitter&lt;br&gt;→ Gemini text-embedding-004 (or hash fallback)&lt;br&gt;→ Upsert to Pinecone/ChromaDB" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="540" width="320" height="90" as="geometry"/></mxCell>
-                <mxCell id="stage3" value="&lt;b&gt;Stage 3: Retrieval (64%)&lt;/b&gt;&lt;br&gt;VectorStoreService.query_similar_documents()&lt;br&gt;→ LangGraph: select_files → collect_chunks → render_context&lt;br&gt;→ Two-tier: file summaries + code chunks" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1"><mxGeometry x="380" y="670" width="320" height="80" as="geometry"/></mxCell>
-                <!-- Right column: Generation + Output -->
-                <mxCell id="stage4" value="&lt;b&gt;Stage 4: Generation (82%)&lt;/b&gt;&lt;br&gt;DocumentationService.generate_all_documentation()&lt;br&gt;→ Gemini: handbook MD + HLD/LLD/Flow Mermaid JSON&lt;br&gt;→ Chat summary for onboarding&lt;br&gt;→ Local heuristic fallback if no API key" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1"><mxGeometry x="800" y="420" width="340" height="90" as="geometry"/></mxCell>
-                <mxCell id="complete" value="&lt;b&gt;Stage 5: Complete (100%)&lt;/b&gt;&lt;br&gt;Write data/status_{id}.json&lt;br&gt;UPDATE AnalysisLog → completed&lt;br&gt;save_repository_to_history() → artifacts" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="800" y="550" width="280" height="80" as="geometry"/></mxCell>
-                <mxCell id="polling" value="&lt;b&gt;script.js: pollStatus()&lt;/b&gt;&lt;br&gt;GET /api/status?analysis_id every 3s&lt;br&gt;sessionStorage persists across back-nav" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="800" y="180" width="260" height="60" as="geometry"/></mxCell>
-                <mxCell id="doc_page" value="&lt;b&gt;GET /doc?analysis_id&lt;/b&gt;&lt;br&gt;render doc.html with result data" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1"><mxGeometry x="800" y="280" width="220" height="50" as="geometry"/></mxCell>
-                <mxCell id="docjs" value="&lt;b&gt;doc.js&lt;/b&gt;&lt;br&gt;• marked.js renders MD → HTML&lt;br&gt;• DOMPurify sanitizes&lt;br&gt;• Mermaid renders HLD/LLD/Flow&lt;br&gt;• Chat Q&amp;A via /api/chat" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1"><mxGeometry x="800" y="670" width="240" height="90" as="geometry"/></mxCell>
-                <!-- Edges -->
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" edge="1" source="start" target="flask_init" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;" edge="1" source="flask_init" target="index_route" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" edge="1" source="index_route" target="js_submit" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;" edge="1" source="js_submit" target="api_analyze" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;dashed=1;" edge="1" source="api_analyze" target="worker_run" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;" edge="1" source="api_analyze" target="polling" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;" edge="1" source="worker_run" target="stage1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="stage1" target="stage2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="stage2" target="stage3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;" edge="1" source="stage3" target="stage4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" edge="1" source="stage4" target="complete" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;" edge="1" source="polling" target="doc_page" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" edge="1" source="doc_page" target="docjs" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="2" value="app.py&lt;br&gt;Flask routes + auth + DB init" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="10" y="566" width="268" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="oauth_utils.py&lt;br&gt;OAuth + Redis cache utilities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="832" y="680" width="268" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="worker.py&lt;br&gt;AnalysisWorker pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="510" y="400" width="220" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="services.py&lt;br&gt;RepositoryService&lt;br&gt;VectorStoreService&lt;br&gt;DocumentationService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="644" y="190" width="196" height="108" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="config.py&lt;br&gt;models, paths, settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="60" width="220" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="models.py&lt;br&gt;shared SQLAlchemy models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="686" y="510" width="228" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="templates/*.html&lt;br&gt;UI + doc viewer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="416" y="260" width="164" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="static/script.js&lt;br&gt;frontend API polling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="284" y="380" width="196" height="68" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="tests/*.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5faff;strokeColor=#607d9b;fontColor=#1f2933;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="80" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="init_oauth/init_redis/history APIs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="2" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="launch worker subprocess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="2" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="render index/doc/login/sign-up" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="2" target="8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="UI calls /api/analyze,/api/status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="2" target="9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="load env/config" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="4" target="6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="run analysis services" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="4" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="save_repository_to_history" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="4" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="DB write path via models.db" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="4" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="GEMINI_API_KEY / model names" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="5" target="6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="route/model tests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="10" target="2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="pipeline/unit tests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="10" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="service behavior tests" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4a6484;" parent="1" source="10" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>

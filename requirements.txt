@@ -12,11 +12,11 @@ SQLAlchemy==2.0.48
 psycopg[binary]>=3.2,<4
 
 # Retrieval & orchestration
-google-genai>=1.69,<2
-llama-index-core>=0.14.20,<1
-langgraph>=1.1.6,<2
+google-genai==1.69.0
+llama-index-core==0.12.52.post1
+langgraph==0.2.70
 pinecone>=5,<8
-tree-sitter>=0.21.3,<1
+tree-sitter==0.21.3
 
 # Version Control
 GitPython==3.1.46
