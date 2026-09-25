@@ -1,0 +1,7 @@
+{"type": "node", "id": "N0", "strategy": "setup: field-map baseline", "parent": null, "status": "kept", "metric": 0.0, "timestamp": 1758840600}
+{"type": "node", "id": "N1", "strategy": "frontier: v0 baseline benchmark", "parent": "N0", "status": "frontier", "metric": 0.0, "timestamp": 1758840600}
+{"type": "edge", "from": "N0", "to": "N1", "kind": "derived"}
+{"type": "node", "id": "N2", "strategy": "frontier: v1 evaluator-optimizer reflection", "parent": "N0", "status": "frontier", "metric": 0.0, "timestamp": 1758840600}
+{"type": "edge", "from": "N0", "to": "N2", "kind": "branch"}
+{"type": "node", "id": "N3", "strategy": "frontier: v2 deterministic treesitter CPG", "parent": "N0", "status": "frontier", "metric": 0.0, "timestamp": 1758840600}
+{"type": "edge", "from": "N0", "to": "N3", "kind": "branch"}
