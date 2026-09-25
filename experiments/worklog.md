@@ -6,6 +6,7 @@
 ## Key Insights
 - (setup) Baseline is linear RAG, not agentic: 3-node straight-edge graph, single-shot generation, no tools/validator/sandbox.
 - (run 1) v0 on synthetic_bad_repo: harness_score=80.09 (validity 1.0, F1 0.68, dead 0.5, RAM 19.7MB). Regex edges already lose ~0.32 F1 vs AST truth — quantifies the CPG opportunity. Tiny-repo score is inflated; real repos (flask/requests) expected to drop F1 further and stress RAM.
+- (model probe) Key valid (50 models listed). gemini-3.8-flash + 3.7-flash = persistent 503 (not provisioned for this key); gemini-2.5-flash = 404 (retired); text-embedding-004 = 404. Adopted: gen `gemini-3.1-flash-lite-preview` (repo default, generate OK), emb `gemini-embedding-001` (3072-dim, OK). Wired via gitignored `.env` only — never committed. Driver iterations should opportunistically re-probe `gemini-flash-latest`/3.8 and adopt if 200.
 
 ## Runs
 ### Run 1: v0_baseline_linear on synthetic_bad_repo — harness_score=80.09 (keep, BASELINE)
