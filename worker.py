@@ -10,15 +10,15 @@ import sys
 import time
 from datetime import datetime
 from typing import Dict, Optional
+
 # Ensure project root is on PYTHONPATH
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
 import config
-from services import DocumentationService, RepositoryService, VectorStoreService
 from oauth_utils import save_repository_to_history
-
+from services import DocumentationService, RepositoryService, VectorStoreService
 
 logging.basicConfig(
     level=logging.INFO,
@@ -77,6 +77,61 @@ class AnalysisWorker:
 
     def _derive_repo_collection(self, repo_url: str) -> str:
         return self.repo_service.build_collection_name(repo_url)
+
+    def _collect_with_tarball_first(self, repo_url: str, repo_local_path: str) -> Dict[str, str]:
+        """Zero-clone tarball ingestion with legacy remote/clone fallback."""
+        try:
+            from src.ingestion._00_tarball_client import stream_files
+            from src.ingestion._01_file_filter import decode_sources
+
+            raw, meta = stream_files(repo_url)
+            rel = {name.split("/", 1)[1] if "/" in name else name: blob for name, blob in raw.items()}
+            decoded = decode_sources(rel)
+            if decoded:
+                self.logger.info("Tarball ingestion: %d files (%s)", len(decoded), meta)
+                return decoded
+        except Exception as exc:
+            self.logger.warning("Tarball ingestion failed, falling back: %s", exc)
+        return self.repo_service.collect_repository_files(
+            repo_url,
+            repo_local_path,
+            config.ALLOWED_EXTENSIONS,
+            config.IGNORED_DIRECTORIES,
+        )
+
+    def _regen_diagram(self, doc_service: DocumentationService, context: str, repo_name: str, kind: str, err: str) -> str:
+        """Regenerate one diagram's mermaid_code with the validator error attached."""
+        note = f"\nPREVIOUS {kind.upper()} ERROR — return valid JSON with fixed mermaid_code: {err}" if err else ""
+        try:
+            raw = doc_service._generate_graph_with_gemini(context + note, repo_name, kind)
+        except Exception as exc:
+            self.logger.warning("Diagram regeneration failed for %s: %s", kind, exc)
+            return ""
+        try:
+            obj = json.loads(self._clean_json_response(raw or ""))
+            code = obj.get("mermaid_code", "") if isinstance(obj, dict) else ""
+            return code if isinstance(code, str) else ""
+        except (json.JSONDecodeError, AttributeError):
+            return ""
+
+    def _generate_with_repair(self, doc_service: DocumentationService, context: str, repo_name: str) -> Dict[str, str]:
+        """Evaluator-optimizer: validate each diagram, reflect with error feedback."""
+        from src.orchestration._01_eval_optimizer import run_eval_optimizer
+
+        docs = doc_service.generate_all_documentation(context, repo_name)
+        if not doc_service._can_use_gemini():
+            return docs  # local backend is deterministic; nothing to reflect on
+        for kind, label in (("hld", "HLD"), ("lld", "LLD"), ("flow", "Flow")):
+            if self._parse_graph_data(docs.get(kind), label).get("status") == "ok":
+                continue
+            self.logger.info("Repairing %s diagram via reflection loop", label)
+            state = run_eval_optimizer(
+                kind, repo_name, context,
+                lambda k, r, c, e: self._regen_diagram(doc_service, c, r, k, e or ""),
+                first_draft=docs.get(kind),
+            )
+            docs[kind] = json.dumps({"mermaid_code": state.get("mermaid", "")})
+        return docs
 
     def _update_database_log(self, analysis_log_id: Optional[int], status: str) -> None:
         """Record status transitions in the `AnalysisLog` table."""
@@ -299,14 +354,9 @@ class AnalysisWorker:
                 progress=22,
                 status_file_path=status_file_path,
             )
-            file_contents = self.repo_service.collect_repository_files(
-                repo_url,
-                repo_local_path,
-                config.ALLOWED_EXTENSIONS,
-                config.IGNORED_DIRECTORIES,
-            )
+            file_contents = self._collect_with_tarball_first(repo_url, repo_local_path)
             if not file_contents:
-                raise RuntimeError("No processable files found from remote ingestion or local clone")
+                raise RuntimeError("No processable files found from tarball, remote ingestion, or local clone")
 
             self._set_stage(
                 status,
@@ -330,6 +380,33 @@ class AnalysisWorker:
             if not context:
                 raise RuntimeError("Failed to retrieve context from vector store")
 
+            self._set_stage(
+                status,
+                stage="graph",
+                message="Building deterministic architecture graph.",
+                progress=72,
+                status_file_path=status_file_path,
+            )
+            cpg_artifact: dict = {}
+            invariant_results: list = []
+            try:
+                from src.cpg._01_cpg_builder import build_graph, to_compact
+                from src.governance._01_invariants import check_invariants
+                from src.orchestration._02_doc_synthesizer import cpg_context_block
+
+                py_files = {k: v for k, v in file_contents.items() if k.endswith(".py")}
+                cpg = build_graph(dict(list(py_files.items())[:300]))
+                context = cpg_context_block(cpg) + "\n\nRETRIEVED CONTEXT:\n" + context
+                nodes = cpg.number_of_nodes()
+                if nodes > 5000:  # ponytail: cap status payload; analysis itself used the full graph
+                    keep = set(list(cpg.nodes)[:5000])
+                    cpg = cpg.subgraph(keep).copy()
+                cpg_artifact = to_compact(cpg)
+                invariant_results = check_invariants(cpg)
+                self.logger.info("CPG grounded context: %d nodes", nodes)
+            except Exception as exc:
+                self.logger.warning("CPG grounding skipped: %s", exc)
+
             doc_service = DocumentationService(
                 api_key=config.GEMINI_API_KEY,
                 model_name=config.DOCUMENTATION_MODEL,
@@ -347,7 +424,7 @@ class AnalysisWorker:
                 progress=82,
                 status_file_path=status_file_path,
             )
-            docs = doc_service.generate_all_documentation(context, repo_name)
+            docs = self._generate_with_repair(doc_service, context, repo_name)
 
             hld_result = self._parse_graph_data(docs.get("hld"), "HLD")
             lld_result = self._parse_graph_data(docs.get("lld"), "LLD")
@@ -367,6 +444,9 @@ class AnalysisWorker:
                 "repo_url": repo_url,
                 "repo_collection": repo_collection,
                 "generation_backend": doc_service.describe_backend(),
+                "engine": "cpg-grounded+eval-optimizer",
+                "cpg_artifact": cpg_artifact,
+                "invariants": invariant_results,
             }
 
             self._update_database_log(analysis_log_id, "completed")

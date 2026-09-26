@@ -27,7 +27,6 @@ from oauth_utils import (
 )
 from services import DocumentationService, RepositoryService, VectorStoreService
 
-
 load_dotenv()
 
 logging.basicConfig(
@@ -230,6 +229,8 @@ class ArchiMindApplication:
         self.app.route("/api/check-limit")(self._api_check_limit)
         self.app.route("/api/preview")(self._api_preview)
         self.app.route("/api/chat", methods=["POST"])(self._api_chat)
+        self.app.route("/api/golden")(self._api_golden)
+        self.app.route("/api/blast-radius")(self._api_blast_radius)
         self.app.route("/api/history")(self._logout_required(self._api_get_history))
         self.app.route("/api/history/<int:repo_id>")(self._logout_required(self._api_get_repository_details))
 
@@ -287,6 +288,18 @@ class ArchiMindApplication:
                         "limit_reached": True,
                     }
                 ), 403
+
+        from src.config._00_settings import SETTINGS
+
+        running = AnalysisLog.query.filter(AnalysisLog.status.in_(["pending", "processing"])).count()
+        if running >= max(1, SETTINGS.max_concurrent_jobs):
+            return jsonify(
+                {
+                    "error": "Server busy",
+                    "message": "One analysis is already running. Please wait and retry.",
+                    "retry": True,
+                }
+            ), 429
 
         analysis_log = AnalysisLog()
         analysis_log.user_id = actor["user_id"]
@@ -416,6 +429,44 @@ class ArchiMindApplication:
         documentation_service = self._build_documentation_service()
         answer = documentation_service.generate_chat_answer(context, repo_name, question)
         return jsonify({"answer": answer, "backend": documentation_service.describe_backend()})
+
+    def _api_golden(self):
+        """Serve instant pre-computed golden demos (no analysis run needed)."""
+        from src.config._00_settings import SETTINGS
+        from src.storage._00_sqlite_cache import CacheStore
+        from src.storage._01_golden_repos import list_golden
+
+        store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
+        return jsonify({"golden": list_golden(store)})
+
+    def _api_blast_radius(self):
+        """Downstream impact of a symbol from a golden or completed analysis CPG."""
+        from src.config._00_settings import SETTINGS
+        from src.governance._00_blast_radius import impact
+        from src.storage._00_sqlite_cache import CacheStore
+
+        symbol = (request.args.get("symbol") or "").strip()
+        if not symbol:
+            return jsonify({"error": "Query parameter 'symbol' is required."}), 400
+
+        artifact = None
+        golden_id = (request.args.get("golden") or "").strip()
+        analysis_id = request.args.get("analysis_id", type=int)
+        if golden_id:
+            store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
+            doc = store.get(f"golden:{golden_id}")
+            if doc:
+                artifact = doc.get("cpg_artifact")
+        elif analysis_id:
+            try:
+                with open(self._status_file_for_analysis(analysis_id), "r", encoding="utf-8") as handle:
+                    status = json.load(handle)
+                artifact = (status.get("result") or {}).get("cpg_artifact")
+            except (FileNotFoundError, json.JSONDecodeError):
+                artifact = None
+        if not artifact:
+            return jsonify({"error": "No architecture graph available. Analyze the repo first or use a golden demo."}), 404
+        return jsonify(impact(symbol, artifact))
 
     def _api_get_history(self):
         if not current_user.is_authenticated:

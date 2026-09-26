@@ -1,0 +1,103 @@
+"""Cyclic LangGraph evaluator-optimizer for Mermaid synthesis.
+
+Purpose: turn single-shot diagram generation into a self-healing loop:
+generator drafts -> deterministic validator checks -> reflection repairs
+(capped at MERMAID_MAX_RETRIES). Guarantees renderable output or an explicit
+failure instead of silently broken markup.
+"""
+import logging
+import re
+from typing import Callable, Optional
+
+from src.config._00_settings import SETTINGS
+from src.orchestration._00_agent_state import DiagramState
+
+logger = logging.getLogger(__name__)
+
+GenerateFn = Callable[[str, str, str, Optional[str]], str]  # (kind, repo, ctx, err) -> mermaid
+
+_MERMAID_BAD = re.compile(r"```|<script|-->.*-->|\{\{|\}\}|\[\[|\]\]|#\w")
+
+
+def validate_mermaid(code: str) -> str:
+    """Return '' when valid, else a short machine-readable error string."""
+    text = (code or "").strip()
+    if not text:
+        return "empty diagram"
+    first = text.splitlines()[0].strip()
+    if not first.startswith(("graph ", "flowchart ", "sequenceDiagram", "classDiagram", "stateDiagram")):
+        return f"bad header: {first[:60]!r}"
+    bad = _MERMAID_BAD.search(text)
+    if bad:
+        return f"illegal token near: {text[max(0, bad.start()-20):bad.end()+20]!r}"
+    return ""
+
+
+def _generate_node(generate: GenerateFn):
+    def run(state: DiagramState) -> DiagramState:
+        err = state.get("validation_error") or None
+        code = generate(state["kind"], state["repo_name"], state["context"], err)
+        history = list(state.get("history", [])) + [code]
+        return {"mermaid": code, "attempts": state.get("attempts", 0) + 1, "history": history}
+
+    return run
+
+
+def _validate_node(state: DiagramState) -> DiagramState:
+    return {"validation_error": validate_mermaid(state.get("mermaid", ""))}
+
+
+def _route(state: DiagramState) -> str:
+    if not state.get("validation_error") or state.get("attempts", 0) >= SETTINGS.mermaid_max_retries:
+        return "done"
+    return "reflect"
+
+
+def _reflect_node(generate: GenerateFn):
+    def run(state: DiagramState) -> DiagramState:
+        return _generate_node(generate)(state)  # regenerate with validation_error in state
+
+    return run
+
+
+def run_eval_optimizer(
+    kind: str, repo_name: str, context: str, generate: GenerateFn, first_draft: Optional[str] = None
+) -> DiagramState:
+    """Execute generate -> validate -> (reflect)? cycle; return terminal state."""
+    try:
+        from langgraph.graph import END, StateGraph
+    except Exception:  # ponytail: LangGraph optional at runtime; linear fallback
+        logger.warning("LangGraph unavailable; single-shot fallback")
+        draft = first_draft if first_draft is not None else generate(kind, repo_name, context, None)
+        return DiagramState(
+            kind=kind,
+            repo_name=repo_name,
+            context=context,
+            mermaid=draft,
+            validation_error=validate_mermaid(draft),
+            attempts=1,
+            history=[draft],
+        )
+
+    graph = StateGraph(DiagramState)
+    graph.add_node("generate", _generate_node(generate))
+    graph.add_node("validate", _validate_node)
+    graph.add_node("reflect", _reflect_node(generate))
+    if first_draft is not None:
+        graph.set_entry_point("validate")
+    else:
+        graph.set_entry_point("generate")
+        graph.add_edge("generate", "validate")
+    graph.add_conditional_edges("validate", _route, {"done": END, "reflect": "reflect"})
+    graph.add_edge("reflect", "validate")
+    app = graph.compile()
+    initial: DiagramState = {
+        "kind": kind,
+        "repo_name": repo_name,
+        "context": context,
+        "mermaid": first_draft or "",
+        "validation_error": "",
+        "attempts": 0,
+        "history": [],
+    }
+    return dict(app.invoke(initial))  # type: ignore[return-value]
