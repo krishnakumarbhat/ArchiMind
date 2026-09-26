@@ -1,0 +1,367 @@
+[
+  {
+    "variation": "v3_trace_informed_cpg",
+    "repo": "synthetic_promo_repo",
+    "files": 8,
+    "metric_def": "dynamic-oracle-heldout-v2",
+    "fold_a_targets": [
+      "svc_a.get_user",
+      "svc_c.close_store"
+    ],
+    "fold_b_targets": [
+      "svc_b.get_audit",
+      "svc_d.get_cached"
+    ],
+    "fold_a_dispatches": 4,
+    "fold_b_dispatches": 7,
+    "oracle_import_failed": {},
+    "learned_name_rules": [
+      [
+        "__init__",
+        "users.UserRepo.__init__"
+      ],
+      [
+        "close",
+        "store.Store.close"
+      ],
+      [
+        "fetch",
+        "users.UserRepo.fetch"
+      ],
+      [
+        "query",
+        "store.Store.query"
+      ]
+    ],
+    "unresolved_call_sites": [
+      [
+        "audit.AuditRepo.scan",
+        "query"
+      ],
+      [
+        "cache.Cache.load",
+        "query"
+      ],
+      [
+        "svc_c.close_store",
+        "close"
+      ],
+      [
+        "svc_d.get_cached",
+        "commit"
+      ],
+      [
+        "svc_d.get_cached",
+        "load"
+      ],
+      [
+        "users.UserRepo.fetch",
+        "query"
+      ]
+    ],
+    "promotion_coverage_ceiling": 0.5,
+    "rows": {
+      "static_control": {
+        "promoted_edges": 0,
+        "call_edges": 5,
+        "struct_precision_dyn": 0.6,
+        "struct_recall_dyn": 0.4286,
+        "struct_f1_dyn": 0.5,
+        "heldout_recall": 0.4286,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 3,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.0,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.close",
+          "store.Store.commit",
+          "store.Store.query"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit",
+          "store.Store.query"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale",
+          "store.Store.close"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.4,
+        "cpg_resolution_rate": 0.4545,
+        "blast_symbols": 8,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.7,
+        "harness_score": 67.55,
+        "harness_score_f1_RETRACTED": 64.55,
+        "in_sample": false,
+        "opaque_names": {
+          "n": 4,
+          "sample": [
+            "close",
+            "commit",
+            "load",
+            "query"
+          ],
+          "truncated": false
+        },
+        "dead_certified": [
+          "cache.Cache.stale"
+        ],
+        "dead_unadjudicable": [
+          "cache.Cache.load",
+          "store.Store.close",
+          "store.Store.commit",
+          "store.Store.query"
+        ],
+        "n_predicted_dead": 5,
+        "n_certified": 1,
+        "n_unadjudicable": 4,
+        "dead_soundness_precondition": true,
+        "dead_term_v3": 1.0,
+        "certification_rate": 0.2,
+        "dead_code_acc_strict": 0.0,
+        "strict_term_proven": [],
+        "strict_term_reverse_nonempty": {
+          "n": 0,
+          "sample": [],
+          "truncated": false
+        },
+        "n_strict_proven": 0,
+        "structural_precision_lower_bound": 0.6,
+        "structural_precision_evaluable": 1.0,
+        "evaluable_edges": 3,
+        "unadjudicable_edges": 2,
+        "structural_identifiable": false,
+        "harness_score_v3": 67.55,
+        "max_score_v3": 80
+      },
+      "mode_a": {
+        "promoted_edges": 2,
+        "call_edges": 7,
+        "struct_precision_dyn": 0.4286,
+        "struct_recall_dyn": 0.4286,
+        "struct_f1_dyn": 0.4286,
+        "heldout_recall": 0.4286,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 3,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.0,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.commit"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.3333,
+        "cpg_resolution_rate": 0.5385,
+        "blast_symbols": 11,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.7,
+        "harness_score": 62.41,
+        "harness_score_f1_RETRACTED": 62.41,
+        "in_sample": false,
+        "opaque_names": {
+          "n": 4,
+          "sample": [
+            "close",
+            "commit",
+            "load",
+            "query"
+          ],
+          "truncated": false
+        },
+        "dead_certified": [
+          "cache.Cache.stale"
+        ],
+        "dead_unadjudicable": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "n_predicted_dead": 3,
+        "n_certified": 1,
+        "n_unadjudicable": 2,
+        "dead_soundness_precondition": true,
+        "dead_term_v3": 1.0,
+        "certification_rate": 0.3333,
+        "dead_code_acc_strict": 0.0,
+        "strict_term_proven": [],
+        "strict_term_reverse_nonempty": {
+          "n": 0,
+          "sample": [],
+          "truncated": false
+        },
+        "n_strict_proven": 0,
+        "structural_precision_lower_bound": 0.4286,
+        "structural_precision_evaluable": 1.0,
+        "evaluable_edges": 3,
+        "unadjudicable_edges": 4,
+        "structural_identifiable": false,
+        "harness_score_v3": 62.41,
+        "max_score_v3": 80
+      },
+      "mode_b": {
+        "promoted_edges": 4,
+        "call_edges": 9,
+        "struct_precision_dyn": 0.5556,
+        "struct_recall_dyn": 0.7143,
+        "struct_f1_dyn": 0.625,
+        "heldout_recall": 0.7143,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 5,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.2857,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.commit"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.3333,
+        "cpg_resolution_rate": 0.6,
+        "blast_symbols": 12,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.7,
+        "harness_score": 66.22,
+        "harness_score_f1_RETRACTED": 68.3,
+        "in_sample": false,
+        "opaque_names": {
+          "n": 4,
+          "sample": [
+            "close",
+            "commit",
+            "load",
+            "query"
+          ],
+          "truncated": false
+        },
+        "dead_certified": [
+          "cache.Cache.stale"
+        ],
+        "dead_unadjudicable": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "n_predicted_dead": 3,
+        "n_certified": 1,
+        "n_unadjudicable": 2,
+        "dead_soundness_precondition": true,
+        "dead_term_v3": 1.0,
+        "certification_rate": 0.3333,
+        "dead_code_acc_strict": 0.0,
+        "strict_term_proven": [],
+        "strict_term_reverse_nonempty": {
+          "n": 0,
+          "sample": [],
+          "truncated": false
+        },
+        "n_strict_proven": 0,
+        "structural_precision_lower_bound": 0.5556,
+        "structural_precision_evaluable": 1.0,
+        "evaluable_edges": 5,
+        "unadjudicable_edges": 4,
+        "structural_identifiable": false,
+        "harness_score_v3": 66.22,
+        "max_score_v3": 80
+      },
+      "deployed_allfolds": {
+        "promoted_edges": 6,
+        "call_edges": 11,
+        "newly_promoted": [
+          [
+            "audit.AuditRepo.scan",
+            "store.Store.query"
+          ],
+          [
+            "cache.Cache.load",
+            "store.Store.query"
+          ],
+          [
+            "svc_c.close_store",
+            "store.Store.close"
+          ],
+          [
+            "svc_d.get_cached",
+            "cache.Cache.load"
+          ],
+          [
+            "svc_d.get_cached",
+            "store.Store.commit"
+          ],
+          [
+            "users.UserRepo.fetch",
+            "store.Store.query"
+          ]
+        ],
+        "struct_precision_dyn": 1.0,
+        "struct_recall_dyn": 1.0,
+        "cpg_resolution_rate": 0.6471,
+        "dead_predicted": [
+          "cache.Cache.stale"
+        ],
+        "dead_code_acc": null,
+        "dead_code_acc_upper": null,
+        "harness_score": null,
+        "harness_score_f1_RETRACTED": null,
+        "harness_score_v3": null,
+        "in_sample": true,
+        "note": "precision is 1.0 by construction; shape only, not a quality claim"
+      }
+    },
+    "ranked_rows": [
+      "static_control",
+      "mode_a",
+      "mode_b"
+    ],
+    "harness_score": 66.22,
+    "metric_def_v3": "certified-dead-v3",
+    "max_score_v3": 80,
+    "harness_score_v3": 66.22,
+    "ranking_v3": [
+      "static_control",
+      "mode_b",
+      "mode_a"
+    ],
+    "ranking_standing": [
+      "static_control",
+      "mode_b",
+      "mode_a"
+    ],
+    "score_unchanged_by_repair": true,
+    "ranking_identifiable": false,
+    "ranking_caveat": "NOT identifiable: precision is a sound lower bound but conflates 'wrong' with 'unjudged'. Evaluable precision is 1.0 for every row, so no sound structural term ranks these variants. The ordering below is produced entirely by edges the oracle never adjudicated.",
+    "token_cost_usd": 0.0,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": null,
+    "dead_code_acc": 0.0,
+    "harness_score_f1_RETRACTED": 68.3,
+    "peak_ram_mb": 22.7,
+    "elapsed_s": 0.01,
+    "caveat": "rows share one process; peak_ram_mb is cumulative"
+  }
+]
