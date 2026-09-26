@@ -1,12 +1,12 @@
 """Base-class inheritance closure gate (no hand-curated allowlists)."""
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 import networkx as nx
 
 from src.cpg._01_cpg_builder import NODE_FUNC, out_of_corpus_bases
 
 
-def withheld_methods(g: nx.DiGraph) -> Dict[str, str]:
+def withheld_methods(g: nx.DiGraph[Any]) -> Dict[str, str]:
     """Method node id -> reason, for methods of classes with out-of-corpus bases.
 
     A class inheriting from an unseen base (e.g. stdlib Handler, SQLAlchemy
@@ -23,7 +23,7 @@ def withheld_methods(g: nx.DiGraph) -> Dict[str, str]:
     return out
 
 
-def certified_dead(predicted: List[str], g: nx.DiGraph) -> List[str]:
+def certified_dead(predicted: List[str], g: nx.DiGraph[Any]) -> List[str]:
     """Filter predicted-dead symbols through the closure witness."""
     withheld = set(withheld_methods(g))
     return [s for s in predicted if s not in withheld]

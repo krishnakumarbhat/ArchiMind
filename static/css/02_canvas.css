@@ -1,0 +1,40 @@
+/* 02_canvas.css — pan/zoom viewport, toolbar, diagram surface. Transform-only animation. */
+.canvas-wrap { position: relative; flex: 1; min-height: 0; background: radial-gradient(circle at 30% 20%, #101724 0, var(--bg) 60%); }
+.viewport { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; }
+.viewport:active { cursor: grabbing; }
+.stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+.mermaid-host { padding: 2rem; }
+.mermaid-host svg { max-width: none; }
+.canvas-toolbar {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  display: flex;
+  gap: 0.35rem;
+  z-index: 5;
+}
+.canvas-toolbar button {
+  background: rgba(22, 27, 36, 0.92);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 8px;
+  min-width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+.canvas-toolbar button:hover { border-color: var(--accent); }
+.diagram-tabs { display: flex; gap: 0.4rem; padding: 0.6rem 0.9rem; border-top: 1px solid var(--border); background: var(--bg-soft); overflow-x: auto; }
+.diagram-tabs button {
+  flex: none;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.diagram-tabs button.active { color: #06121a; background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.canvas-empty { margin: auto; color: var(--faint); text-align: center; padding: 2rem; font-size: var(--fs-sm); }
+.canvas-error { margin: auto; color: var(--bad); padding: 2rem; font-size: var(--fs-sm); max-width: 40rem; }

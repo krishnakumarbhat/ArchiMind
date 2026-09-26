@@ -7,7 +7,7 @@ failure instead of silently broken markup.
 """
 import logging
 import re
-from typing import Callable, Optional
+from typing import Callable, Dict, Optional
 
 from src.config._00_settings import SETTINGS
 from src.orchestration._00_agent_state import DiagramState
@@ -33,7 +33,7 @@ def validate_mermaid(code: str) -> str:
     return ""
 
 
-def _generate_node(generate: GenerateFn):
+def _generate_node(generate: GenerateFn) -> Callable[[DiagramState], DiagramState]:
     def run(state: DiagramState) -> DiagramState:
         err = state.get("validation_error") or None
         code = generate(state["kind"], state["repo_name"], state["context"], err)
@@ -53,7 +53,7 @@ def _route(state: DiagramState) -> str:
     return "reflect"
 
 
-def _reflect_node(generate: GenerateFn):
+def _reflect_node(generate: GenerateFn) -> Callable[[DiagramState], DiagramState]:
     def run(state: DiagramState) -> DiagramState:
         return _generate_node(generate)(state)  # regenerate with validation_error in state
 
@@ -100,4 +100,14 @@ def run_eval_optimizer(
         "attempts": 0,
         "history": [],
     }
-    return dict(app.invoke(initial))  # type: ignore[return-value]
+    final = app.invoke(initial)
+    history_raw = final.get("history", [])
+    return DiagramState(
+        kind=str(final.get("kind", kind)),
+        repo_name=str(final.get("repo_name", repo_name)),
+        context=str(final.get("context", context)),
+        mermaid=str(final.get("mermaid", "")),
+        validation_error=str(final.get("validation_error", "")),
+        attempts=int(final.get("attempts", 0)),
+        history=[str(h) for h in history_raw] if isinstance(history_raw, list) else [],
+    )

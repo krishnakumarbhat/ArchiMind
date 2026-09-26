@@ -11,11 +11,11 @@ from src.config._01_constants import (
 from src.cpg._01_cpg_builder import EDGE_CALLS, EDGE_IMPORTS
 
 
-def _names(g: nx.DiGraph, node: str) -> str:
+def _names(g: nx.DiGraph[Any], node: str) -> str:
     return str(g.nodes[node].get("name") or node)
 
 
-def check_invariants(g: nx.DiGraph) -> List[Dict[str, Any]]:
+def check_invariants(g: nx.DiGraph[Any]) -> List[Dict[str, Any]]:
     """Evaluate invariants; return [{id, passed, details}]."""
     results: List[Dict[str, Any]] = []
     edges = [(u, v, d.get("kind")) for u, v, d in g.edges(data=True)]
