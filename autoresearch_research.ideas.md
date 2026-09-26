@@ -1,6 +1,11 @@
 # Ideas Backlog (variation tree — drain before declaring done)
 
-> STEER 2026-09-26 10:30 (human): iters 8–10 timed out (rc=124, 20-min watchdog) with no state change on N11.
+> STEER 2026-09-26 PM (human): two driver self-exits on watchdog stalls. Theory work has
+> converged (score frozen ×5, leaderboard + dashboard now in tree at docs/leaderboard.md).
+> PHASE 5 ONLY until deliverables complete: docs/architecture.md, docs/profiling.md,
+> docs/hld.drawio + docs/lld.drawio. No new N-nodes, no refactors >50 lines per iteration,
+> log state every step. Theory refinements (N14/N15 WIP in tree) are parked unless they
+> fit in one sub-20-min iteration with a state log.
 > Decompose N11 into sub-20-min steps: (a) proposition + countermodel write-up only, log it;
 > (b) closed-world-assumption literature check as a separate iteration; (c) leaderboard +
 > architecture docs synthesis. Log state after EVERY step — a timeout must never again
