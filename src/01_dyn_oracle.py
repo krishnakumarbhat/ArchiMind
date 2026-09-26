@@ -605,6 +605,21 @@ def _traced(
         sys.settrace(tracer)
         threading_signal = signal.signal
         threading_signal(signal.SIGALRM, _alarm)
+    except (_Timeout, _BudgetExhausted):
+        # RUN 14: the tracer is installed BEFORE this guard's body runs, and
+        # ``signal.signal`` is Python code, so the trace callback fires on the
+        # setup itself. With a tight budget the callback raises
+        # _BudgetExhausted HERE -- inside the setup guard rather than inside the
+        # harness call -- and this clause used to catch only ValueError/OSError,
+        # so the cut propagated out of run_oracle and aborted the whole sweep
+        # instead of one target. The mode that arms no clock of its own is the
+        # mode that hits this, which is why run 13's exclusive budget survived a
+        # single run and failed under a sweep: a cut has to be survivable more
+        # than once per process.
+        oracle.budget_exhausted.add(getattr(module, "__name__", "?"))
+        oracle.voided = True
+        sys.settrace(None)
+        return
     except (ValueError, OSError):
         oracle.import_failed[getattr(module, "__name__", "?")] = "no-trace-signal"
         sys.settrace(None)

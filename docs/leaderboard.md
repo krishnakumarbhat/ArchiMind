@@ -41,7 +41,10 @@
 - **PyCG** (MSR 2021, ~99.2% prec / ~69.9% rec) — the true baseline; loop cited it only at run 6.
 - **Vulture** — global bare-name counting = run 6's `R(m)`; whitelist = killed N10; issues #417/#430 request the per-module fix run 6 proved unsound.
 - **N11 ≤1/2 impossibility framing** — UNVERIFIED-novel (rests on Reiter closed-world + Cook–Goodwin undecidability, unchecked).
-- Novelty peak 46/100 → engineering track, no paper.
+- **Vulture README** (VERIFIED run 14) — documents the `getattr` false positive and claims NO soundness, so run 12's retraction withdraws *this loop's* adjective, not a published claim.
+- **Headroom law (run 14)** — NO SOURCE FOUND: that an incomplete oracle both manufactures false positives and shields the upper-bound direction against invention. The only element of runs 12–14 carried at novelty > standard.
+- L1–L3 (run 13) — accepted by the reviewing sub-agent as **restated measurement theory**; a reviewer would say so.
+- Novelty peak 46/100 (run 14, up from 34) → engineering track, no paper.
 
 ## Conclusion
 
@@ -49,3 +52,11 @@ Ship v2 CPG + N7/N9/N10 gate stack: precision 1.0, zero false positives on all f
 sound-by-construction withholding on real repos. Do not ship trace promotion (v3) or name
 manifests (N10-as-proposed): measured unsound. Open problem: recall stuck at 0.5
 (attribute-on-instance); structural term unmeasurable on real repos by design.
+
+**Runs 12–14 corrected the record rather than the score.** Run 12 refuted eq. row 18 and withdrew the
+word *sound* from six runs of certification counts (the counts stand). Run 13 published L1 and measured
+it at zero on every fixture — a vacuous law with 24/24 green self-checks. Run 14 built the missing
+ablation, made L1 non-vacuous, retracted *strictly* in favour of the iff `measured − true =
+|predicted & omitted|`, and established the headroom law. A crash in the oracle's setup guard and a
+verdict string that read `REVERSES` beside `direction_survives = True` were both found by running the
+experiment and are fixed. N8 blocked for the seventh consecutive run; N6 deferred.
