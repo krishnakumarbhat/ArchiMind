@@ -16,7 +16,11 @@ google-genai==1.69.0
 llama-index-core==0.12.52.post1
 langgraph==0.2.70
 pinecone>=5,<8
-tree-sitter==0.21.3
+tree-sitter>=0.25,<0.26
+tree-sitter-python==0.25.0
+networkx==3.4.2
+pydantic==2.13.4
+pydantic-settings==2.10.1
 
 # Version Control
 GitPython==3.1.46
