@@ -1,0 +1,1838 @@
+[
+ {
+  "variation": "n12_partial_interface_price + n12b_n11c_law_retraction",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the SEVENTH consecutive run. The dead term is UNSCORED, so harness_score cannot move. What moved is a PUBLISHED LAW, withdrawn.",
+  "parity": {
+   "fixture": "synthetic_cpg_repo",
+   "source": "run_one('v2_treesitter_cpg', 'synthetic_cpg_repo')",
+   "measured": {
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "dead_code_acc": 0.3333,
+    "cpg_resolution_rate": 0.5,
+    "blast_latency_ms": 0.51,
+    "struct_false_edges": []
+   },
+   "identical_to_run7": true,
+   "diffs": {},
+   "composite": 86.24,
+   "composite_runs_2_to_7": 86.23,
+   "note": "every scored QUALITY quantity must be bit-identical. blast_latency_ms and peak_ram_mb are the resource terms and are the only fields allowed to move; the composite delta is attributed to them alone."
+  },
+  "self_check": {
+   "n11c_refuted_by_isolating_partition": true,
+   "counterexample_acc_star_flat_vs_isolating": [
+    0.5,
+    0.75
+   ],
+   "counterexample_coverage_flat_vs_isolating": [
+    0.0,
+    0.5
+   ],
+   "corrected_law_matches_definition": true,
+   "n11c_survives_for_flag_partitions": true,
+   "value_accounting_monotone_under_refinement": true,
+   "bit_accounting_NOT_monotone_under_refinement": true
+  },
+  "index_fixture": {
+   "repo": "synthetic_index_repo",
+   "driver_status": "executed",
+   "n_reached_by_execution": 4,
+   "liveness_derivation": "EXECUTED: sentinel set returned by the out-of-corpus driver",
+   "n_class_methods": 8,
+   "n_dead": 4,
+   "n_live": 4,
+   "n_e_classes": 1,
+   "e_class_sizes": [
+    8
+   ],
+   "carrier_meta": {
+    "n_symbols": 8,
+    "n_with_a_parsed_definition_site": 8,
+    "def_index_coverage": 1.0,
+    "carriers": [
+     "arity",
+     "class_x_file",
+     "decorated",
+     "decorator_name",
+     "discrete",
+     "file",
+     "module",
+     "package",
+     "python_class"
+    ],
+    "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+   },
+   "value_lattice": {
+    "per_partition": {
+     "file": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "alpha",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "module": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "alpha",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "package": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "alpha",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "arity": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "a1-",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "decorated": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "bare",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "decorator_name": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "bare",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "discrete": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 1,
+      "dead_trapped_in_mixed": 0,
+      "acc_star": 1.0,
+      "acc_star_closed_form": 1.0,
+      "coverage_precision_1": 1.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.5,
+      "value_is_positive": true,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 8,
+        "n_mixed_blocks": 0,
+        "n_pure_dead_blocks": 4,
+        "n_pure_live_blocks": 4,
+        "resolved": true,
+        "dead_trapped_in_mixed": 0,
+        "acc_star": 1.0,
+        "coverage": 1.0,
+        "blocks": [
+         {
+          "id": "alpha.T.process_bind_param",
+          "n": 1,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "alpha.T.coerce_compared_value",
+          "n": 1,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "alpha.T._dead_never_dispatched_one",
+          "n": 1,
+          "pure": true,
+          "n_dead": 1
+         },
+         {
+          "id": "alpha.T._dead_never_dispatched_three",
+          "n": 1,
+          "pure": true,
+          "n_dead": 1
+         },
+         {
+          "id": "alpha.T._dead_never_dispatched_two",
+          "n": 1,
+          "pure": true,
+          "n_dead": 1
+         },
+         {
+          "id": "alpha.T._dead_never_dispatched_four",
+          "n": 1,
+          "pure": true,
+          "n_dead": 1
+         },
+         {
+          "id": "alpha.T.process_literal_param",
+          "n": 1,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "alpha.T.process_result_value",
+          "n": 1,
+          "pure": true,
+          "n_dead": 0
+         }
+        ]
+       }
+      ]
+     },
+     "python_class": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "alpha",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     },
+     "class_x_file": {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "alpha@alpha",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "free_carriers": [
+     "arity",
+     "class_x_file",
+     "decorated",
+     "decorator_name",
+     "file",
+     "module",
+     "package",
+     "python_class"
+    ],
+    "best_partition": "discrete",
+    "best_free_carrier": "arity",
+    "ranking_by_dead_trapped": [
+     "discrete",
+     "arity",
+     "class_x_file",
+     "decorated",
+     "decorator_name",
+     "file",
+     "module",
+     "package",
+     "python_class"
+    ],
+    "ranking_among_free_carriers": [
+     "arity",
+     "class_x_file",
+     "decorated",
+     "decorator_name",
+     "file",
+     "module",
+     "package",
+     "python_class"
+    ],
+    "partial_interface_is_worthless_over_ALL_carriers": false,
+    "partial_interface_is_worthless_over_FREE_carriers": true,
+    "best_free_acc_star": 0.5,
+    "best_free_coverage": 0.0,
+    "free_carriers_trapping_fewer_dead_than_discrete": [],
+    "allowlist_price_tag": {
+     "carrier": "discrete",
+     "acc_star": 1.0,
+     "coverage": 1.0,
+     "note": "the per-symbol labelling; resolves by construction and is prior art"
+    },
+    "best_acc_star": 1.0,
+    "best_acc_star_is_baseline": false,
+    "best_coverage": 1.0
+   },
+   "refinement": {
+    "n_refining_pairs": 64,
+    "n_pairs_violating_value_monotonicity": 0,
+    "value_accounting_is_monotone": true,
+    "n_pairs_violating_bit_monotonicity": 0,
+    "bit_accounting_is_monotone": true,
+    "nonmonotone_bit_examples": [],
+    "consequence": "the VALUE accounting is monotone under refinement, so a cheapest free partition exists and the run may publish one; the BIT accounting is not, so the interface-size argument of N11d cannot be minimised over the lattice and must not be reported as if it could. The two accountings order the same family of partitions differently, which is why run 9's cost table and this run's value table disagree about which carrier is cheapest without either being arithmetically wrong"
+   },
+   "n11c_scope_check": {
+    "family": "flag partitions -- mark j live members, split each fibre in two",
+    "rows": [
+     {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 1,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 0,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "unflagged",
+          "n": 8,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ],
+      "n11c_flat_law": 0.5,
+      "agrees_with_n11c": true
+     },
+     {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 2,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 1,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "unflagged",
+          "n": 7,
+          "pure": false,
+          "n_dead": 4
+         },
+         {
+          "id": "flagged",
+          "n": 1,
+          "pure": true,
+          "n_dead": 0
+         }
+        ]
+       }
+      ],
+      "n11c_flat_law": 0.5,
+      "agrees_with_n11c": true
+     },
+     {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 2,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 1,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "flagged",
+          "n": 2,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "unflagged",
+          "n": 6,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ],
+      "n11c_flat_law": 0.5,
+      "agrees_with_n11c": true
+     },
+     {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 0,
+      "dead_trapped_in_mixed": 4,
+      "acc_star": 0.5,
+      "acc_star_closed_form": 0.5,
+      "coverage_precision_1": 0.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.0,
+      "value_is_positive": false,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 2,
+        "n_mixed_blocks": 1,
+        "n_pure_dead_blocks": 0,
+        "n_pure_live_blocks": 1,
+        "resolved": false,
+        "dead_trapped_in_mixed": 4,
+        "acc_star": 0.5,
+        "coverage": 0.0,
+        "blocks": [
+         {
+          "id": "flagged",
+          "n": 3,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "unflagged",
+          "n": 5,
+          "pure": false,
+          "n_dead": 4
+         }
+        ]
+       }
+      ],
+      "n11c_flat_law": 0.5,
+      "agrees_with_n11c": true
+     },
+     {
+      "n_symbols": 8,
+      "n_dead": 4,
+      "n_live": 4,
+      "n_fibres": 1,
+      "n_mixed_fibres": 1,
+      "n_resolved_fibres": 1,
+      "dead_trapped_in_mixed": 0,
+      "acc_star": 1.0,
+      "acc_star_closed_form": 1.0,
+      "coverage_precision_1": 1.0,
+      "baseline_acc_star": 0.5,
+      "baseline_coverage": 0.0,
+      "delta_acc_star_vs_baseline": 0.5,
+      "value_is_positive": true,
+      "per_fibre": [
+       {
+        "e_class": 0,
+        "size": 8,
+        "dead": 4,
+        "live": 4,
+        "mixed_fibre": true,
+        "n_blocks": 2,
+        "n_mixed_blocks": 0,
+        "n_pure_dead_blocks": 1,
+        "n_pure_live_blocks": 1,
+        "resolved": true,
+        "dead_trapped_in_mixed": 0,
+        "acc_star": 1.0,
+        "coverage": 1.0,
+        "blocks": [
+         {
+          "id": "flagged",
+          "n": 4,
+          "pure": true,
+          "n_dead": 0
+         },
+         {
+          "id": "unflagged",
+          "n": 4,
+          "pure": true,
+          "n_dead": 4
+         }
+        ]
+       }
+      ],
+      "n11c_flat_law": 1.0,
+      "agrees_with_n11c": true
+     }
+    ],
+    "all_rows_agree_with_n11c": true,
+    "verdict": "N11c's flat law is CORRECT for flag partitions and WRONG for general ones, so it was a fact about the enumerated hypothesis class published as a law. Every row below is the corrected law agreeing with the old one, which is the retraction's scope and not its refutation."
+   },
+   "run7_discriminating_pair_smallest_instance": {
+    "live": "alpha.T.process_literal_param",
+    "dead": "alpha._fixture_dead_plain",
+    "evidence_equal": true,
+    "occ_live": 1,
+    "occ_dead": 1,
+    "n11c_hardcoded_bound": 0.5,
+    "isolating_partition_acc_star": 1.0,
+    "note": "NOT a refutation, and recorded as such because the number 1.0 looks like one. On a TWO-symbol fibre any split into two blocks IS the discrete partition, so isolating the dead member is a complete declaration and N11c's own last row predicts 1.0. Run 7's literal 0.5 is therefore the best over INCOMPLETE declarations, which is what it was used for, and it stands. The retraction needs a fibre of at least three symbols and is made on the eight-method fixture above, not here. Reported because a two-element case is exactly where a reader would check the retraction and must find it does not apply."
+   }
+  },
+  "corpus_carriers": [
+   {
+    "repo": "synthetic_cpg_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 3,
+    "n_certified": 1,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 3,
+     "n_with_a_parsed_definition_site": 3,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "synthetic_promo_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 5,
+    "n_certified": 1,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 5,
+     "n_with_a_parsed_definition_site": 5,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 1,
+      "n_certified": 1,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "synthetic_taint_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 4,
+    "n_certified": 2,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 4,
+     "n_with_a_parsed_definition_site": 4,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 4,
+      "n_blocks_free_of_demonstrated_live": 4,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 2,
+      "n_certified": 2,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "synthetic_exports_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 7,
+    "n_certified": 3,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 7,
+     "n_with_a_parsed_definition_site": 7,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 7,
+      "n_blocks_free_of_demonstrated_live": 7,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 3,
+      "n_certified": 3,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "synthetic_protocol_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 8,
+    "n_certified": 6,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 8,
+     "n_with_a_parsed_definition_site": 8,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 8,
+      "n_blocks_free_of_demonstrated_live": 8,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 6,
+      "n_certified": 6,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "synthetic_index_repo",
+    "is_real_repo": false,
+    "n_predicted_dead": 8,
+    "n_certified": 8,
+    "n_demonstrated_live_by_execution": 1,
+    "VACUOUS": false,
+    "vacuity_note": "non-vacuous: at least one executed dispatch to separate against",
+    "demonstrated_live": [
+     "alpha.T.process_bind_param"
+    ],
+    "carrier_meta": {
+     "n_symbols": 8,
+     "n_with_a_parsed_definition_site": 8,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "module": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "package": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "arity": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "decorated": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "decorator_name": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "discrete": {
+      "n_blocks": 8,
+      "n_blocks_free_of_demonstrated_live": 7,
+      "n_certified_in_a_clean_block": 7,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.875
+     },
+     "python_class": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     },
+     "class_x_file": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 0,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 8,
+      "fraction_certified_separable": 0.0
+     }
+    },
+    "best_carrier": "discrete",
+    "any_carrier_separates_all_certified": false,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "pallets/flask",
+    "is_real_repo": true,
+    "n_predicted_dead": 204,
+    "n_certified": 4,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 204,
+     "n_with_a_parsed_definition_site": 204,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 19,
+      "n_blocks_free_of_demonstrated_live": 19,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 19,
+      "n_blocks_free_of_demonstrated_live": 19,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 18,
+      "n_blocks_free_of_demonstrated_live": 18,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 11,
+      "n_blocks_free_of_demonstrated_live": 11,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 204,
+      "n_blocks_free_of_demonstrated_live": 204,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 19,
+      "n_blocks_free_of_demonstrated_live": 19,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 19,
+      "n_blocks_free_of_demonstrated_live": 19,
+      "n_certified_in_a_clean_block": 4,
+      "n_certified": 4,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "psf/requests",
+    "is_real_repo": true,
+    "n_predicted_dead": 110,
+    "n_certified": 17,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 110,
+     "n_with_a_parsed_definition_site": 110,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 15,
+      "n_blocks_free_of_demonstrated_live": 15,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "module": {
+      "n_blocks": 15,
+      "n_blocks_free_of_demonstrated_live": 15,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "package": {
+      "n_blocks": 1,
+      "n_blocks_free_of_demonstrated_live": 1,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "arity": {
+      "n_blocks": 12,
+      "n_blocks_free_of_demonstrated_live": 12,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "decorated": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "decorator_name": {
+      "n_blocks": 4,
+      "n_blocks_free_of_demonstrated_live": 4,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "discrete": {
+      "n_blocks": 110,
+      "n_blocks_free_of_demonstrated_live": 110,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "python_class": {
+      "n_blocks": 15,
+      "n_blocks_free_of_demonstrated_live": 15,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     },
+     "class_x_file": {
+      "n_blocks": 15,
+      "n_blocks_free_of_demonstrated_live": 15,
+      "n_certified_in_a_clean_block": 17,
+      "n_certified": 17,
+      "fraction_certified_separable": 1.0
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "tiangolo/sqlmodel",
+    "is_real_repo": true,
+    "n_predicted_dead": 246,
+    "n_certified": 0,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 246,
+     "n_with_a_parsed_definition_site": 246,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 114,
+      "n_blocks_free_of_demonstrated_live": 114,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "module": {
+      "n_blocks": 114,
+      "n_blocks_free_of_demonstrated_live": 114,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "package": {
+      "n_blocks": 3,
+      "n_blocks_free_of_demonstrated_live": 3,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "arity": {
+      "n_blocks": 13,
+      "n_blocks_free_of_demonstrated_live": 13,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "decorated": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "decorator_name": {
+      "n_blocks": 5,
+      "n_blocks_free_of_demonstrated_live": 5,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "discrete": {
+      "n_blocks": 246,
+      "n_blocks_free_of_demonstrated_live": 246,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "python_class": {
+      "n_blocks": 114,
+      "n_blocks_free_of_demonstrated_live": 114,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "class_x_file": {
+      "n_blocks": 114,
+      "n_blocks_free_of_demonstrated_live": 114,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   },
+   {
+    "repo": "Textualize/rich",
+    "is_real_repo": true,
+    "n_predicted_dead": 452,
+    "n_certified": 0,
+    "n_demonstrated_live_by_execution": 0,
+    "VACUOUS": true,
+    "vacuity_note": "NO demonstrated-live symbol, so EVERY block is trivially free of one and 'a carrier separates all certified' is a vacuous truth, not a result. Reported as such rather than as a pass. This is the same shape as run 6's flat impossible zero: a structural precondition that makes the question unaskable while the instrument still returns a number.",
+    "demonstrated_live": [],
+    "carrier_meta": {
+     "n_symbols": 452,
+     "n_with_a_parsed_definition_site": 452,
+     "def_index_coverage": 1.0,
+     "carriers": [
+      "arity",
+      "class_x_file",
+      "decorated",
+      "decorator_name",
+      "discrete",
+      "file",
+      "module",
+      "package",
+      "python_class"
+     ],
+     "note": "a symbol with no parsed definition site falls in an <unknown> block rather than being dropped; dropping it would shrink the very fibres whose ambiguity is being measured"
+    },
+    "per_carrier": {
+     "file": {
+      "n_blocks": 62,
+      "n_blocks_free_of_demonstrated_live": 62,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "module": {
+      "n_blocks": 62,
+      "n_blocks_free_of_demonstrated_live": 62,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "package": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "arity": {
+      "n_blocks": 21,
+      "n_blocks_free_of_demonstrated_live": 21,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "decorated": {
+      "n_blocks": 2,
+      "n_blocks_free_of_demonstrated_live": 2,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "decorator_name": {
+      "n_blocks": 9,
+      "n_blocks_free_of_demonstrated_live": 9,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "discrete": {
+      "n_blocks": 452,
+      "n_blocks_free_of_demonstrated_live": 452,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "python_class": {
+      "n_blocks": 62,
+      "n_blocks_free_of_demonstrated_live": 62,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     },
+     "class_x_file": {
+      "n_blocks": 62,
+      "n_blocks_free_of_demonstrated_live": 62,
+      "n_certified_in_a_clean_block": 0,
+      "n_certified": 0,
+      "fraction_certified_separable": null
+     }
+    },
+    "best_carrier": "file",
+    "any_carrier_separates_all_certified": null,
+    "ground_truth_note": "no ground truth on a real repo. A certificate counts as SEPARABLE when its block holds no symbol an executed framework was seen to dispatch to. That is a necessary condition for a carrier to help and needs no oracle; it refutes a carrier that fails it and leaves a carrier that passes it UNMEASURED, which is the honest direction."
+   }
+  ],
+  "n12b_n11c_law_retraction": {
+   "retracted_claim": "N11c, published in run 9: accuracy = n_live/|C| for j < n_live and 1.0 at j = n_live; 'a bit identifying a LIVE symbol licenses exactly one abstention and nothing else'; therefore a partial interface is worth exactly zero and the interface is worthless until it is COMPLETE",
+   "why_false": "a declaration need not identify a LIVE symbol. It may isolate a DEAD one, and a block of pure-dead symbols is certifiable at precision 1 by a sound gate. The flag partitions run 9 enumerated cannot do this -- a flag splits a fibre into flagged and not-flagged, and the not-flagged half still holds every dead symbol -- so the flat curve describes the hypothesis class, not the world",
+   "counterexample": {
+    "fibre": "C = {1,2,3,4}, dead {1,2}, live {3,4}",
+    "flat_partition": "one block {1,2,3,4}",
+    "flat_acc_star": 0.5,
+    "isolating_partition": "{1} | {2,3,4}",
+    "isolating_acc_star": 0.75,
+    "isolating_coverage_precision_1": 0.5,
+    "n11c_predicts_for_both": 0.5,
+    "no_false_positive_manufactured": true,
+    "asserted_in": "src/09_resolution_price.py::self_check"
+   },
+   "corrected_law": "acc*(Pi) = 1 - |D n mixed(Pi)| / |S|, where mixed(Pi) is the union of the blocks of Pi ^ E holding both a dead and a live member. Equivalently, the precision-1 objective: coverage(Pi) = |{d in D : d's block is pure-dead}| / |D|. A partial interface is worth exactly the dead symbols it moves out of mixed blocks, and nothing else.",
+   "n11c_still_correct_for": "flag partitions, measured row by row on the fixture",
+   "n11c_scope_rows_all_agree": true,
+   "frontier_consequence": "N12's premise is withdrawn, so N12 is answered in the negative by the loop's own maths: the search for a mechanism that resolves an ENTIRE E-class was aimed at a target that a partial mechanism already reaches. The node is not deleted -- the corrected law is its replacement.",
+   "same_species_as_the_defect_it_replaced": "run 9 retracted an objective mismatch (agreement scored as accuracy) and the replacement then generalised a curve measured over one hypothesis class. Two runs, the same failure: a number computed inside a chosen hypothesis class, published as a property of the problem.",
+   "n12_premise_measurements": {
+    "best_free_carrier_on_fixture": "arity",
+    "best_free_acc_star": 0.5,
+    "baseline_acc_star": 0.5,
+    "partial_interface_is_worthless_over_FREE_carriers": true,
+    "n_free_carriers": 8,
+    "free_carriers_trapping_fewer_dead_than_discrete": [],
+    "allowlist_price_tag": {
+     "carrier": "discrete",
+     "acc_star": 1.0,
+     "coverage": 1.0,
+     "note": "the per-symbol labelling; resolves by construction and is prior art"
+    },
+    "third_shape_verdict": "N12 asked for a THIRD shape -- neither an allowlist nor a per-class declaration -- that resolves a whole fibre. Measured on the only corpus with executed truth: all 8 corpus-derived carriers (python class, class x file, file, module, package, arity, decorated, decorator name) score EXACTLY the abstain-everywhere baseline. Not one isolates a single dead method. The third shape does not exist in the corpus, the only carrier that resolves is the allowlist, and the allowlist is Vulture's shipped whitelist. So N12's CONCLUSION is confirmed by a measurement it did not have, and its stated REASON -- N11c's flat law -- is retracted.",
+    "ranking_among_free_carriers": [
+     "arity",
+     "class_x_file",
+     "decorated",
+     "decorator_name",
+     "file",
+     "module",
+     "package",
+     "python_class"
+    ]
+   },
+   "value_accounting_is_monotone": true,
+   "bit_accounting_is_monotone": true,
+   "n_prior_art_kill": "the corrected law is PRIOR_ART_STANDARD: a classifier constrained to be constant on a partition is optimal by the majority rule per block, and run 9's own retraction already recorded the constant-on-a-fibre bound as textbook. Novelty is claimed for the CORRECTION and the trapped-dead statistic, not for the mathematics."
+  },
+  "real_repo_carrier_summary": {
+   "n_real_repos": 4,
+   "total_certified": 21,
+   "total_demonstrated_live": 0,
+   "n_vacuous_repos": 4,
+   "all_real_repos_vacuous": true,
+   "any_carrier_separates_all_certified": null,
+   "real_repo_channel_note": "ALL FOUR real repos are VACUOUS on this question. Run 7's inheritance witness closed all four of run 6's residuals, so no certified symbol any longer has a name an executed framework was seen to dispatch to, and a truth-light separation test has nothing to separate against. The loop's own repair emptied the channel through which N12 would have been adjudicated on real code, so N12 is decidable ONLY on the fixture. That is a fact about the instrument's coverage, not about the carriers, and it is the second thing this run found that the plan did not anticipate.",
+   "per_repo": [
+    {
+     "repo": "pallets/flask",
+     "certified": 4,
+     "demonstrated_live": 0,
+     "best_carrier": "file",
+     "certified_separable_under_best": null
+    },
+    {
+     "repo": "psf/requests",
+     "certified": 17,
+     "demonstrated_live": 0,
+     "best_carrier": "file",
+     "certified_separable_under_best": null
+    },
+    {
+     "repo": "tiangolo/sqlmodel",
+     "certified": 0,
+     "demonstrated_live": 0,
+     "best_carrier": "file",
+     "certified_separable_under_best": null
+    },
+    {
+     "repo": "Textualize/rich",
+     "certified": 0,
+     "demonstrated_live": 0,
+     "best_carrier": "file",
+     "certified_separable_under_best": null
+    }
+   ]
+  }
+ }
+]

@@ -1,0 +1,297 @@
+[
+  {
+    "variation": "n10_protocol_driver",
+    "repo": "synthetic_protocol_repo",
+    "files_analysis": 2,
+    "files_corpus": 2,
+    "metric_def": "unreferenced-domain-v4",
+    "max_metric": 80,
+    "corpus_meta": {
+      "n_py_in_artefact": 2,
+      "n_analysis": 2,
+      "n_corpus": 2,
+      "basename_collisions": [],
+      "max_files_cap": 4000
+    },
+    "run4_precondition_ok": true,
+    "run4_n_certified": 5,
+    "run4_certified": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value",
+      "gamma.Collider.process_bind_param"
+    ],
+    "corpus_complete": true,
+    "n_predicted_dead": 5,
+    "n_certified": 3,
+    "certification_rate": 0.6,
+    "dead_certified": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+    ],
+    "n_blocked": 2,
+    "n_blocked_by_string_only": 0,
+    "dead_blocked_by_string_only": [],
+    "n_complex_sites": 0,
+    "cpg_resolution_rate": 1.0,
+    "cpg_parse_errors": [],
+    "n_parse_errors": 0,
+    "peak_ram_mb": 24.5,
+    "token_cost_usd": 0.0,
+    "elapsed_s": 0.0,
+    "run4_term_v3": 1.0,
+    "unreferenced_term": 1.0,
+    "unreferenced_term_refused_reason": null,
+    "new_subset_of_run4_ungated": true,
+    "n_run4_cert_out_of_scope_refs": 0,
+    "run4_cert_out_of_scope_sample": [],
+    "n_run4_cert_blocked_only_by_string": 0,
+    "n_run4_ungated_false_positives": 2,
+    "n_run4_gated_certified": 5,
+    "n_certified_only_by_new_rule": 0,
+    "status": "unvalidated",
+    "reason": "oracle observed no dispatches; structural term undefined",
+    "oracle_ran": false,
+    "harness_score_v4": null,
+    "struct_precision_dyn": null,
+    "struct_recall_dyn": null,
+    "metric_def_note": "UNCHANGED. The dead term remains UNSCORED, so harness_score_v4 is run 6's number by construction; what changes is the certified set.",
+    "n_star_import_sites": 0,
+    "n_star_target_modules": 0,
+    "n_unresolved_star_imports": 0,
+    "n_modules_with_dunder_all": 0,
+    "star_exposed_dead": [],
+    "closure_changed_run5": [],
+    "star_closure_is_noop": true,
+    "n_withheld_external_driver": 0,
+    "withheld_external_driver": [],
+    "external_driver_reasons": {},
+    "withheld_by_toplevel_dir": {},
+    "external_driver_adjudication": "NOT executed. The driver (pytest, pytest-benchmark, CI) was not run, so these are withheld as externally-driven, not counted as measured false positives.",
+    "n_certified_run5": 3,
+    "n_certified_closed": 3,
+    "n_certified_per_module_UNSOUND": 0,
+    "per_module_extra_vs_global": [],
+    "n_publicly_exported": 0,
+    "n_externally_driven_bucket": 0,
+    "n_blocked_by_mention": 2,
+    "blocker_reasons": {
+      "dunder_all_declared": 0,
+      "cross_module_collision": 5,
+      "string_literal_only": 0,
+      "internal_reference": 0,
+      "unknown": 0
+    },
+    "certified_by_toplevel_dir": {
+      "alpha": 3
+    },
+    "n_certified_run5_by_toplevel_dir": {
+      "alpha": 3
+    },
+    "certified_dead": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+    ],
+    "publicly_exported": [],
+    "bucket_partition_is_exact": true,
+    "blocked_sample": [
+      "alpha.T.process_bind_param",
+      "gamma.Collider.process_bind_param"
+    ],
+    "name_to_dispatch_lemma": "A star import creates a BINDING to m.n that spells n nowhere, but every way of dispatching through a binding names it: Name and attribute lookups both spell the leaf, a subscript spells it as a key or computes it, and the only nameless route is reflection over vars()/dir(), which is the already-named runtime-assembly ceiling. So occ[leaf(s)] == 1 is still a sound certificate.",
+    "harness_score_identical_to_run7": true,
+    "scored_term_unchanged": true,
+    "certified_set_identical_to_run7": true,
+    "certified_removed_by_repair": [],
+    "ground_truth_checked": true,
+    "harness_score_identical_to_run9": true,
+    "env_meta": {
+      "n_env_files": 0,
+      "n_env_bytes": 0,
+      "n_resolved_modules": 0,
+      "resolved_modules": [],
+      "n_shadowed_modules": 0,
+      "shadowed_modules": [],
+      "n_unresolved": 0,
+      "unresolved_missing_dependency": [],
+      "unresolved_repo_internal": [],
+      "truncated": [],
+      "env_complete": true,
+      "precondition_failure": null,
+      "max_env_bytes": 67108864
+    },
+    "env_precondition_ok": true,
+    "env_precondition_failure": null,
+    "rule_r5_n_certified": 3,
+    "rule_r6_n_certified": 3,
+    "rule_r10a_n_certified": 1,
+    "rule_r10b_n_certified": 3,
+    "rule_r10b_status": "scored",
+    "certified_r5": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+    ],
+    "certified_r6": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+    ],
+    "certified_r10a": [
+      "alpha.T.process_literal_param"
+    ],
+    "certified_r10b": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+    ],
+    "r10a_removed_vs_r6": 2,
+    "r10b_removed_vs_r6": 0,
+    "manifest_is_approximation": true,
+    "manifest_size": 20,
+    "manifest_blocked_total": 4,
+    "manifest_blocked_by_dir": {
+      "alpha": 3,
+      "gamma": 1
+    },
+    "env_occurrences_for_predicted_dead": {
+      "0": 5
+    },
+    "n_blocked_by_env_alone": 0,
+    "withheld_reasons": {
+      "alpha.T.coerce_compared_value": "manifest_name",
+      "alpha.T.process_bind_param": "manifest_name",
+      "alpha.T.process_result_value": "manifest_name",
+      "gamma.Collider.process_bind_param": "manifest_name"
+    },
+    "r10a_vs_r10b_comparable": [
+      true,
+      false
+    ],
+    "n_certified_by_both": 1,
+    "only_r10a": [],
+    "only_r10b": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_result_value"
+    ],
+    "fixture_driver_probe": {
+      "driver_dir": "experiments/fixtures/synthetic_protocol_driver",
+      "repo_dir": "experiments/fixtures/synthetic_protocol_repo",
+      "protocol_tuple": [
+        "process_bind_param",
+        "process_result_value",
+        "coerce_compared_value",
+        "process_literal_param"
+      ],
+      "status": "failed",
+      "error": "TypeError: T.process_bind_param() missing 1 required positional argument: 'value'"
+    },
+    "executed_live": [],
+    "executed_live_symbols": [],
+    "ground_truth_dead": [
+      "alpha.fixture_dead_plain",
+      "gamma.Collider.process_bind_param"
+    ],
+    "adjudication": {
+      "truth_dead": [
+        "alpha.fixture_dead_plain",
+        "gamma.Collider.process_bind_param"
+      ],
+      "rule_r5": {
+        "status": "scored",
+        "n_certified": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positives": [
+          "alpha.T.coerce_compared_value",
+          "alpha.T.process_literal_param",
+          "alpha.T.process_result_value"
+        ],
+        "false_negatives": [
+          "alpha.fixture_dead_plain",
+          "gamma.Collider.process_bind_param"
+        ]
+      },
+      "rule_r6": {
+        "status": "scored",
+        "n_certified": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positives": [
+          "alpha.T.coerce_compared_value",
+          "alpha.T.process_literal_param",
+          "alpha.T.process_result_value"
+        ],
+        "false_negatives": [
+          "alpha.fixture_dead_plain",
+          "gamma.Collider.process_bind_param"
+        ]
+      },
+      "rule_r10a": {
+        "status": "scored",
+        "n_certified": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positives": [
+          "alpha.T.process_literal_param"
+        ],
+        "false_negatives": [
+          "alpha.fixture_dead_plain",
+          "gamma.Collider.process_bind_param"
+        ]
+      },
+      "rule_r10b": {
+        "status": "scored",
+        "n_certified": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positives": [
+          "alpha.T.coerce_compared_value",
+          "alpha.T.process_literal_param",
+          "alpha.T.process_result_value"
+        ],
+        "false_negatives": [
+          "alpha.fixture_dead_plain",
+          "gamma.Collider.process_bind_param"
+        ]
+      }
+    },
+    "manifest_missed_live_symbols": [],
+    "fixture_env_occurrence": {
+      "alpha.fixture_dead_plain": 0,
+      "gamma.Collider.process_bind_param": 0
+    },
+    "n_immune_dead_symbols": 2,
+    "real_framework_probes": {
+      "logging_into_rich": {
+        "status": "executed",
+        "driver": "stdlib logging (out of corpus)",
+        "object": "rich.logging.RichHandler",
+        "object_source": "/media/pope/projecteo/python_libs/site-packages/rich/logging.py",
+        "dispatched": [
+          "emit",
+          "handle"
+        ],
+        "not_dispatched": [
+          "close",
+          "flush"
+        ],
+        "observation": "instance attribute spy; a lower bound on reachability"
+      },
+      "sqlalchemy_type_protocol": {
+        "status": "executed",
+        "driver": "sqlalchemy 2.0.23 TypeDecorator.bind_processor (out of corpus)",
+        "object": "google.adk.sessions.schemas.shared.DynamicJSON",
+        "object_source": "/home/pope/.local/lib/python3.10/site-packages/google/adk/sessions/schemas/shared.py",
+        "dispatched": [
+          "process_bind_param"
+        ],
+        "value_out": "'{\"k\": 1}'",
+        "observation": "class attribute spy; a lower bound on reachability"
+      }
+    }
+  }
+]
