@@ -98,3 +98,44 @@ certificate removal in `experiments/run-6.log`.
 **N10's H1, measured: REFUTED_UNSOUND.** `synthetic_protocol_repo`, written-down truth, **executed** out-of-corpus driver. `PROTOCOL_NAMES` certifies `alpha.T.process_literal_param`, which the driver dispatches — precision 0.0, 1 false positive. An open list withholds only what it lists, so an unlisted protocol name is certified: it fails **unsoundly**, strictly worse than run 6's over-blocking conventions.
 
 **N11 (impossibility result): NOVEL in framing, prior art in ingredients — UNVERIFIED, flagged.** The 1/2 bound and the "reflection interface is irreducibly external" formulation were found in **no** source. Ingredients that plausibly already contain it: the **closed-world assumption** (Reiter) in knowledge bases — the same argument that absence of evidence is not evidence of absence; **Cook & Goodwin (1986)** on the undecidability of dynamic dispatch; reflection analysis in Python static analysis (Pysa, TamiFlex). **I did not verify any of these three and a human must.** The loop has now twice been wrong about a literature it had not read (run 6: PyCG uncited for six runs; run 7: Vulture's whitelist reinvented three times), so the honest prior on my own novelty verdicts is low.
+
+---
+
+## Run 9 — adversarial novelty check on the N11 claim set (recovered work)
+
+**Method.** Two sub-agents in parallel, on separate providers. One told to find prior art that
+**kills** the claim set; one told to assume the mathematics was **wrong** and find the error.
+Both were given the claim set and nothing else about the loop's reasoning. The second found the
+defect that mattered; see eq. row 30. Full detail: `equations.md` rows 28–31, `experiments/run-9-n11-reproduce.log`.
+
+### Novelty: 46 → **15/100**. Engineering track, no LaTeX paper. Lowest in the loop's history.
+
+| # | Claim | Verdict | Basis |
+|---|---|---|---|
+| 1 | Any deterministic in-corpus gate scores ≤ 1/2 on the protocol class | **PRIOR-ART-KILL** | Rice 1953; Reiter 1978 (closed-world assumption); Cook & Goodwin, ECOOP 1999; PyCG arXiv:2103.00587 |
+| 2 | The achievable (certified, accuracy) set is a two-point dichotomy | **INCREMENTAL** | the CWA binary; the 2560-gate enumeration is implementation detail |
+| 3 | `accuracy = (n_dead + j)/\|C\|`, one bit worth `1/\|C\|` | **PRIOR-ART-KILL as concept**, UNVERIFIED-NOVEL as a named law | linear arithmetic; **and after eq. row 30 it is a law about an unsound gate family** |
+| 4 | Only a per-symbol declaration lifts the bound; that shape is an allowlist | **PRIOR-ART-KILL** | **Vulture's shipped whitelist, verified in-repo** — the loop had already killed N10 for exactly this in run 7 and then re-derived it |
+| 5 | Interface cost: arbitrary = `ν(M)` bits, allowlist = 5.13 bits more | **INCREMENTAL** | Wolpert 1996 (NFLT); `6.129283` NO SOURCE FOUND as a prior published value |
+| 6 | 21/21 real-repo certificates are class-level, not per-symbol | **INCREMENTAL** | the 21/21 measurement is new data; the structural claim is the standard open-world limit (cf. Ray et al., FSE 2017) |
+| 7 | Run 7's 0.875 is predicted by the law | **INCREMENTAL** | arithmetic verification of claim 3 |
+
+**Three most damaging citations.**
+1. **Reiter, R. (1978), "On Closed World Data Bases"** — the formalisation behind the exact binary the loop presented as a finding. Verified via the Wikipedia CWA entry; the primary source was not reached.
+2. **`jendrikseipp/vulture`, README, "Whitelists"** — ships the per-symbol allowlist the claim calls irreducible. Verified in-repo. This is the *second* time this loop rediscovered Vulture's mechanism (run 7 killed N10 on it) and then re-derived it as a discovery.
+3. **Salis et al., PyCG, arXiv:2103.00587** — the Python CPG baseline this loop never cited until run 6; 99.2% precision / 69.9% recall with dynamic calls left unresolved, i.e. the open-world limit is already accepted in the literature.
+
+**Could NOT be verified — recorded, not papered over.**
+- Cook & Goodwin (ECOOP 1999) URL: DBLP and Google Scholar returned 403/429. Citation form confirmed via Netzer 2011's reference list. **UNVERIFIED-URL, VERIFIED-CITATION.**
+- Ray et al., FSE 2017 (Sourcerer), DOI 10.1145/3243734.3243803: ACM DL 403. **UNVERIFIED-URL, VERIFIED-CITATION.**
+- Any published information-theoretic lower bound of the form *"N bits of interface declaration are required to analyse P"*: **NO SOURCE FOUND** after arXiv and web attempts. Not fabricated.
+- Any prior publication of the **19683-gate enumeration** or the **6.129283-bit** value: **NO SOURCE FOUND.** These are this loop's measurements, not prior results.
+
+**The finding that the check produced, and it was not a novelty result at all.** The math
+verification was asked to refute the law and asked *what is a bit, and is the achiever sound?*
+The second question is the one no assertion in nine runs had asked: the enumeration maximised
+**agreement** over an **unconstrained** gate family, so its reported maximum was attained by the
+gate that certifies live symbols. Five self-checks missed it because the agreement and sound
+curves coincide at `j = 0`. The loop's own self-checks assert that the docstring's claims hold;
+they never assert that the *quantity being maximised* is the quantity the deliverable needs.
+Retraction and both repaired curves: `equations.md` row 30.

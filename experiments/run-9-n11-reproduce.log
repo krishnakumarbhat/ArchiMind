@@ -1,0 +1,1360 @@
+[
+ {
+  "variation": "n11_interface_index_dichotomy",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the fifth consecutive run. The dead term is UNSCORED, so harness_score cannot move; the deliverable is the DERIVED bound, the stated dichotomy and the measured interface size.",
+  "parity": {
+   "fixture": "synthetic_cpg_repo",
+   "source": "run_one('v2_treesitter_cpg', 'synthetic_cpg_repo')",
+   "measured": {
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "dead_code_acc": 0.3333,
+    "cpg_resolution_rate": 0.5,
+    "blast_latency_ms": 0.51,
+    "struct_false_edges": []
+   },
+   "identical_to_run7": true,
+   "diffs": {},
+   "composite": 86.24,
+   "composite_runs_2_to_7": 86.23,
+   "note": "every scored QUALITY quantity must be bit-identical. blast_latency_ms and peak_ram_mb are the resource terms and are the only fields allowed to move; the composite delta is attributed to them alone."
+  },
+  "index_fixture": {
+   "repo": "synthetic_index_repo",
+   "driver_status": "executed",
+   "driver_protocol_tuple": [
+    "process_bind_param",
+    "process_result_value",
+    "coerce_compared_value",
+    "process_literal_param"
+   ],
+   "n_reached_by_execution": 4,
+   "reached_symbols": [
+    "alpha.T.coerce_compared_value",
+    "alpha.T.process_bind_param",
+    "alpha.T.process_literal_param",
+    "alpha.T.process_result_value"
+   ],
+   "liveness_derivation": "EXECUTED: the sentinel set returned by the out-of-corpus driver",
+   "n_class_methods": 8,
+   "n_predicted_dead": 8,
+   "n_e_classes": 1,
+   "n_mixed_classes": 1,
+   "class_sizes": [
+    8
+   ],
+   "mixed_class_split": [
+    {
+     "dead": 4,
+     "live": 4
+    }
+   ],
+   "nu": 1,
+   "derived_bound": 0.5,
+   "bound_is_derived_not_literal": true,
+   "max_accuracy_conjunctive": {
+    "n_gates": 19683,
+    "sound_only": false,
+    "n_symbols_scored": 8,
+    "max_accuracy": 0.5,
+    "achieved_by": "TRUE",
+    "closed_form_prediction": 0.5,
+    "matches_closed_form": true,
+    "min_accuracy": 0.5
+   },
+   "max_accuracy_all_gates_4_features": {
+    "n_gates": 65536,
+    "sound_only": false,
+    "n_symbols_scored": 8,
+    "max_accuracy": 0.5,
+    "achieved_by": "mask0000000000000000",
+    "closed_form_prediction": 0.5,
+    "matches_closed_form": true,
+    "min_accuracy": 0.5
+   },
+   "zero_variance_across_gates": true,
+   "pareto_frontier": {
+    "n_gates": 19683,
+    "achievable_points": [
+     [
+      0,
+      8
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "n_points": 2,
+    "is_binary_dichotomy": true,
+    "sound_points_certify": [
+     0
+    ],
+    "sound_points_all_zero": true
+   },
+   "dichotomy_is_exact": true,
+   "interface_bit_control": {
+    "max_accuracy_without_any_declaration": 0.5,
+    "per_class_declaration": {
+     "measurable": false,
+     "why": "no class map supplied; the answer is UNKNOWN, not zero",
+     "expressible_as": [
+      "class T(Protocol)",
+      "@runtime_checkable",
+      "a written base class",
+      "__all__",
+      "a docstring",
+      "an entry in a config file keyed by class"
+     ]
+    },
+    "global_constant_declaration": {
+     "cost_bits": 1,
+     "max_accuracy": 0.5,
+     "lift": 0.0,
+     "constant_value_true": 0.5,
+     "constant_value_false": 0.5,
+     "worth_zero": true
+    },
+    "per_symbol_declaration": {
+     "cost_symbols": 8,
+     "cost_bits_information": 6.129283,
+     "max_accuracy": 1.0,
+     "lift": 0.5,
+     "reaches_one": true,
+     "expressible_as": [
+      "a bare-name allowlist",
+      "Vulture's whitelist"
+     ]
+    },
+    "one_bit_suffices": false,
+    "retracted_claim_one_bit": "the earlier control reported one_bit_suffices=True, lift=0.5; its 'bit' was a per-symbol labelling, so the claim was a tautology and it contradicted this module's own value curve. Retracted, not deleted.",
+    "retracted_claim_class_level_zero": "the earlier control reported class_level lift == 0.0, 'worth exactly zero'. TWO independent faults, both recorded. (i) Its arm appended ONE value to EVERY symbol, so it measured a GLOBAL constant, not a per-class declaration, and it then reported the global-constant result under the per-class shape's name. (ii) The predicate that replaced it was ALSO wrong at first: it counted classes SPANNING two E-classes, which buys nothing, instead of E-classes SPLIT across two classes, which is the only way a per-class value separates symbols. Fault (ii) reported 4/6/6/5 classes and would have appeared to SUPPORT the retracted claim; the correct predicate reports 2/3, 3/3, 5/6, 2/7 of E-classes split, covering 201/110/243/409 predicted-dead symbols, up to 100 classes in one E-class. Refuted by the loop's own run-7 measurement too: a per-class declaration (a written base class) removed 9 real-repo certificates. Retracted, not deleted.",
+    "interpretation": "the bound is the absence of a PER-SYMBOL declaration; a per-class declaration buys lift exactly when it splits an E-class, which partition_refinement() shows it does on every real repo measured, so the class-level mechanisms of the typing ecosystem are NOT worthless here -- the retracted zero was a mislabelled global-constant control read through an inverted predicate; a global constant is worth nothing at all; and the per-symbol shape is an allowlist, which run 7 already identified as shipped prior art"
+   },
+   "stated_claims": [
+    {
+     "claim": "dichotomy_has_exactly_two_points",
+     "expected": 2,
+     "measured": 2,
+     "holds": true
+    },
+    {
+     "claim": "sound_point_certifies_nothing",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "dichotomy_pairs",
+     "expected": [
+      [
+       0,
+       4
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "measured": [
+      [
+       0,
+       4
+      ],
+      [
+       1,
+       0
+      ]
+     ],
+     "holds": true
+    },
+    {
+     "claim": "dichotomy_coordinate_is_class_size_not_dead_size",
+     "expected": {
+      "unsound_point": 4,
+      "class_size": 4,
+      "dead_members": 2,
+      "refuted_point_reachable": false
+     },
+     "measured": {
+      "unsound_point": 4,
+      "class_size": 4,
+      "dead_members": 2,
+      "refuted_point_reachable": false
+     },
+     "holds": true
+    },
+    {
+     "claim": "fibre_bound_max(|D|,|L|)/|C| [conjunctive]",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "bound_is_not_gate_dependent_min==max [conjunctive]",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "fibre_bound_max(|D|,|L|)/|C| [exhaustive4]",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "bound_is_not_gate_dependent_min==max [exhaustive4]",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "invariance_in_m_all_half",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "invariance_in_m_zero_variance",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "general_formula_m_classes_of_size_2",
+     "expected": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "measured": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "holds": true
+    },
+    {
+     "claim": "agreement_curve_equals_(n_dead+j)/|C|",
+     "expected": [
+      0.5,
+      0.625,
+      0.75,
+      0.875,
+      1.0
+     ],
+     "measured": [
+      0.5,
+      0.625,
+      0.75,
+      0.875,
+      1.0
+     ],
+     "holds": true
+    },
+    {
+     "claim": "agreement_one_correct_bit_is_worth_1_over_|C|",
+     "expected": 0.125,
+     "measured": 0.125,
+     "holds": true
+    },
+    {
+     "claim": "sound_curve_is_flat_then_1",
+     "expected": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      1.0
+     ],
+     "measured": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      1.0
+     ],
+     "holds": true
+    },
+    {
+     "claim": "sound_curve_matches_its_closed_form",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "curves_agree_only_at_j0",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "sound_marginal_before_last_bit_is_zero",
+     "expected": 0.0,
+     "measured": 0.0,
+     "holds": true
+    },
+    {
+     "claim": "sound_last_bit_is_worth_the_whole_gap",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "no_sound_gate_exceeds_the_majority_before_the_last_bit",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "arbitrary_spec_bits_is_the_answer_length_not_a_saving",
+     "expected": 1,
+     "measured": 1,
+     "holds": true
+    },
+    {
+     "claim": "spec_bits_keys_equal_the_retracted_code_bits_keys",
+     "expected": [
+      1,
+      2.584963
+     ],
+     "measured": [
+      1,
+      2.584963
+     ],
+     "holds": true
+    },
+    {
+     "claim": "allowlist_at_least_as_expensive",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "allowlist_gap_positive_when_class_exceeds_2",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "accountings_coincide_only_at_size_2",
+     "expected": [
+      1,
+      1.0,
+      0.0
+     ],
+     "measured": [
+      1,
+      1.0,
+      0.0
+     ],
+     "holds": true
+    },
+    {
+     "claim": "no_declaration_makes_every_gate_sound",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "global_constant_declaration_is_worth_zero",
+     "expected": 0.0,
+     "measured": 0.0,
+     "holds": true
+    },
+    {
+     "claim": "global_constant_reaches_the_bound_not_beyond",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "per_class_declaration_worth_zero_when_class_refines",
+     "expected": 0.0,
+     "measured": 0.0,
+     "holds": true
+    },
+    {
+     "claim": "per_symbol_declaration_reaches_one",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "per_symbol_declaration_costs_one_symbol_per_class_member",
+     "expected": 4,
+     "measured": 4,
+     "holds": true
+    },
+    {
+     "claim": "retracted_one_bit_suffices_is_false",
+     "expected": false,
+     "measured": false,
+     "holds": true
+    },
+    {
+     "claim": "retracted_class_level_zero_is_refuted_by_a_split_class",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "per_class_lift_on_straddling_fixture",
+     "expected": 0.5,
+     "measured": 0.5,
+     "holds": true
+    },
+    {
+     "claim": "per_class_reaches_one_on_straddling_fixture",
+     "expected": 1.0,
+     "measured": 1.0,
+     "holds": true
+    },
+    {
+     "claim": "per_class_worth_zero_on_the_coarsening_map",
+     "expected": 0.0,
+     "measured": 0.0,
+     "holds": true
+    },
+    {
+     "claim": "split_predicate_detects_a_split",
+     "expected": false,
+     "measured": false,
+     "holds": true
+    },
+    {
+     "claim": "split_predicate_detects_a_coarsening",
+     "expected": true,
+     "measured": true,
+     "holds": true
+    },
+    {
+     "claim": "n_split_e_classes_on_the_refuting_map",
+     "expected": 1,
+     "measured": 1,
+     "holds": true
+    }
+   ],
+   "interface_value_curve": {
+    "applicable": true,
+    "class_size": 8,
+    "n_dead": 4,
+    "n_live": 4,
+    "n_gates_per_row": 59049,
+    "rows": [
+     {
+      "correct_external_bits": 0,
+      "agreement_max_accuracy": 0.5,
+      "agreement_achieved_by": "TRUE",
+      "agreement_closed_form": 0.5,
+      "agreement_matches_closed_form": true,
+      "sound_max_accuracy": 0.5,
+      "sound_achieved_by": "f9",
+      "sound_closed_form": 0.5,
+      "sound_matches_closed_form": true,
+      "curves_agree": true,
+      "marginal_value_of_one_bit_agreement": null,
+      "marginal_value_of_one_bit_sound": null
+     },
+     {
+      "correct_external_bits": 1,
+      "agreement_max_accuracy": 0.625,
+      "agreement_achieved_by": "~f9",
+      "agreement_closed_form": 0.625,
+      "agreement_matches_closed_form": true,
+      "sound_max_accuracy": 0.5,
+      "sound_achieved_by": "f8",
+      "sound_closed_form": 0.5,
+      "sound_matches_closed_form": true,
+      "curves_agree": false,
+      "marginal_value_of_one_bit_agreement": 0.125,
+      "marginal_value_of_one_bit_sound": 0.0
+     },
+     {
+      "correct_external_bits": 2,
+      "agreement_max_accuracy": 0.75,
+      "agreement_achieved_by": "~f9",
+      "agreement_closed_form": 0.75,
+      "agreement_matches_closed_form": true,
+      "sound_max_accuracy": 0.5,
+      "sound_achieved_by": "f8",
+      "sound_closed_form": 0.5,
+      "sound_matches_closed_form": true,
+      "curves_agree": false,
+      "marginal_value_of_one_bit_agreement": 0.125,
+      "marginal_value_of_one_bit_sound": 0.0
+     },
+     {
+      "correct_external_bits": 3,
+      "agreement_max_accuracy": 0.875,
+      "agreement_achieved_by": "~f9",
+      "agreement_closed_form": 0.875,
+      "agreement_matches_closed_form": true,
+      "sound_max_accuracy": 0.5,
+      "sound_achieved_by": "f8",
+      "sound_closed_form": 0.5,
+      "sound_matches_closed_form": true,
+      "curves_agree": false,
+      "marginal_value_of_one_bit_agreement": 0.125,
+      "marginal_value_of_one_bit_sound": 0.0
+     },
+     {
+      "correct_external_bits": 4,
+      "agreement_max_accuracy": 1.0,
+      "agreement_achieved_by": "~f9",
+      "agreement_closed_form": 1.0,
+      "agreement_matches_closed_form": true,
+      "sound_max_accuracy": 1.0,
+      "sound_achieved_by": "~f9",
+      "sound_closed_form": 1.0,
+      "sound_matches_closed_form": true,
+      "curves_agree": true,
+      "marginal_value_of_one_bit_agreement": 0.125,
+      "marginal_value_of_one_bit_sound": 0.5
+     }
+    ],
+    "all_rows_match_closed_form": true,
+    "marginal_value_of_one_bit_agreement": 0.125,
+    "law_agreement": "accuracy = (n_dead + j) / |C|; one correct external bit is worth 1/|C|. AGREEMENT over an unconstrained gate family; the achiever certifies live symbols",
+    "law_sound": "accuracy = n_live / |C| for j < n_live, and 1.0 at j = n_live; a bit identifying a LIVE symbol licenses one abstention and nothing else, so the curve is flat until the last bit",
+    "marginal_value_of_one_bit_sound_before_last": 0.0,
+    "marginal_value_of_last_bit_sound": 0.5,
+    "curves_diverge_above_j0": true
+   },
+   "n10_manifest_lands_on_the_law": {
+    "correct_bits_supplied_by_manifest": 3,
+    "law_predicts_accuracy": 0.875,
+    "measured_accuracy": 0.875,
+    "prediction_holds": true,
+    "curve_it_lands_on": "agreement",
+    "sound_curve_value_at_the_same_j": 0.5,
+    "why_it_matters": "run 7 recorded 0.875 for the manifest with no law behind it. Here 0.875 is PREDICTED from the number of correct bits it supplies, so the number is explained rather than merely observed -- and the unexplained part (the one missed name) is exactly the residual. It lands on the AGREEMENT curve, not the sound one, which is the whole point: the manifest is an unsound gate and 0.875 is its agreement accuracy, so the law predicts it correctly while licensing nothing."
+   },
+   "invariance_in_m": [
+    {
+     "m_mixed_pairs": 1,
+     "n_symbols": 2,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 2,
+     "n_symbols": 4,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 4,
+     "n_symbols": 8,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 8,
+     "n_symbols": 16,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 16,
+     "n_symbols": 32,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 32,
+     "n_symbols": 64,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 64,
+     "n_symbols": 128,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 128,
+     "n_symbols": 256,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 256,
+     "n_symbols": 512,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "m_mixed_pairs": 512,
+     "n_symbols": 1024,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    }
+   ],
+   "invariance_single_class": [
+    {
+     "class_size": 2,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 4,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 8,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 16,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 32,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 64,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    },
+    {
+     "class_size": 128,
+     "best_accuracy": 0.5,
+     "worst_accuracy": 0.5,
+     "variance_across_gates": 0.0,
+     "invariant": true
+    }
+   ],
+   "interface_cost_arbitrary_bit": 1,
+   "interface_cost_allowlist": {
+    "arbitrary_spec_bits": 1,
+    "allowlist_spec_bits": 6.129283,
+    "arbitrary_code_bits": 1,
+    "allowlist_code_bits": 6.129283,
+    "code_bits_RETRACTED": "the two keys above are SPECIFICATION bits; the *_code_bits reading was a misnomer and is retained only so the stale run-8 artefact stays diffable",
+    "bits_are": "specification/information bits, directly comparable to each other",
+    "allowlist_at_least_as_expensive": true,
+    "gap_bits": 5.129283,
+    "allowlist_names_supplied": 4,
+    "allowlist_covers_all_mixed_classes": false,
+    "mixed_classes_covered_by_allowlist": 0,
+    "every_gate_sound_impossible": true,
+    "why": "the labelling is chosen after the gate is fixed, so any gate that certifies a member of a mixed class is refuted by labelling that member live; no declaration short of splitting every mixed class prevents this, and none can make a certifying gate sound"
+   },
+   "n10_manifest_allowlist_cost_bits": {
+    "arbitrary_spec_bits": 1,
+    "allowlist_spec_bits": 6.129283,
+    "arbitrary_code_bits": 1,
+    "allowlist_code_bits": 6.129283,
+    "code_bits_RETRACTED": "the two keys above are SPECIFICATION bits; the *_code_bits reading was a misnomer and is retained only so the stale run-8 artefact stays diffable",
+    "bits_are": "specification/information bits, directly comparable to each other",
+    "allowlist_at_least_as_expensive": true,
+    "gap_bits": 5.129283,
+    "allowlist_names_supplied": 20,
+    "allowlist_covers_all_mixed_classes": false,
+    "mixed_classes_covered_by_allowlist": 0,
+    "every_gate_sound_impossible": true,
+    "why": "the labelling is chosen after the gate is fixed, so any gate that certifies a member of a mixed class is refuted by labelling that member live; no declaration short of splitting every mixed class prevents this, and none can make a certifying gate sound"
+   },
+   "n10_manifest_covers_fixture": false,
+   "loop_gates_on_this_fixture": {
+    "run5_unreferenced": {
+     "certified": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two",
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_certified": 8,
+     "false_positives": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_false_positives": 4,
+     "true_positives": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two"
+     ],
+     "n_true_positives": 4,
+     "precision": 0.5,
+     "recall": 1.0,
+     "accuracy": 0.5
+    },
+    "run6_export_boundary": {
+     "certified": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two",
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_certified": 8,
+     "false_positives": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_false_positives": 4,
+     "true_positives": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two"
+     ],
+     "n_true_positives": 4,
+     "precision": 0.5,
+     "recall": 1.0,
+     "accuracy": 0.5
+    },
+    "run7_base_witness": {
+     "certified": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two",
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_certified": 8,
+     "false_positives": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "n_false_positives": 4,
+     "true_positives": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two"
+     ],
+     "n_true_positives": 4,
+     "precision": 0.5,
+     "recall": 1.0,
+     "accuracy": 0.5
+    },
+    "run7_plus_n10_manifest": {
+     "certified": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two",
+      "alpha.T.process_literal_param"
+     ],
+     "n_certified": 5,
+     "false_positives": [
+      "alpha.T.process_literal_param"
+     ],
+     "n_false_positives": 1,
+     "true_positives": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two"
+     ],
+     "n_true_positives": 4,
+     "precision": 0.8,
+     "recall": 1.0,
+     "accuracy": 0.875
+    }
+   },
+   "dichotomy_observed": {
+    "every_gate_that_certifies_anything_here_is_unsound": false,
+    "the_sound_option_certifies": 0
+   },
+   "ambiguity_report": {
+    "n_certified": 8,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 8,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 1,
+    "demonstrated_live_in_ambiguous_class": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_bind_param",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value"
+    ],
+    "interface_lower_bound_bits_demonstrated": 1,
+    "largest_ambiguous_class": 8,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one"
+   }
+  },
+  "invariance_in_m": [
+   {
+    "m_mixed_pairs": 1,
+    "n_symbols": 2,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 2,
+    "n_symbols": 4,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 4,
+    "n_symbols": 8,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 8,
+    "n_symbols": 16,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 16,
+    "n_symbols": 32,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 32,
+    "n_symbols": 64,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 64,
+    "n_symbols": 128,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 128,
+    "n_symbols": 256,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 256,
+    "n_symbols": 512,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "m_mixed_pairs": 512,
+    "n_symbols": 1024,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   }
+  ],
+  "invariance_single_class": [
+   {
+    "class_size": 2,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 4,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 8,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 16,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 32,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 64,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   },
+   {
+    "class_size": 128,
+    "best_accuracy": 0.5,
+    "worst_accuracy": 0.5,
+    "variance_across_gates": 0.0,
+    "invariant": true
+   }
+  ],
+  "corpus_ambiguity": [
+   {
+    "n_certified": 1,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 0,
+    "fraction_not_per_symbol": 0.0,
+    "n_ambiguous_classes": 0,
+    "interface_lower_bound_bits": 0,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 0,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_cpg_repo",
+    "n_predicted_dead": 3,
+    "n_e_classes_over_dead_set": 2,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 2,
+     "n_split_e_classes": 0,
+     "split_fraction": 0.0,
+     "n_symbols_in_split_e_classes": 0,
+     "class_partition_coarsens_e_partition": true,
+     "per_class_lift_is_zero": true,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 0
+    },
+    "certification_rate": 0.3333,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 1,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 0,
+    "fraction_not_per_symbol": 0.0,
+    "n_ambiguous_classes": 0,
+    "interface_lower_bound_bits": 0,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 0,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_promo_repo",
+    "n_predicted_dead": 5,
+    "n_e_classes_over_dead_set": 2,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 2,
+     "n_split_e_classes": 1,
+     "split_fraction": 0.5,
+     "n_symbols_in_split_e_classes": 4,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 2
+    },
+    "certification_rate": 0.2,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 2,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 2,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 2,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_taint_repo",
+    "n_predicted_dead": 4,
+    "n_e_classes_over_dead_set": 2,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 2,
+     "n_split_e_classes": 2,
+     "split_fraction": 1.0,
+     "n_symbols_in_split_e_classes": 4,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 2
+    },
+    "certification_rate": 0.5,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 3,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 3,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 3,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_exports_repo",
+    "n_predicted_dead": 7,
+    "n_e_classes_over_dead_set": 3,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 3,
+     "n_split_e_classes": 3,
+     "split_fraction": 1.0,
+     "n_symbols_in_split_e_classes": 7,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 3
+    },
+    "certification_rate": 0.4286,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 6,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 6,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 6,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_protocol_repo",
+    "n_predicted_dead": 8,
+    "n_e_classes_over_dead_set": 2,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 2,
+     "n_split_e_classes": 2,
+     "split_fraction": 1.0,
+     "n_symbols_in_split_e_classes": 8,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 2
+    },
+    "certification_rate": 0.75,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 8,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 8,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 1,
+    "demonstrated_live_in_ambiguous_class": [
+     "alpha.T.process_bind_param"
+    ],
+    "interface_lower_bound_bits_demonstrated": 1,
+    "largest_ambiguous_class": 8,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "synthetic_index_repo",
+    "n_predicted_dead": 8,
+    "n_e_classes_over_dead_set": 1,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 1,
+     "n_split_e_classes": 0,
+     "split_fraction": 0.0,
+     "n_symbols_in_split_e_classes": 0,
+     "class_partition_coarsens_e_partition": true,
+     "per_class_lift_is_zero": true,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 0
+    },
+    "certification_rate": 1.0,
+    "is_real_repo": false,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 4,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 4,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 4,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "pallets/flask",
+    "n_predicted_dead": 204,
+    "n_e_classes_over_dead_set": 3,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 3,
+     "n_split_e_classes": 2,
+     "split_fraction": 0.666667,
+     "n_symbols_in_split_e_classes": 201,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 19
+    },
+    "certification_rate": 0.0196,
+    "is_real_repo": true,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 17,
+    "n_classes_touched": 1,
+    "n_certified_in_multi_symbol_class": 17,
+    "fraction_not_per_symbol": 1.0,
+    "n_ambiguous_classes": 1,
+    "interface_lower_bound_bits": 1,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 22,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "psf/requests",
+    "n_predicted_dead": 110,
+    "n_e_classes_over_dead_set": 3,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 3,
+     "n_split_e_classes": 3,
+     "split_fraction": 1.0,
+     "n_symbols_in_split_e_classes": 110,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 14
+    },
+    "certification_rate": 0.1545,
+    "is_real_repo": true,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 0,
+    "n_classes_touched": 0,
+    "n_certified_in_multi_symbol_class": 0,
+    "fraction_not_per_symbol": null,
+    "n_ambiguous_classes": 0,
+    "interface_lower_bound_bits": 0,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 0,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "tiangolo/sqlmodel",
+    "n_predicted_dead": 246,
+    "n_e_classes_over_dead_set": 6,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 6,
+     "n_split_e_classes": 5,
+     "split_fraction": 0.833333,
+     "n_symbols_in_split_e_classes": 243,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 100
+    },
+    "certification_rate": 0.0,
+    "is_real_repo": true,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   },
+   {
+    "n_certified": 0,
+    "n_classes_touched": 0,
+    "n_certified_in_multi_symbol_class": 0,
+    "fraction_not_per_symbol": null,
+    "n_ambiguous_classes": 0,
+    "interface_lower_bound_bits": 0,
+    "n_classes_with_demonstrated_live_member": 0,
+    "demonstrated_live_in_ambiguous_class": [],
+    "interface_lower_bound_bits_demonstrated": 0,
+    "largest_ambiguous_class": 0,
+    "verdict": "every certificate in a multi-symbol class is a CLASS-level verdict, not a per-symbol one, and cannot be reported as a per-symbol one",
+    "repo": "Textualize/rich",
+    "n_predicted_dead": 452,
+    "n_e_classes_over_dead_set": 7,
+    "e_class_split_by_python_class": {
+     "n_e_classes": 7,
+     "n_split_e_classes": 2,
+     "split_fraction": 0.285714,
+     "n_symbols_in_split_e_classes": 409,
+     "class_partition_coarsens_e_partition": false,
+     "per_class_lift_is_zero": false,
+     "verdict": "a per-class declaration buys lift exactly when one E-class holds members of two or more Python classes; the lift is zero iff the class partition coarsens the E-class partition",
+     "largest_n_classes_in_one_e_class": 59
+    },
+    "certification_rate": 0.0,
+    "is_real_repo": true,
+    "ground_truth_note": "no ground truth on a real repo, so this is a bound on the AMBIGUITY of the output, not an accuracy claim. The direction is conservative: a class is counted ambiguous whenever it has more than one member, whatever the truth."
+   }
+  ],
+  "n11b_class_level_declaration_retraction": {
+   "retracted_claim": "a class-level declaration (class T(Protocol), @runtime_checkable, a written base, __all__, a docstring) is worth EXACTLY ZERO bits, because it is constant on the class and hence constant on the class's evidence",
+   "fault_1_mislabelled_arm": "the control appended ONE value to EVERY symbol, so it measured a GLOBAL constant and reported it under the name class_level",
+   "fault_2_inverted_predicate": "the first replacement counted classes SPANNING two E-classes, which buys nothing, instead of E-classes SPLIT across two classes, which is the only way a per-class value separates symbols. It reported 4/6/6/5 and would have appeared to SUPPORT the retracted claim",
+   "corrected_statement": "a per-class declaration buys lift exactly when it splits an E-class; the lift is zero iff the class partition coarsens the E-class partition",
+   "n_e_classes_split_real": [
+    2,
+    3,
+    5,
+    2
+   ],
+   "n_e_classes_total_real": [
+    3,
+    3,
+    6,
+    7
+   ],
+   "split_fraction_real": [
+    0.666667,
+    1.0,
+    0.833333,
+    0.285714
+   ],
+   "predicted_dead_symbols_in_a_split_e_class_real": [
+    201,
+    110,
+    243,
+    409
+   ],
+   "largest_n_classes_in_one_e_class_real": [
+    19,
+    14,
+    100,
+    59
+   ],
+   "any_real_repo_fully_unsplit": false,
+   "verdict": "REFUTED on all four real repos; the retracted zero is withdrawn",
+   "corroboration_from_run7": "run 7's inheritance witness IS a per-class declaration and removed 9 real-repo certificates, which a globally constant feature cannot do",
+   "p4_verdict_prior_art": "PRIOR_ART_STANDARD (a classifier is constant on a fibre)",
+   "p3_verdict_prior_art": "NOVEL-but-taxonomic, literature link UNVERIFIED",
+   "novelty_score": 22
+  },
+  "real_repo_ambiguity_summary": {
+   "n_real_repos": 4,
+   "total_certified": 21,
+   "total_certified_not_per_symbol": 21,
+   "total_interface_lower_bound_bits": 2,
+   "total_demonstrated_live_bits": 0,
+   "per_repo": [
+    {
+     "repo": "pallets/flask",
+     "certified": 4,
+     "not_per_symbol": 4,
+     "fraction": 1.0,
+     "bits": 1
+    },
+    {
+     "repo": "psf/requests",
+     "certified": 17,
+     "not_per_symbol": 17,
+     "fraction": 1.0,
+     "bits": 1
+    },
+    {
+     "repo": "tiangolo/sqlmodel",
+     "certified": 0,
+     "not_per_symbol": 0,
+     "fraction": null,
+     "bits": 0
+    },
+    {
+     "repo": "Textualize/rich",
+     "certified": 0,
+     "not_per_symbol": 0,
+     "fraction": null,
+     "bits": 0
+    }
+   ]
+  }
+ }
+]

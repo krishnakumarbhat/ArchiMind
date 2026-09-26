@@ -396,7 +396,38 @@ def _fixture_dir(repo):
         return build_exports_fixture()
     if repo == "synthetic_protocol_repo":
         return build_protocol_fixture()
+    if repo == "synthetic_index_repo":
+        return build_index_fixture()
     return None
+
+
+def build_index_fixture(path="experiments/fixtures/synthetic_index_repo"):
+    """One ambiguous class of eight: four dispatched methods, four dead ones.
+
+    Run 7's discriminating pair had two members, and a two-member result invites the
+    objection that it is a small-sample artefact. This fixture puts FOUR live and
+    FOUR dead methods in a SINGLE class with identical in-corpus evidence -- same
+    class, no written base, no ``__all__``, no driver-owned path, no name
+    convention, each leaf mentioned exactly once -- so the ambiguity is 8 symbols
+    deep and still cannot be resolved. Liveness is adjudicated by EXECUTION in
+    ``scripts/run_n11_measurement.py``, not written down here.
+    """
+    os.makedirs(path, exist_ok=True)
+    live = ("process_bind_param", "process_result_value",
+            "coerce_compared_value", "process_literal_param")
+    dead = tuple(
+        f"_dead_never_dispatched_{w}" for w in ("one", "two", "three", "four")
+    )
+    body = ['class T:', '    """No base, no __all__, occ == 1 throughout."""', ""]
+    for name in live + dead:
+        body += [
+            f"    def {name}(self, value):",
+            f'        return "alpha.T.{name}"',
+            "",
+        ]
+    with open(os.path.join(path, "alpha.py"), "w") as fh:
+        fh.write("\n".join(body))
+    return path
 
 
 def build_protocol_fixture(
