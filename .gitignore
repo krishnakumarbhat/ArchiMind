@@ -1,3 +1,9 @@
+# Autoresearch driver runtime artifacts (never commit)
+.autoresearch-loop.lock
+.autoresearch-loop.log
+.autoresearch-stop
+.autoresearch_research-off
+
 # Environment variables and secrets
 .env
 .env.local
