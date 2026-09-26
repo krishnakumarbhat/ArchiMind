@@ -86,3 +86,15 @@ only). **No LaTeX paper.** Engineering track: the deliverable is the measured re
 node's own hypothesis, the `R(m)` theorem in `equations.md` row 22, the sign-corrected
 external-driver withholding clause in `src/05_export_boundary.py`, and the 48-of-75 real-repo
 certificate removal in `experiments/run-6.log`.
+
+---
+
+## Run 7 — adversarial novelty check (the check found the kill)
+
+**N10's protocol manifest: PRIOR ART, killed before implementation.** Vulture's documented remedy for a false positive is a hand-maintained external list: [vulture.readthedocs.io — "Whitelists"](https://vulture.readthedocs.io/en/stable/whitelists.html) instructs users to add used code to a Python module on the scanned path, and the package ships `vulture/whitelists/` for common packages. A declared protocol manifest is that mechanism under a different noun. Its matching bug is on the record: [jendrikseipp/vulture#430](https://github.com/jendrikseipp/vulture/issues/430) — "Whitelist matches by bare identifier name only … `used_names` is a single global set of bare strings … Any symbol, in any file, with the same name is permanently shielded." Run 6's retracted `setup_`/`teardown_` list was already a second instance; N10 proposed a third and larger one.
+
+**Run 6's `R(m)` theorem: prior art CONFIRMED, from Vulture's own source.** [vulture/core.py](https://github.com/jendrikseipp/vulture/blob/main/vulture/core.py) keeps one global `used_names` set of bare strings — this *is* `R(m) = all modules`, the identity over-approximation of eq. row 22. [Issue #417](https://github.com/jendrikseipp/vulture/pull/417) and #430 both request the per-module scoping that run 6 **proved unsound** (it certifies `lib.legacy.legacy_star_target`, which `app.main()` calls). This is the first prior-art *confirmation* in the loop's history, and it was found by the checker rather than by me.
+
+**N10's H1, measured: REFUTED_UNSOUND.** `synthetic_protocol_repo`, written-down truth, **executed** out-of-corpus driver. `PROTOCOL_NAMES` certifies `alpha.T.process_literal_param`, which the driver dispatches — precision 0.0, 1 false positive. An open list withholds only what it lists, so an unlisted protocol name is certified: it fails **unsoundly**, strictly worse than run 6's over-blocking conventions.
+
+**N11 (impossibility result): NOVEL in framing, prior art in ingredients — UNVERIFIED, flagged.** The 1/2 bound and the "reflection interface is irreducibly external" formulation were found in **no** source. Ingredients that plausibly already contain it: the **closed-world assumption** (Reiter) in knowledge bases — the same argument that absence of evidence is not evidence of absence; **Cook & Goodwin (1986)** on the undecidability of dynamic dispatch; reflection analysis in Python static analysis (Pysa, TamiFlex). **I did not verify any of these three and a human must.** The loop has now twice been wrong about a literature it had not read (run 6: PyCG uncited for six runs; run 7: Vulture's whitelist reinvented three times), so the honest prior on my own novelty verdicts is low.

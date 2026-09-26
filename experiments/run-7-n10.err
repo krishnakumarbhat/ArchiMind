@@ -1,0 +1,2 @@
+/home/pope/.local/lib/python3.10/site-packages/google/adk/features/_feature_decorator.py:72: UserWarning: [EXPERIMENTAL] feature PLUGGABLE_AUTH is enabled.
+  check_feature_enabled()

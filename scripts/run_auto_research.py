@@ -30,6 +30,7 @@ PROMOTE_MOD = importlib.import_module("src.02_trace_promote")
 GATE_MOD = importlib.import_module("src.03_metric_gate")
 DOMAIN_MOD = importlib.import_module("src.04_symbol_domain")
 EXPORT_MOD = importlib.import_module("src.05_export_boundary")
+PROTO_MOD = importlib.import_module("src.06_protocol_driver")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("auto_research")
@@ -40,6 +41,7 @@ REPOS = {
     "synthetic_promo_repo": None,  # local fixture, disjoint callers across folds
     "synthetic_taint_repo": None,  # local fixture, KNOWN dead-code ground truth
     "synthetic_exports_repo": None,  # local fixture, KNOWN ground truth + export surface
+    "synthetic_protocol_repo": None,  # local fixture, out-of-corpus protocol driver
     "pallets/flask": "https://codeload.github.com/pallets/flask/tar.gz/refs/heads/main",
     "psf/requests": "https://codeload.github.com/psf/requests/tar.gz/refs/heads/main",
     "tiangolo/sqlmodel": "https://codeload.github.com/tiangolo/sqlmodel/tar.gz/refs/heads/main",
@@ -49,7 +51,7 @@ REPOS = {
 VARIATIONS = ["v0_baseline_linear", "v1_eval_optimizer", "v2_treesitter_cpg",
               "v3_trace_informed_cpg", "v3_hybrid_cpg_rag",
               "v4_governance_harness", "v5_full_agentic_system", "n7_symbol_domain",
-              "n9_export_boundary"]
+              "n9_export_boundary", "n10_protocol_driver"]
 
 SKIP_DIRS = {"tests", "test", "docs", "examples", "vendor", "node_modules", ".git", "__pycache__"}
 SKIP_EXT = {".png", ".jpg", ".mp4", ".gif", ".ico", ".woff", ".ttf", ".bin", ".so"}
@@ -392,7 +394,118 @@ def _fixture_dir(repo):
         return build_taint_fixture()
     if repo == "synthetic_exports_repo":
         return build_exports_fixture()
+    if repo == "synthetic_protocol_repo":
+        return build_protocol_fixture()
     return None
+
+
+def build_protocol_fixture(
+    path="experiments/fixtures/synthetic_protocol_repo",
+    driver_path="experiments/fixtures/synthetic_protocol_driver",
+):
+    """Fixture where the OUT-OF-CORPUS DRIVER is the thing under test (N10).
+
+    The driver is a SEPARATE DIRECTORY. That is the whole point: it is never in
+    the analysed corpus, so no occurrence count over the corpus can see it, and
+    it is the only thing that can dispatch to the fixture's methods. It reaches
+    them by ``getattr(obj, name)`` over a protocol tuple it spells itself --
+    the shape of stdlib ``logging`` calling a Handler, and of SQLAlchemy calling
+    a user type.
+
+    Every method returns a UNIQUE SENTINEL, so the set of sentinels the driver
+    returns is the set of methods actually dispatched: the fixture's liveness
+    truth is an EXECUTION result, not an assertion about what ought to happen.
+
+    Clause by clause, so each rule's cost is measurable:
+
+      ``T.process_bind_param``      LIVE, driven. In the manifest.
+      ``T.process_result_value``    LIVE, driven. In the manifest.
+      ``T.coerce_compared_value``   LIVE, driven. In the manifest.
+      ``T.process_literal_param``   LIVE, driven. **NOT in the manifest** -- a
+                                     real documented SQLAlchemy TypeDecorator
+                                     hook that the hand list omits, so the
+                                     manifest's incompleteness is MEASURED
+                                     rather than asserted.
+      ``_fixture_dead_plain``       DEAD, private, name absent from the
+                                     environment corpus. The true positive
+                                     every rule should keep.
+      ``beta._make_iterencode``      DEAD, and its name occurs in stdlib json,
+                                     which ``beta`` imports -- so the
+                                     environment-augmented rule destroys a
+                                     true positive. The env rule's price.
+      ``beta._beta_dead_immune``    DEAD, private, and named so that NO
+                                     installed module mentions it.
+      ``Collider.process_bind_param`` DEAD, and its NAME collides with the
+                                     manifest. This is the manifest's price: a
+                                     name-keyed rule destroys a true positive.
+
+    Ground truth dead = {alpha.fixture_dead_plain, gamma.Collider.process_bind_param}.
+    """
+    os.makedirs(path, exist_ok=True)
+    files = {
+        "alpha.py": (
+            "class T:\n"
+            '    def process_bind_param(self, value):\n        return "alpha.T.process_bind_param"\n'
+            '    def process_result_value(self, value):\n        return "alpha.T.process_result_value"\n'
+            '    def coerce_compared_value(self, value):\n        return "alpha.T.coerce_compared_value"\n'
+            '    def process_literal_param(self, value):\n        return "alpha.T.process_literal_param"\n'
+            "def _fixture_dead_plain():\n    return 1\n"
+        ),
+        "gamma.py": (
+            "class Collider:\n"
+            '    def process_bind_param(self, value):\n        return "gamma.Collider.process_bind_param"\n'
+        ),
+        # Hole B, the OTHER out-of-corpus mechanism, in the same fixture: a
+        # driver the repository IMPORTS. `beta` imports json, so the
+        # environment corpus contains stdlib json -- five files, ~48kB -- and
+        # json/encoder.py names `_make_iterencode`. `_make_iterencode` here is
+        # DEAD, so the environment rule destroys a TRUE POSITIVE: the collision
+        # cost, with written-down truth. `_beta_dead_immune` is DEAD and named
+        # so that no installed module mentions it, so it is the true positive
+        # every rule keeps.
+        "beta.py": (
+            "import json\n"
+            "def _make_iterencode():\n    return 1\n"
+            "def _beta_dead_immune():\n    return 2\n"
+        ),
+    }
+    for name, content in files.items():
+        with open(os.path.join(path, name), "w") as fh:
+            fh.write(content)
+    os.makedirs(driver_path, exist_ok=True)
+    # The driver. Out of corpus by construction: a different directory that
+    # `load_repo_corpus` is never pointed at.
+    with open(os.path.join(driver_path, "framework.py"), "w") as fh:
+        fh.write(
+            '"""Stand-in for a framework that dispatches to user objects by name."""\n'
+            "PROTOCOL = (\n"
+            '    "process_bind_param",\n'
+            '    "process_result_value",\n'
+            '    "coerce_compared_value",\n'
+            '    "process_literal_param",\n'
+            ")\n"
+            "def drive(obj):\n"
+            "    reached = []\n"
+            "    for name in PROTOCOL:\n"
+            "        fn = getattr(obj, name, None)\n"
+            "        if fn is None:\n"
+            "            continue\n"
+            "        reached.append(fn(None))\n"
+            "    return reached\n"
+        )
+    return path
+
+
+# The CPG treats a module's PUBLIC top-level functions as entry points, so a
+# predicted-dead module-level function must be private; the fixture's dead
+# functions are underscore-prefixed for that reason (the same convention
+# synthetic_taint_repo uses).
+GROUND_TRUTH_DEAD_PROTOCOL = {
+    "alpha._fixture_dead_plain",
+    "beta._make_iterencode",
+    "beta._beta_dead_immune",
+    "gamma.Collider.process_bind_param",
+}
 
 
 def load_repo_corpus(repo):
@@ -1170,7 +1283,165 @@ def run_n9(repo):
     return out
 
 
+def run_n10(repo):
+    """N10: out-of-corpus protocol dispatch, and the manifest N10 prescribes.
+
+    Static, except for the three probes -- the fixture driver and the two real
+    framework drivers -- which execute code and run on LOCAL fixtures and
+    INSTALLED packages only. The dynamic oracle still never touches a
+    third-party tarball.
+
+    ``run_n9`` is called for the base row, so ``harness_score_v4`` is run 6's by
+    construction rather than by re-deriving the arithmetic: the dead term is
+    unscored and this node changes no scored term.
+
+    Four rules, paired on the same graph and the same tokenisation:
+
+      ``rule_r5``   run 5: ``occ[leaf] == 1`` over the repository corpus.
+      ``rule_r6``   run 6: R5 minus the star-import lemma and the
+                    external-driver conventions. The starting point.
+      ``rule_r10a`` N10's prescription: R6 minus a hand-maintained manifest of
+                    protocol method NAMES.
+      ``rule_r10b`` the alternative that needs no hand list: R6 with the
+                    occurrence count widened to the INSTALLED MODULES THE
+                    REPOSITORY IMPORTS. Refuses (``None``) when that corpus is
+                    incomplete.
+    """
+    base = run_n9(repo)
+    files, corpus, meta = load_repo_corpus(repo)
+    root = _fixture_dir(repo)
+    t0 = time.time()
+    cpg = CPG_MOD.build_cpg(files)
+    dead = cpg.dead_symbols(dunder_exempt=True)
+    counts = DOMAIN_MOD.token_name_counts(corpus.values())
+    witnesses = EXPORT_MOD.star_import_witnesses(corpus)
+
+    r5 = DOMAIN_MOD.certify_unreferenced(dead, counts)
+    r6 = EXPORT_MOD.certify_dead_within_corpus(dead, counts, witnesses)
+    manifest_blocked = PROTO_MOD.manifest_withheld(dead)
+    r10a = r6 - manifest_blocked
+    env_counts, env_meta = PROTO_MOD.env_reference_corpus(files, repo_root=root)
+    r10b = PROTO_MOD.certify_with_env(dead, counts, env_counts, env_meta["env_complete"])
+
+    out = dict(base)
+    out.update({
+        "variation": "n10_protocol_driver",
+        "metric_def": "unreferenced-domain-v4",
+        "max_metric": GATE_MOD.MAX_GATED_SCORE,
+        "metric_def_note": (
+            "UNCHANGED. The dead term remains UNSCORED, so harness_score_v4 is "
+            "run 6's number by construction; what changes is the certified set."
+        ),
+        "harness_score_identical_to_run9": out.get("harness_score_v4") == base.get(
+            "harness_score_v4"
+        ),
+        "n_predicted_dead": len(dead),
+        # -- the environment corpus, with its CHECKED precondition
+        "env_meta": env_meta,
+        "env_precondition_ok": env_meta["env_complete"],
+        "env_precondition_failure": env_meta["precondition_failure"],
+        # -- the four rules, paired
+        "rule_r5_n_certified": len(r5),
+        "rule_r6_n_certified": len(r6),
+        "rule_r10a_n_certified": len(r10a),
+        "rule_r10b_n_certified": (len(r10b) if r10b is not None else None),
+        "rule_r10b_status": "scored" if r10b is not None else "refused",
+        "certified_r5": sorted(r5)[:12],
+        "certified_r6": sorted(r6)[:12],
+        "certified_r10a": sorted(r10a)[:12],
+        "certified_r10b": (sorted(r10b)[:12] if r10b is not None else None),
+        "r10a_removed_vs_r6": len(r6 - r10a),
+        "r10b_removed_vs_r6": (len(r6 - r10b) if r10b is not None else None),
+        # -- the manifest's price, on the manifest's own terms
+        "manifest_is_approximation": True,
+        "manifest_size": len(PROTO_MOD.PROTOCOL_NAMES),
+        "manifest_blocked_total": len(manifest_blocked),
+        "manifest_blocked_by_dir": _dir_histogram(manifest_blocked),
+        # -- leakage: how often the environment mentions each candidate name.
+        # Reported so a rule that certifies nothing because EVERY name collides
+        # can never be mistaken for a rule that certifies nothing because it is
+        # right.
+        "env_occurrences_for_predicted_dead": _hist(
+            f"{env_counts.get(DOMAIN_MOD.bare(s), 0)}" for s in sorted(dead)
+        ),
+        "n_blocked_by_env_alone": len({
+            s for s in r6 if env_counts.get(DOMAIN_MOD.bare(s), 0) > 0
+        }),
+        "peak_ram_mb": round(peak_rss_mb(), 2),
+        "token_cost_usd": 0.0,
+        "elapsed_s": round(time.time() - t0, 2),
+    })
+    # -- per-symbol adjudication: which rule certified what, and why not. The
+    # reviewer's objection to an aggregate is right, so the aggregate is not the
+    # headline; this table is.
+    env_only_block = {
+        s for s in r6 if env_counts.get(DOMAIN_MOD.bare(s), 0) > 0
+    }
+    out["withheld_reasons"] = {
+        s: ("manifest_name" if s in manifest_blocked else "")
+        + ("|" if s in manifest_blocked and s in env_only_block else "")
+        + ("env_occurrence" if s in env_only_block else "")
+        for s in sorted((manifest_blocked | env_only_block) & dead)
+    }
+    out["r10a_vs_r10b_comparable"] = (
+        None if r10b is None else (r10a <= r10b, r10b <= r10a)
+    )
+    out["n_certified_by_both"] = (
+        None if r10b is None else len(r10a & r10b)
+    )
+    out["only_r10a"] = None if r10b is None else sorted(r10a - r10b)[:12]
+    # The four names run 6 recorded as unadjudicated residuals, looked up in the
+    # environment corpus of THIS repository. Stated as counts so the reader can
+    # see whether the framework that dispatches them is reachable from the repo's
+    # own imports (hole B) or not (hole A).
+    out["env_occurrence_of_run6_residuals"] = {
+        n: env_counts.get(n, 0)
+        for n in ("emit", "flush", "process_bind_param", "process_result_value",
+                  "coerce_compared_value")
+    }
+    out["residual_names_visible_in_env"] = sorted(
+        n for n, c in out["env_occurrence_of_run6_residuals"].items() if c > 0
+    )
+    # Whether the automatic alternative to a hand manifest -- scan the WHOLE
+    # environment -- is admissible at all on this machine. Measured, not argued.
+    out["whole_env_admissibility"] = PROTO_MOD.whole_env_admissibility()
+    out["only_r10b"] = None if r10b is None else sorted(r10b - r10a)[:12]
+
+    if repo == "synthetic_protocol_repo":
+        probe = PROTO_MOD.fixture_driver_probe(
+            root, "experiments/fixtures/synthetic_protocol_driver"
+        )
+        truth = GROUND_TRUTH_DEAD_PROTOCOL
+        verdict = PROTO_MOD.adjudicate(
+            dead, truth, {"rule_r5": r5, "rule_r6": r6, "rule_r10a": r10a, "rule_r10b": r10b}
+        )
+        out["fixture_driver_probe"] = probe
+        out["executed_live"] = sorted(probe.get("reached_sentinels", []))
+        out["executed_live_symbols"] = sorted(
+            s.replace("alpha.T.", "alpha.T.") for s in probe.get("reached_sentinels", [])
+        )
+        out["ground_truth_dead"] = sorted(truth)
+        out["ground_truth_checked"] = True
+        out["adjudication"] = verdict
+        out["manifest_missed_live_symbols"] = sorted(
+            set(out["executed_live"]) & set(r10a)
+        )
+        out["fixture_env_occurrence"] = {
+            s: env_counts.get(DOMAIN_MOD.bare(s), 0)
+            for s in sorted(truth | set(out["executed_live"]))
+        }
+        out["n_immune_dead_symbols"] = sum(
+            1 for s in truth if env_counts.get(DOMAIN_MOD.bare(s), 0) == 0
+        )
+        out["real_framework_probes"] = PROTO_MOD.real_framework_probes()
+    else:
+        out["ground_truth_checked"] = False
+    return out
+
+
 def run_one(variation, repo):
+    if variation == "n10_protocol_driver":
+        return run_n10(repo)
     if variation == "n9_export_boundary":
         return run_n9(repo)
     if variation == "n7_symbol_domain":

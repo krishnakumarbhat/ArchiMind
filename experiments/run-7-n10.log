@@ -1,0 +1,353 @@
+[
+ {
+  "variation": "n10_import_closure_base_witness",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the fourth run. The dead term remains UNSCORED, so no harness_score can move; the certified SET is the deliverable.",
+  "gates": [
+   {
+    "repo": "synthetic_cpg_repo",
+    "n_predicted_dead": 3,
+    "n_run6_certified": 1,
+    "n_run7_certified": 1,
+    "certification_rate_run6": 0.3333,
+    "certification_rate_run7": 0.3333,
+    "n_witnessed_classes": 0,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "repo.UserRepo.dead_method"
+    ],
+    "certified_run7": [
+     "repo.UserRepo.dead_method"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "synthetic_promo_repo",
+    "n_predicted_dead": 5,
+    "n_run6_certified": 1,
+    "n_run7_certified": 1,
+    "certification_rate_run6": 0.2,
+    "certification_rate_run7": 0.2,
+    "n_witnessed_classes": 0,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "cache.Cache.stale"
+    ],
+    "certified_run7": [
+     "cache.Cache.stale"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "synthetic_taint_repo",
+    "n_predicted_dead": 4,
+    "n_run6_certified": 2,
+    "n_run7_certified": 2,
+    "certification_rate_run6": 0.5,
+    "certification_rate_run7": 0.5,
+    "n_witnessed_classes": 0,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "alpha._alpha_dead",
+     "beta._beta_dead"
+    ],
+    "certified_run7": [
+     "alpha._alpha_dead",
+     "beta._beta_dead"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "synthetic_exports_repo",
+    "n_predicted_dead": 7,
+    "n_run6_certified": 3,
+    "n_run7_certified": 3,
+    "certification_rate_run6": 0.4286,
+    "certification_rate_run7": 0.4286,
+    "n_witnessed_classes": 0,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "lib.core._core_dead",
+     "lib.extra.twin_dead",
+     "lib.legacy._legacy_private"
+    ],
+    "certified_run7": [
+     "lib.core._core_dead",
+     "lib.extra.twin_dead",
+     "lib.legacy._legacy_private"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "synthetic_protocol_repo",
+    "n_predicted_dead": 8,
+    "n_run6_certified": 6,
+    "n_run7_certified": 6,
+    "certification_rate_run6": 0.75,
+    "certification_rate_run7": 0.75,
+    "n_witnessed_classes": 0,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value",
+     "alpha._fixture_dead_plain",
+     "beta._beta_dead_immune",
+     "beta._make_iterencode"
+    ],
+    "certified_run7": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value",
+     "alpha._fixture_dead_plain",
+     "beta._beta_dead_immune",
+     "beta._make_iterencode"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "pallets/flask",
+    "n_predicted_dead": 204,
+    "n_run6_certified": 4,
+    "n_run7_certified": 4,
+    "certification_rate_run6": 0.0196,
+    "certification_rate_run7": 0.0196,
+    "n_witnessed_classes": 19,
+    "n_withheld_by_witness": 0,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "src.flask.app.Flask.open_instance_resource",
+     "src.flask.cli._path_is_ancestor",
+     "src.flask.sansio.app.App.shell_context_processor",
+     "src.flask.testing.EnvironBuilder.json_dumps"
+    ],
+    "certified_run7": [
+     "src.flask.app.Flask.open_instance_resource",
+     "src.flask.cli._path_is_ancestor",
+     "src.flask.sansio.app.App.shell_context_processor",
+     "src.flask.testing.EnvironBuilder.json_dumps"
+    ],
+    "removed_by_witness": [],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "psf/requests",
+    "n_predicted_dead": 110,
+    "n_run6_certified": 22,
+    "n_run7_certified": 17,
+    "certification_rate_run6": 0.2,
+    "certification_rate_run7": 0.1545,
+    "n_witnessed_classes": 17,
+    "n_withheld_by_witness": 5,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "src.requests.adapters.HTTPAdapter.get_connection",
+     "src.requests.cookies.MockRequest.add_header",
+     "src.requests.cookies.MockRequest.add_unredirected_header",
+     "src.requests.cookies.MockRequest.get_full_url",
+     "src.requests.cookies.MockRequest.get_header",
+     "src.requests.cookies.MockRequest.get_type",
+     "src.requests.cookies.MockRequest.has_header",
+     "src.requests.cookies.MockRequest.origin_req_host",
+     "src.requests.cookies.MockRequest.unverifiable",
+     "src.requests.cookies.RequestsCookieJar._find",
+     "src.requests.cookies.RequestsCookieJar.get_dict",
+     "src.requests.cookies.RequestsCookieJar.list_domains",
+     "src.requests.cookies.RequestsCookieJar.list_paths",
+     "src.requests.cookies.RequestsCookieJar.multiple_domains",
+     "src.requests.models.RequestHooksMixin.deregister_hook",
+     "src.requests.models.Response.is_permanent_redirect",
+     "src.requests.utils.atomic_open",
+     "src.requests.utils.dict_from_cookiejar",
+     "src.requests.utils.dict_to_sequence",
+     "src.requests.utils.from_key_val_list",
+     "src.requests.utils.get_unicode_from_response",
+     "src.requests.utils.parse_list_header"
+    ],
+    "certified_run7": [
+     "src.requests.adapters.HTTPAdapter.get_connection",
+     "src.requests.cookies.MockRequest.add_header",
+     "src.requests.cookies.MockRequest.add_unredirected_header",
+     "src.requests.cookies.MockRequest.get_full_url",
+     "src.requests.cookies.MockRequest.get_header",
+     "src.requests.cookies.MockRequest.get_type",
+     "src.requests.cookies.MockRequest.has_header",
+     "src.requests.cookies.MockRequest.origin_req_host",
+     "src.requests.cookies.MockRequest.unverifiable",
+     "src.requests.models.RequestHooksMixin.deregister_hook",
+     "src.requests.models.Response.is_permanent_redirect",
+     "src.requests.utils.atomic_open",
+     "src.requests.utils.dict_from_cookiejar",
+     "src.requests.utils.dict_to_sequence",
+     "src.requests.utils.from_key_val_list",
+     "src.requests.utils.get_unicode_from_response",
+     "src.requests.utils.parse_list_header"
+    ],
+    "removed_by_witness": [
+     "src.requests.cookies.RequestsCookieJar._find",
+     "src.requests.cookies.RequestsCookieJar.get_dict",
+     "src.requests.cookies.RequestsCookieJar.list_domains",
+     "src.requests.cookies.RequestsCookieJar.list_paths",
+     "src.requests.cookies.RequestsCookieJar.multiple_domains"
+    ],
+    "run6_residuals_removed": [],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "tiangolo/sqlmodel",
+    "n_predicted_dead": 246,
+    "n_run6_certified": 3,
+    "n_run7_certified": 0,
+    "certification_rate_run6": 0.0122,
+    "certification_rate_run7": 0.0,
+    "n_witnessed_classes": 10,
+    "n_withheld_by_witness": 3,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "sqlmodel.sql.sqltypes.UTCDateTime.coerce_compared_value",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_bind_param",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_result_value"
+    ],
+    "certified_run7": [],
+    "removed_by_witness": [
+     "sqlmodel.sql.sqltypes.UTCDateTime.coerce_compared_value",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_bind_param",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_result_value"
+    ],
+    "run6_residuals_removed": [
+     "sqlmodel.sql.sqltypes.UTCDateTime.coerce_compared_value",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_bind_param",
+     "sqlmodel.sql.sqltypes.UTCDateTime.process_result_value"
+    ],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   },
+   {
+    "repo": "Textualize/rich",
+    "n_predicted_dead": 452,
+    "n_run6_certified": 1,
+    "n_run7_certified": 0,
+    "certification_rate_run6": 0.0022,
+    "certification_rate_run7": 0.0,
+    "n_witnessed_classes": 51,
+    "n_withheld_by_witness": 1,
+    "witness_is_subset_of_run6": true,
+    "certified_run6": [
+     "rich.logging.RichHandler.emit"
+    ],
+    "certified_run7": [],
+    "removed_by_witness": [
+     "rich.logging.RichHandler.emit"
+    ],
+    "run6_residuals_removed": [
+     "rich.logging.RichHandler.emit"
+    ],
+    "run6_residuals_still_certified": [],
+    "peak_ram_mb": null
+   }
+  ],
+  "discriminating_pair": {
+   "live": "alpha.T.process_literal_param",
+   "dead": "alpha._fixture_dead_plain",
+   "evidence_equal": true,
+   "occ_live": 1,
+   "occ_dead": 1,
+   "base_witness_distinguishes": false,
+   "max_accuracy_on_pair": 0.5,
+   "live_adjudication": "DISPATCHED by executed out-of-corpus driver",
+   "dead_adjudication": "written down as dead, never dispatched",
+   "consequence": "identical in-corpus evidence + different liveness => any deterministic in-corpus-only gate scores <= 0.5 on this pair. A declared interface is not a tuning knob; it is the only carrier of the missing bit.",
+   "in_n10_manifest": false,
+   "manifest_separates_pair": false,
+   "surviving_false_positive": {
+    "symbol": "alpha.T.process_literal_param",
+    "in_run6_certified": true,
+    "in_run7_certified": true,
+    "reason_manifest_fails": "its name is absent from PROTOCOL_NAMES, so the manifest withholds nothing; an OPEN list cannot be sound",
+    "reason_base_witness_fails": "class T has no written base, so there is no inheritance edge to point out of the corpus",
+    "is_blocked_by_occurrence": false
+   }
+  },
+  "executed_framework_adjudication": [
+   {
+    "probe": "logging_into_rich",
+    "dispatched_name": "emit",
+    "object": "rich.logging.RichHandler",
+    "source": "/media/pope/projecteo/python_libs/site-packages/rich/logging.py",
+    "verdict": "run 6's certificate on such a symbol would be a FALSE POSITIVE"
+   },
+   {
+    "probe": "logging_into_rich",
+    "dispatched_name": "handle",
+    "object": "rich.logging.RichHandler",
+    "source": "/media/pope/projecteo/python_libs/site-packages/rich/logging.py",
+    "verdict": "run 6's certificate on such a symbol would be a FALSE POSITIVE"
+   },
+   {
+    "probe": "sqlalchemy_type_protocol",
+    "dispatched_name": "process_bind_param",
+    "object": "google.adk.sessions.schemas.shared.DynamicJSON",
+    "source": "/home/pope/.local/lib/python3.10/site-packages/google/adk/sessions/schemas/shared.py",
+    "verdict": "run 6's certificate on such a symbol would be a FALSE POSITIVE"
+   }
+  ],
+  "real_framework_probes": {
+   "logging_into_rich": {
+    "status": "executed",
+    "driver": "stdlib logging (out of corpus)",
+    "object": "rich.logging.RichHandler",
+    "object_source": "/media/pope/projecteo/python_libs/site-packages/rich/logging.py",
+    "dispatched": [
+     "emit",
+     "handle"
+    ],
+    "not_dispatched": [
+     "close",
+     "flush"
+    ],
+    "observation": "instance attribute spy; a lower bound on reachability"
+   },
+   "sqlalchemy_type_protocol": {
+    "status": "executed",
+    "driver": "sqlalchemy 2.0.23 TypeDecorator.bind_processor (out of corpus)",
+    "object": "google.adk.sessions.schemas.shared.DynamicJSON",
+    "object_source": "/home/pope/.local/lib/python3.10/site-packages/google/adk/sessions/schemas/shared.py",
+    "dispatched": [
+     "process_bind_param"
+    ],
+    "value_out": "'{\"k\": 1}'",
+    "observation": "class attribute spy; a lower bound on reachability"
+   }
+  },
+  "n10_manifest_prior_art": {
+   "mechanism": "hand-maintained external name list",
+   "is_vulture_whitelist": true,
+   "vulture_whitelist_matches_by": "bare name in a single global set (issue #430)",
+   "verdict": "N10's proposal is PRIOR ART and inherits the open-list soundness hole"
+  }
+ }
+]
