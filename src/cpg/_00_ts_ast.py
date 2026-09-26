@@ -6,7 +6,7 @@ without dumping file text into an LLM context window.
 import ast
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +77,9 @@ def _extract_treesitter(source: str, path: str) -> Optional[ModuleSymbols]:
         return None
     syms = ModuleSymbols(path=path)
     src = source.encode("utf-8", "replace")
+    syms.parse_ok = not tree.root_node.has_error
 
-    def text(node) -> str:
+    def text(node: Any) -> str:
         return src[node.start_byte : node.end_byte].decode("utf-8", "replace")
 
     defs = QueryCursor(Query(lang, _QUERY_DEFS)).captures(tree.root_node)

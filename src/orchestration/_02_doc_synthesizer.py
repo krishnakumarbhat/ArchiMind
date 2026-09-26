@@ -1,13 +1,13 @@
 """Context-scoped technical handbook builder (CPG-grounded prompt context)."""
 import logging
-from typing import Callable, Dict
+from typing import Any, Callable, Dict
 
 import networkx as nx
 
 logger = logging.getLogger(__name__)
 
 
-def cpg_context_block(g: nx.DiGraph, char_limit: int = 6000) -> str:
+def cpg_context_block(g: nx.DiGraph[Any], char_limit: int = 6000) -> str:
     """Compact deterministic architecture summary for the doc-generation prompt."""
     from src.cpg._01_cpg_builder import EDGE_CALLS, EDGE_INHERITS, NODE_CLASS, NODE_FILE, NODE_FUNC
 
@@ -30,7 +30,7 @@ def cpg_context_block(g: nx.DiGraph, char_limit: int = 6000) -> str:
 SynthesizeFn = Callable[[str, str], Dict[str, str]]  # (context, repo) -> docs
 
 
-def synthesize(context: str, repo_name: str, graph: nx.DiGraph, fn: SynthesizeFn) -> Dict[str, str]:
+def synthesize(context: str, repo_name: str, graph: nx.DiGraph[Any], fn: SynthesizeFn) -> Dict[str, str]:
     """Prepend the deterministic CPG block, then delegate to the LLM synthesizer."""
     grounded = cpg_context_block(graph) + "\n\nRETRIEVED CONTEXT:\n" + context
     return fn(grounded, repo_name)

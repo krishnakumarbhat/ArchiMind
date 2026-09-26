@@ -17,10 +17,10 @@ def _qid(*parts: str) -> str:
     return "::".join(parts)
 
 
-def build_graph(files: Dict[str, str]) -> nx.DiGraph:
+def build_graph(files: Dict[str, str]) -> nx.DiGraph[Any]:
     """Build typed CPG from {path: source}. Nodes File/Class/Function."""
     mods = {p: extract_module(s, p) for p, s in files.items()}
-    g = nx.DiGraph()
+    g = nx.DiGraph[Any]()
     for path, m in mods.items():
         g.add_node(_qid("f", path), kind=NODE_FILE, path=path, parse_ok=m.parse_ok)
         for cls, bases in m.classes.items():
@@ -60,7 +60,7 @@ def build_graph(files: Dict[str, str]) -> nx.DiGraph:
     return g
 
 
-def blast_radius(g: nx.DiGraph, symbol: str) -> List[str]:
+def blast_radius(g: nx.DiGraph[Any], symbol: str) -> List[str]:
     """Downstream symbols reachable from any node whose name matches symbol."""
     roots = [n for n, d in g.nodes(data=True) if d.get("name") == symbol or str(n).endswith("::" + symbol)]
     seen: Set[str] = set()
@@ -74,7 +74,7 @@ def blast_radius(g: nx.DiGraph, symbol: str) -> List[str]:
     return sorted(seen)
 
 
-def out_of_corpus_bases(g: nx.DiGraph) -> Dict[str, List[str]]:
+def out_of_corpus_bases(g: nx.DiGraph[Any]) -> Dict[str, List[str]]:
     """Class -> bases with no in-corpus definition (inheritance witness)."""
     defined = {str(d.get("name")) for _, d in g.nodes(data=True) if d.get("kind") == NODE_CLASS}
     result: Dict[str, List[str]] = {}
@@ -87,7 +87,7 @@ def out_of_corpus_bases(g: nx.DiGraph) -> Dict[str, List[str]]:
     return result
 
 
-def to_compact(g: nx.DiGraph) -> Dict[str, Any]:
+def to_compact(g: nx.DiGraph[Any]) -> Dict[str, Any]:
     """JSON-serializable artifact for status payloads, cache, and API."""
     return {
         "nodes": [
@@ -98,9 +98,9 @@ def to_compact(g: nx.DiGraph) -> Dict[str, Any]:
     }
 
 
-def from_compact(doc: Dict[str, Any]) -> nx.DiGraph:
+def from_compact(doc: Dict[str, Any]) -> nx.DiGraph[Any]:
     """Rebuild graph from a compact artifact."""
-    g = nx.DiGraph()
+    g = nx.DiGraph[Any]()
     for n in doc.get("nodes", []):
         g.add_node(n["id"], kind=n.get("kind"), name=n.get("name"), path=n.get("path"))
     for e in doc.get("edges", []):
