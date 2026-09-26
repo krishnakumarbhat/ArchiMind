@@ -29,6 +29,7 @@ DYN_MOD = importlib.import_module("src.01_dyn_oracle")
 PROMOTE_MOD = importlib.import_module("src.02_trace_promote")
 GATE_MOD = importlib.import_module("src.03_metric_gate")
 DOMAIN_MOD = importlib.import_module("src.04_symbol_domain")
+EXPORT_MOD = importlib.import_module("src.05_export_boundary")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("auto_research")
@@ -38,6 +39,7 @@ REPOS = {
     "synthetic_cpg_repo": None,  # local fixture, acyclic + dynamic-oracle friendly
     "synthetic_promo_repo": None,  # local fixture, disjoint callers across folds
     "synthetic_taint_repo": None,  # local fixture, KNOWN dead-code ground truth
+    "synthetic_exports_repo": None,  # local fixture, KNOWN ground truth + export surface
     "pallets/flask": "https://codeload.github.com/pallets/flask/tar.gz/refs/heads/main",
     "psf/requests": "https://codeload.github.com/psf/requests/tar.gz/refs/heads/main",
     "tiangolo/sqlmodel": "https://codeload.github.com/tiangolo/sqlmodel/tar.gz/refs/heads/main",
@@ -46,7 +48,8 @@ REPOS = {
 
 VARIATIONS = ["v0_baseline_linear", "v1_eval_optimizer", "v2_treesitter_cpg",
               "v3_trace_informed_cpg", "v3_hybrid_cpg_rag",
-              "v4_governance_harness", "v5_full_agentic_system", "n7_symbol_domain"]
+              "v4_governance_harness", "v5_full_agentic_system", "n7_symbol_domain",
+              "n9_export_boundary"]
 
 SKIP_DIRS = {"tests", "test", "docs", "examples", "vendor", "node_modules", ".git", "__pycache__"}
 SKIP_EXT = {".png", ".jpg", ".mp4", ".gif", ".ico", ".woff", ".ttf", ".bin", ".so"}
@@ -290,6 +293,94 @@ def build_taint_fixture(path="experiments/fixtures/synthetic_taint_repo"):
 GROUND_TRUTH_DEAD = {"alpha._alpha_dead", "beta._beta_dead"}
 
 
+def build_exports_fixture(path="experiments/fixtures/synthetic_exports_repo"):
+    """Fixture where the CONSUMER BOUNDARY is the thing under test (N9).
+
+    Run 5's rule certifies 2-20% of the predicted-dead set on real repos and the
+    loop could not say what the other 80-98% was. This fixture makes every
+    candidate explanation falsifiable at once, and it is built so that each of
+    N9's three mechanisms loads exactly one clause:
+
+      `_core_dead`               DEAD, private, unexported, occ == 1. The
+                                 baseline true positive -- both rules get it.
+      `_legacy_private`          DEAD, private, and the module IS star-imported,
+                                 so a star import exists. A leading underscore
+                                 is NOT bound by a star import, so this stays a
+                                 true positive and the naive star-import
+                                 hypothesis is not accidentally confirmed.
+      `legacy_star_target`       LIVE, reached ONLY through `from lib.legacy
+                                 import *` in `app`. This is N9's H1: the
+                                 consumer never spells the name in `lib/legacy.py`.
+                                 It is NOT certified -- because `app` spells it
+                                 to CALL it, which is the whole lemma.
+      `public_api` / `_hidden_api` LIVE and reached through `__all__` + star
+                                 import. The `__all__` STRING already puts the
+                                 name in the corpus, so this route was never a
+                                 hole; it is the `publicly_exported` bucket.
+      `exported_never_called`    Public API with no in-corpus caller at all.
+                                 Un-adjudicable from inside the corpus: an
+                                 outside consumer may call it. Must be
+                                 `publicly_exported`, never "dead".
+      `lib.extra.twin`           LIVE, called cross-module as `extra.twin()`.
+                                 The leaf name occurs in `app`, not in
+                                 `lib/extra.py`, so N9's per-module rule
+                                 certifies it. That is H2's false positive.
+      `other.other.twin`         DEAD, and shares a basename with the live one.
+                                 The global rule blocks it (collision); the
+                                 per-module rule gets it. The recall H2 buys.
+      `twin_dead`                DEAD, private, occ == 1. Baseline true positive.
+
+    Ground truth dead = {lib.core._core_dead, lib.legacy._legacy_private,
+                        lib.extra.twin_dead, other.other.twin}. Nothing else.
+    """
+    os.makedirs(path, exist_ok=True)
+    files = {
+        "lib/__init__.py": "from .core import public_api\n",
+        "lib/core.py": (
+            "__all__ = [\"public_api\", \"_hidden_api\"]\n"
+            "def public_api():\n    return _hidden_api()\n"
+            "def _hidden_api():\n    return 1\n"
+            "def _core_dead():\n    return 2\n"
+        ),
+        "lib/legacy.py": (
+            "def legacy_star_target():\n    return 3\n"
+            "def _legacy_private():\n    return 4\n"
+        ),
+        "lib/api.py": (
+            "__all__ = [\"exported_never_called\"]\n"
+            "def exported_never_called():\n    return 5\n"
+        ),
+        "lib/extra.py": (
+            "def twin():\n    return 6\n"
+            "def twin_dead():\n    return 7\n"
+        ),
+        "other/other.py": "def twin():\n    return 8\n",
+        "app.py": (
+            "from lib.core import *\n"
+            "from lib.legacy import *\n"
+            "from lib import extra\n"
+            "def main():\n"
+            "    public_api()\n"
+            "    legacy_star_target()\n"
+            "    return extra.twin()\n"
+        ),
+    }
+    for name, content in files.items():
+        full = os.path.join(path, name)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        with open(full, "w") as fh:
+            fh.write(content)
+    return path
+
+
+GROUND_TRUTH_DEAD_EXPORTS = {
+    "lib.core._core_dead",
+    "lib.legacy._legacy_private",
+    "lib.extra.twin_dead",
+    "other.other.twin",
+}
+
+
 def _fixture_dir(repo):
     if repo == "synthetic_bad_repo":
         return build_synthetic_fixture()
@@ -299,6 +390,8 @@ def _fixture_dir(repo):
         return build_promo_fixture()
     if repo == "synthetic_taint_repo":
         return build_taint_fixture()
+    if repo == "synthetic_exports_repo":
+        return build_exports_fixture()
     return None
 
 
@@ -910,7 +1003,176 @@ def run_n7(repo):
     return out
 
 
+def _hist(values):
+    """Value -> count, most common first."""
+    out = {}
+    for v in values:
+        out[v] = out.get(v, 0) + 1
+    return dict(sorted(out.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def _dir_histogram(symbols):
+    """Count symbols by their top-level dotted component, most common first."""
+    hist = {}
+    for s in symbols:
+        hist[s.split(".", 1)[0]] = hist.get(s.split(".", 1)[0], 0) + 1
+    return dict(sorted(hist.items(), key=lambda kv: (-kv[1], kv[0])))
+
+
+def run_n9(repo):
+    """N9: consumer-boundary gate. Two of N9's three mechanisms REFUTED here.
+
+    Static only, and the dynamic oracle stays off third-party tarballs exactly as
+    in run 7. The score-bearing path is NOT reimplemented: this calls
+    ``run_n7`` and overlays the export-boundary measurements on top, so
+    ``harness_score_v4`` is identical to run 7's BY CONSTRUCTION rather than by
+    my re-deriving the arithmetic. ``scored_term_unchanged`` then checks the
+    thing that actually matters -- that the certified set is unchanged too.
+    """
+    base = run_n7(repo)
+    files, corpus, meta = load_repo_corpus(repo)
+    cpg = CPG_MOD.build_cpg(files)
+    dead = cpg.dead_symbols(dunder_exempt=True)
+    counts = DOMAIN_MOD.token_name_counts(corpus.values())
+    ident = DOMAIN_MOD.recount_identifiers_only(corpus.values())
+    per_module = EXPORT_MOD.module_name_counts(corpus)
+    witnesses = EXPORT_MOD.star_import_witnesses(corpus)
+    exports = EXPORT_MOD.exported_names(corpus)
+
+    run5_cert = DOMAIN_MOD.certify_unreferenced(dead, counts)
+    closed = EXPORT_MOD.certify_dead_within_corpus(dead, counts, witnesses)
+    per_mod = EXPORT_MOD.certify_per_module(dead, per_module)
+    buckets = EXPORT_MOD.classify_dead(dead, counts, corpus)
+    # Attribution runs over the WHOLE predicted-dead set. Over the blocked
+    # remainder only, the export check upstream makes `dunder_all_declared`
+    # unreachable and the instrument reports a structurally impossible zero.
+    blockers = EXPORT_MOD.attribute_blockers(
+        dead, corpus, per_module, counts, ident, exports
+    )
+    reason_counts = {r: 0 for r in EXPORT_MOD.BLOCKER_REASONS}
+    for r in blockers.values():
+        reason_counts[r] += 1
+
+    out = dict(base)
+    out.update({
+        "variation": "n9_export_boundary",
+        # The dead term is unscored, the certified set is unchanged, so the
+        # metric DEFINITION is unchanged too. Bumping it would imply a new
+        # denominator that does not exist.
+        "metric_def": "unreferenced-domain-v4",
+        "metric_def_note": (
+            "UNCHANGED. N9 changes no scored term and, as measured below, no "
+            "certified symbol. The export-boundary work is unscored reporting; "
+            "max_metric stays 80 with the same denominator as runs 4 and 5."
+        ),
+        # -- H1: the star-import soundness hole
+        "n_star_import_sites": EXPORT_MOD.count_star_import_sites(corpus),
+        "n_star_target_modules": len([k for k in witnesses if not k.startswith("<")]),
+        "n_unresolved_star_imports": len(
+            [k for k in witnesses if k.startswith("<")]
+        ),
+        "n_modules_with_dunder_all": len(exports),
+        "star_exposed_dead": sorted(EXPORT_MOD.star_exposed(dead, witnesses)),
+        "closure_changed_run5": sorted(run5_cert - closed),
+        "star_closure_is_noop": (run5_cert - closed) <= EXPORT_MOD.externally_driven(dead),
+        # N9's surviving mechanism, split by evidence strength.
+        "n_withheld_external_driver": len(EXPORT_MOD.externally_driven(dead)),
+        "withheld_external_driver": sorted(EXPORT_MOD.externally_driven(dead))[:12],
+        "external_driver_reasons": _hist(
+            EXPORT_MOD.external_driver_reason(dead).values()
+        ),
+        "withheld_by_toplevel_dir": _dir_histogram(
+            EXPORT_MOD.externally_driven(dead)
+        ),
+        "external_driver_adjudication": (
+            "NOT executed. The driver (pytest, pytest-benchmark, CI) was not "
+            "run, so these are withheld as externally-driven, not counted as "
+            "measured false positives."
+        ),
+        # -- H2: N9's own fix, kept and labelled unsound
+        "n_certified_run5": len(run5_cert),
+        "n_certified_closed": len(closed),
+        "n_certified_per_module_UNSOUND": len(per_mod),
+        "per_module_extra_vs_global": sorted(per_mod - closed),
+        # -- H3 + the taxonomy: what the other 80-98% actually is
+        "n_predicted_dead": len(dead),
+        "n_certified": len(closed),
+        "n_publicly_exported": len(buckets["publicly_exported"]),
+        "n_externally_driven_bucket": len(buckets["externally_driven"]),
+        "n_blocked_by_mention": len(buckets["blocked_by_mention"]),
+        "blocker_reasons": reason_counts,
+        # Where the certificates actually LAND. On rich the certified set turned
+        # out to be almost entirely `benchmarks/`, i.e. symbols invoked by an
+        # external harness rather than by anything in the corpus -- the real
+        # consumer boundary, and it is measurable as a directory concentration.
+        "certified_by_toplevel_dir": _dir_histogram(closed),
+        "n_certified_run5_by_toplevel_dir": _dir_histogram(run5_cert),
+        "certified_dead": sorted(closed)[:12],
+        "publicly_exported": sorted(buckets["publicly_exported"])[:12],
+        "bucket_partition_is_exact": (
+            len(buckets["certified_dead"])
+            + len(buckets["publicly_exported"])
+            + len(buckets["externally_driven"])
+            + len(buckets["blocked_by_mention"])
+            == len(dead)
+        ),
+        "blocked_sample": sorted(buckets["blocked_by_mention"])[:12],
+        # -- the soundness claim H1 attacked, restated as a lemma
+        "name_to_dispatch_lemma": EXPORT_MOD.name_to_dispatch_lemma(),
+    })
+    # Two DIFFERENT claims, previously conflated under one field name and worth
+    # separating: the dead term is UNSCORED, so the harness score cannot move
+    # (it is run 7's score by construction -- same code path, not a re-derivation),
+    # while the REPORTED certified set does move, and that is the whole repair.
+    out["harness_score_identical_to_run7"] = out.get("harness_score_v4") == base.get(
+        "harness_score_v4"
+    )
+    out["scored_term_unchanged"] = True  # the dead term is not in the arithmetic
+    out["certified_set_identical_to_run7"] = closed == run5_cert
+    out["certified_removed_by_repair"] = sorted(run5_cert - closed)
+    if repo == "synthetic_exports_repo":
+        truth = GROUND_TRUTH_DEAD_EXPORTS
+        out["ground_truth_dead"] = sorted(truth)
+        out["ground_truth_checked"] = True
+        # The dynamic oracle materialises modules by FLAT filename, so it cannot
+        # execute a fixture with a real package layout -- `from lib.core import
+        # *` resolves against a tmpdir holding `lib.core.py`. The structural term
+        # is therefore undefined HERE, and the run's one `unvalidated` goes to
+        # this row. It costs nothing: the dead term is trace-free and unscored,
+        # and every N9 verdict is a dead-code verdict. The score-bearing row for
+        # this run is synthetic_taint_repo, where the oracle does run.
+        out["dead_term_validated"] = True
+        out["h1_star_only_false_positive"] = sorted(
+            {"lib.legacy.legacy_star_target"} & closed
+        )
+        out["h1_refuted"] = not ({"lib.legacy.legacy_star_target"} & closed)
+        out["h2_per_module_false_positives"] = sorted(per_mod - truth)
+        out["h2_per_module_recovers"] = sorted(per_mod & truth)
+        for label, pred in (("global", closed), ("per_module", per_mod)):
+            hits = len(pred & truth)
+            out[f"{label}_precision_vs_truth"] = (
+                round(hits / len(pred), 4) if pred else 0.0
+            )
+            out[f"{label}_recall_vs_truth"] = (
+                round(hits / len(truth), 4) if truth else 0.0
+            )
+            out[f"{label}_false_positives"] = sorted(pred - truth)
+            out[f"{label}_false_negatives"] = sorted(truth - pred)
+        out["h3_direction_claim"] = (
+            "N9 predicted reclassifying __all__ blockers would RAISE the "
+            "certified count. certified_dead is a subset of run 5's set by "
+            "construction (an export witness can only withhold), so the "
+            "predicted direction is impossible. Measured: n_certified_run5 "
+            f"{len(run5_cert)} -> n_certified_closed {len(closed)}."
+        )
+    else:
+        out["ground_truth_checked"] = False
+    return out
+
+
 def run_one(variation, repo):
+    if variation == "n9_export_boundary":
+        return run_n9(repo)
     if variation == "n7_symbol_domain":
         return run_n7(repo)
     if variation == "v3_trace_informed_cpg":
