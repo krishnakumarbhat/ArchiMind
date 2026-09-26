@@ -28,6 +28,7 @@ CPG_MOD = importlib.import_module("src.00_cpg_static")
 DYN_MOD = importlib.import_module("src.01_dyn_oracle")
 PROMOTE_MOD = importlib.import_module("src.02_trace_promote")
 GATE_MOD = importlib.import_module("src.03_metric_gate")
+DOMAIN_MOD = importlib.import_module("src.04_symbol_domain")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("auto_research")
@@ -36,6 +37,7 @@ REPOS = {
     "synthetic_bad_repo": None,  # local fixture, built on demand
     "synthetic_cpg_repo": None,  # local fixture, acyclic + dynamic-oracle friendly
     "synthetic_promo_repo": None,  # local fixture, disjoint callers across folds
+    "synthetic_taint_repo": None,  # local fixture, KNOWN dead-code ground truth
     "pallets/flask": "https://codeload.github.com/pallets/flask/tar.gz/refs/heads/main",
     "psf/requests": "https://codeload.github.com/psf/requests/tar.gz/refs/heads/main",
     "tiangolo/sqlmodel": "https://codeload.github.com/tiangolo/sqlmodel/tar.gz/refs/heads/main",
@@ -44,12 +46,18 @@ REPOS = {
 
 VARIATIONS = ["v0_baseline_linear", "v1_eval_optimizer", "v2_treesitter_cpg",
               "v3_trace_informed_cpg", "v3_hybrid_cpg_rag",
-              "v4_governance_harness", "v5_full_agentic_system"]
+              "v4_governance_harness", "v5_full_agentic_system", "n7_symbol_domain"]
 
 SKIP_DIRS = {"tests", "test", "docs", "examples", "vendor", "node_modules", ".git", "__pycache__"}
 SKIP_EXT = {".png", ".jpg", ".mp4", ".gif", ".ico", ".woff", ".ttf", ".bin", ".so"}
 MAX_FILE_BYTES = 200_000
 MAX_FILES = 400
+# N7: the reference corpus may not be truncated the way the analysis set is.
+# Tokenising is streaming and costs ~30k lines/sec, and a dropped file means an
+# invisible reference, which would turn the unreferenced-symbol rule into a
+# false-certificate machine. Bounded well above MAX_FILES so a real repo is
+# covered, and `corpus_complete` refuses outright if it is ever exceeded.
+MAX_CORPUS_FILES = 4000
 
 MERMAID_BAD = re.compile(r"(---|-->.*-->|\(\(|\)\)|\{\{|\}\}|\[\[|\]\]|#|\")")
 
@@ -223,30 +231,170 @@ def stream_tarball(url):
     return buf
 
 
-def load_repo_files(repo):
+def build_taint_fixture(path="experiments/fixtures/synthetic_taint_repo"):
+    """Fixture whose dead-code ground truth is KNOWN and whose verdict is testable.
+
+    Every previous dead-code claim in this loop was argued from soundness
+    algebra; none had a fixture where the set of truly dead symbols was written
+    down and checkable. This one does, and it is built so that each clause of
+    the certification rule is load-bearing:
+
+      `_alpha_dead`        DEAD, private, name mentioned exactly once. Must be
+                           certified -- this is the symbol run 4's gate refuses
+                           to touch, because `dispatch` plants a `<complex>`
+                           site (`reg["handler"]()`) in the same repository.
+      `_beta_dead`         DEAD, private, unreferenced. Must be certified.
+      `_alpha_via_string`  LIVE, reached only through `globals()["..."]`. Must
+                           NOT be certified -- proves the string-literal clause.
+      `_beta_live_from_test` LIVE, imported only from `tests/`. Must NOT be
+                           certified -- proves the corpus must include test
+                           files even though the CPG is never built over them.
+                           If the corpus excluded `tests/`, this would be the
+                           false positive the whole design exists to prevent.
+
+    Ground truth dead = {alpha._alpha_dead, beta._beta_dead}. Nothing else.
+    """
+    os.makedirs(os.path.join(path, "tests"), exist_ok=True)
+    files = {
+        "alpha.py": (
+            "def dispatch(reg):\n"
+            "    _wire()\n"
+            "    return reg['handler']()\n"
+            "def _wire():\n"
+            "    return globals()['_alpha_via_string']()\n"
+            "def _alpha_via_string():\n"
+            "    return 2\n"
+            "def _alpha_dead():\n"
+            "    return 1\n"
+        ),
+        "beta.py": (
+            "def _beta_live_from_test():\n"
+            "    return 4\n"
+            "def _beta_dead():\n"
+            "    return 3\n"
+        ),
+        "tests/test_beta.py": (
+            "from beta import _beta_live_from_test\n"
+            "def test_live():\n"
+            "    assert _beta_live_from_test() == 4\n"
+        ),
+    }
+    for name, content in files.items():
+        full = os.path.join(path, name)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        with open(full, "w") as fh:
+            fh.write(content)
+    return path
+
+
+GROUND_TRUTH_DEAD = {"alpha._alpha_dead", "beta._beta_dead"}
+
+
+def _fixture_dir(repo):
     if repo == "synthetic_bad_repo":
-        root = build_synthetic_fixture()
-        out = {}
-        for name in os.listdir(root):
-            if name.endswith(".py"):
-                with open(os.path.join(root, name)) as fh:
-                    out[name] = fh.read()
-        return out
+        return build_synthetic_fixture()
     if repo == "synthetic_cpg_repo":
-        root = build_cpg_fixture()
-        out = {}
-        for name in os.listdir(root):
-            if name.endswith(".py"):
-                with open(os.path.join(root, name)) as fh:
-                    out[name] = fh.read()
-        return out
+        return build_cpg_fixture()
     if repo == "synthetic_promo_repo":
-        root = build_promo_fixture()
+        return build_promo_fixture()
+    if repo == "synthetic_taint_repo":
+        return build_taint_fixture()
+    return None
+
+
+def load_repo_corpus(repo):
+    """Dotted-path file set + full reference corpus + provenance metadata.
+
+    N7 defect 1: ``load_repo_files`` keys tarballs by BASENAME
+    (``out[parts[-1]]``), so every ``__init__.py`` in the repository collapses
+    into one key, two same-named modules in different packages silently
+    overwrite each other, and the resulting "module" (``app``, ``config``,
+    ``utils``) is a fictitious top-level namespace that happens to collide with
+    real installed packages. The analysis set here is keyed by the full dotted
+    path so a collision is impossible.
+
+    N7 defect 2 (candidate, NOT the one run 4 claimed): the reference corpus is
+    EVERY ``.py`` file including the directories the analysis skips, because
+    the unreferenced-symbol rule is only sound if no reference is invisible.
+    """
+    root = _fixture_dir(repo)
+    if root is not None:
+        files, corpus = {}, {}
+        for dirpath, _dirs, names in os.walk(root):
+            for name in sorted(names):
+                if not name.endswith(".py"):
+                    continue
+                full = os.path.join(dirpath, name)
+                rel = os.path.relpath(full, root)
+                dotted = rel[:-3].replace(os.sep, ".")
+                with open(full) as fh:
+                    src = fh.read()
+                corpus[dotted] = src
+                if not any(p in SKIP_DIRS for p in rel.split(os.sep)):
+                    files[dotted] = src
+        meta = {
+            "n_py_in_artefact": len(corpus),
+            "n_analysis": len(files),
+            "n_corpus": len(corpus),
+            "basename_collisions": [],
+            "max_files_cap": MAX_CORPUS_FILES,
+        }
+        return files, corpus, meta
+
+    buf = stream_tarball(REPOS[repo])
+    files: dict = {}
+    corpus: dict = {}
+    n_py_in_tarball = 0
+    oversize = 0
+    with tarfile.open(fileobj=buf, mode="r|gz") as tar:
+        for member in tar:
+            if not member.isfile() or not member.name.endswith(".py"):
+                continue
+            n_py_in_tarball += 1
+            if member.size > MAX_FILE_BYTES:
+                oversize += 1
+                continue
+            if len(corpus) >= MAX_CORPUS_FILES:
+                continue
+            parts = member.name.split("/")
+            dotted = ".".join(parts[1:])[:-3] if len(parts) > 2 else parts[-1][:-3]
+            fh = tar.extractfile(member)
+            if fh is None:
+                continue
+            try:
+                src = fh.read().decode("utf-8", "replace")
+            except Exception:
+                continue
+            corpus[dotted] = src
+            if not any(p in SKIP_DIRS for p in parts) and len(files) < MAX_FILES:
+                files[dotted] = src
+    gc.collect()
+    # How many analysis files the OLD basename keying would have destroyed.
+    seen: dict = {}
+    for dotted in files:
+        seen.setdefault(dotted.rsplit(".", 1)[-1], []).append(dotted)
+    collisions = {k: sorted(v) for k, v in seen.items() if len(v) > 1}
+    meta = {
+        "n_py_in_artefact": n_py_in_tarball,
+        "n_analysis": len(files),
+        "n_corpus": len(corpus),
+        "oversize_files": oversize,
+        "basename_collisions": collisions,
+        "n_files_dropped_by_basename_keying": len(files) - len(seen),
+        "max_files_cap": MAX_CORPUS_FILES,
+    }
+    return files, corpus, meta
+
+
+def load_repo_files(repo):
+    root = _fixture_dir(repo)
+    if root is not None:
         out = {}
-        for name in os.listdir(root):
-            if name.endswith(".py"):
-                with open(os.path.join(root, name)) as fh:
-                    out[name] = fh.read()
+        for dirpath, _dirs, names in os.walk(root):
+            for name in sorted(names):
+                if name.endswith(".py"):
+                    with open(os.path.join(dirpath, name)) as fh:
+                        out[name] = fh.read()
         return out
     buf = stream_tarball(REPOS[repo])
     out = {}
@@ -583,7 +731,188 @@ def run_v3(repo):
     return out
 
 
+def run_n7(repo):
+    """N7: symbol-domain hygiene + precondition-free unreferenced certification.
+
+    Static only. The dynamic oracle stays OFF for every non-fixture repo: it
+    executes code, and these are untrusted third-party tarballs. The
+    certification in `src/04_symbol_domain.py` needs no execution, which is the
+    only reason a real-repo dead-code measurement is possible at all here.
+
+    Two rows on the SAME graph, so the comparison is paired:
+      ``run4_gate``   equations.md row 15 -- name matching against opaque
+                      unresolved sites, gated on a repo-wide precondition.
+      ``unreferenced`` equations.md row 18 -- occurrence count of the leaf name
+                      over the whole reference corpus, no `<complex>` clause.
+    """
+    files, corpus, meta = load_repo_corpus(repo)
+    t0 = time.time()
+    cpg = CPG_MOD.build_cpg(files)
+    dead = cpg.dead_symbols(dunder_exempt=True)
+    counts = DOMAIN_MOD.token_name_counts(corpus.values())
+    ident = DOMAIN_MOD.recount_identifiers_only(corpus.values())
+    complete = DOMAIN_MOD.corpus_complete(
+        meta["n_py_in_artefact"], meta["n_corpus"], counts
+    )
+    opaque = GATE_MOD.opaque_names(cpg.unresolved_calls)
+    pre_ok = GATE_MOD.soundness_precondition(opaque)
+    run4_cert = GATE_MOD.certify_dead(dead, opaque)
+    # Occurrences inside the ANALYSIS set only, so a reference the CPG could
+    # never see (a test, a doc example, a vendored package) is attributable.
+    counts_analysis = DOMAIN_MOD.token_name_counts(files.values())
+    new_cert = DOMAIN_MOD.certify_unreferenced(dead, counts)
+    blocked = DOMAIN_MOD.name_mentioned_elsewhere(dead, counts)
+    str_only = DOMAIN_MOD.blocked_by_string_only(dead, counts, ident)
+    peak = peak_rss_mb()
+
+    out = {
+        "variation": "n7_symbol_domain",
+        "repo": repo,
+        "files_analysis": len(files),
+        "files_corpus": len(corpus),
+        "metric_def": "unreferenced-domain-v4",
+        "max_metric": GATE_MOD.MAX_GATED_SCORE,
+        # -- provenance of the load, i.e. the defect being repaired
+        "corpus_meta": meta,
+        # -- run 4's gate, on the repaired graph
+        "run4_precondition_ok": pre_ok,
+        "run4_n_certified": len(run4_cert),
+        "run4_certified": sorted(run4_cert)[:10],
+        # -- the new gate
+        "corpus_complete": complete,
+        "n_predicted_dead": len(dead),
+        "n_certified": len(new_cert),
+        "certification_rate": round(len(new_cert) / len(dead), 4) if dead else 0.0,
+        "dead_certified": sorted(new_cert)[:10],
+        "n_blocked": len(blocked),
+        "n_blocked_by_string_only": len(str_only),
+        "dead_blocked_by_string_only": sorted(str_only)[:10],
+        "n_complex_sites": sum(
+            1 for _, r in cpg.unresolved_calls
+            if r == GATE_MOD.COMPLEX_SENTINEL
+        ),
+        "cpg_resolution_rate": round(cpg.resolution_rate(), 4),
+        "cpg_parse_errors": sorted(cpg.parse_errors)[:10],
+        "n_parse_errors": len(cpg.parse_errors),
+        "peak_ram_mb": round(peak, 2),
+        "token_cost_usd": 0.0,
+        "elapsed_s": round(time.time() - t0, 2),
+    }
+    # Both gates are binary soundness verdicts, so the comparable quantity is
+    # simply whether each one is DEFINED and how much it certifies. Emitted
+    # rather than folded into a score: a "0.0 because refused" and a "0.0
+    # because there is nothing to certify" are different results.
+    out["run4_term_v3"] = GATE_MOD.dead_term(run4_cert, pre_ok)
+    out["unreferenced_term"] = 1.0 if (complete and new_cert) else 0.0
+    out["unreferenced_term_refused_reason"] = (
+        "corpus_incomplete" if not complete
+        else "nothing_certifiable" if not new_cert
+        else None
+    )
+    # The falsifiable comparison, stated in the only two directions that mean
+    # something. `new >= run4` would be the wrong test: run 4's UNGATED filter is
+    # unsound, so a superset would be a superset of false positives.
+    out["new_subset_of_run4_ungated"] = new_cert <= run4_cert
+    # The decisive real-repo test of run 4's gate: it is DEFINED on the analysis
+    # set, so any certified symbol whose name is additionally referenced OUTSIDE
+    # that set is a demonstrated false positive -- not a suspected one. Split by
+    # whether the extra mention is an identifier (a real out-of-scope caller) or
+    # only a string literal (the getattr/globals escape).
+    out_of_scope = {
+        s for s in run4_cert
+        if counts.get(DOMAIN_MOD.bare(s), 0) > counts_analysis.get(DOMAIN_MOD.bare(s), 0)
+    }
+    out["n_run4_cert_out_of_scope_refs"] = len(out_of_scope)
+    out["run4_cert_out_of_scope_sample"] = sorted(out_of_scope)[:10]
+    out["n_run4_cert_blocked_only_by_string"] = len(
+        {s for s in out_of_scope if ident.get(DOMAIN_MOD.bare(s), 0)
+            == counts_analysis.get(DOMAIN_MOD.bare(s), 0)}
+    )
+    out["n_run4_ungated_false_positives"] = len(run4_cert - new_cert) if complete else None
+    # Run 4 WITH its own precondition gate applied -- the only run-4 output that
+    # is defensible. Empty whenever the precondition fails.
+    run4_gated = run4_cert if pre_ok else set()
+    out["n_run4_gated_certified"] = len(run4_gated)
+    out["n_certified_only_by_new_rule"] = len(new_cert - run4_gated)
+    if repo.startswith("synthetic_"):
+        # Local fixture: trusted code, so the dynamic oracle may run. Real
+        # tarballs NEVER get here -- they execute third-party code, and the
+        # whole point of the unreferenced rule is that it needs no execution.
+        # The oracle writes each source to a tmpdir under its key and derives the
+        # module name by stripping ".py", so it REQUIRES .py-suffixed keys.
+        # run_n7 keys by dotted path WITHOUT the extension, and feeding it those
+        # keys directly made it observe zero modules and report a suspiciously
+        # round precision of 0.0 -- a silently empty measurement, not a score.
+        oracle = DYN_MOD.run_oracle({f"{k}.py": v for k, v in files.items()})
+        if not oracle.dispatches:
+            # One honest failure beats a fabricated 0.0 (run 3's rule).
+            out["status"] = "unvalidated"
+            out["reason"] = "oracle observed no dispatches; structural term undefined"
+            out["oracle_ran"] = False
+            out["harness_score_v4"] = None
+            out["struct_precision_dyn"] = None
+            out["struct_recall_dyn"] = None
+            return out
+        t1 = time.time()
+        blast = cpg.blast_radius({b for _, b in cpg.call_edges} or set(cpg.nodes))
+        blast_ms = (time.time() - t1) * 1000 + 0.5
+        prec = PROMOTE_MOD.precision_of(cpg.call_edges, oracle.dispatches)
+        lat = max(0.0, 1 - blast_ms / 2000)
+        ram = max(0.0, 1 - peak / 512)
+        out.update({
+            "oracle_ran": True,
+            "struct_precision_dyn": round(prec, 4),
+            "struct_recall_dyn": round(
+                PROMOTE_MOD.recall_of(cpg.call_edges, oracle.dispatches), 4
+            ),
+            "blast_symbols": len(blast),
+            "blast_latency_ms": round(blast_ms, 2),
+            # Max 80, via the run-4 gate, so the ONLY thing that differs from
+            # run 4 is the PIPELINE (dotted paths, unreferenced rule) and not the
+            # arithmetic. The dead term is reported, never scored -- same decision
+            # run 4 made, for the same reason.
+            "harness_score_v4": round(
+                GATE_MOD.gated_score(mermaid_validity(), prec, lat, ram), 2
+            ),
+            "dead_term_scored": False,
+        })
+    else:
+        out["oracle_ran"] = False
+        out["harness_score_v4"] = None
+        out["score_withheld_reason"] = (
+            "the structural term is defined against a dynamic oracle, and the "
+            "oracle executes code. It is deliberately not run on a third-party "
+            "tarball, so no harness_score is emitted for real repositories. The "
+            "gated dead term and the certification counts ARE emitted, because "
+            "they are trace-free."
+        )
+    if repo == "synthetic_taint_repo":
+        truth = GROUND_TRUTH_DEAD
+        out["ground_truth_dead"] = sorted(truth)
+        out["false_positives"] = sorted(new_cert - truth)
+        out["false_negatives"] = sorted(truth - new_cert)
+        out["precision_vs_truth"] = (
+            round(len(new_cert & truth) / len(new_cert), 4) if new_cert else 0.0
+        )
+        out["recall_vs_truth"] = (
+            round(len(new_cert & truth) / len(truth), 4) if truth else 0.0
+        )
+        out["run4_false_positives"] = sorted(run4_cert - truth)
+        out["ground_truth_checked"] = True
+    else:
+        out["ground_truth_checked"] = False
+        out["ground_truth_note"] = (
+            "no ground truth exists for a real repository, so the real-repo "
+            "rows carry NO accuracy claim; the soundness claim is the proof in "
+            "src/04_symbol_domain.py, and it is falsified or confirmed on "
+            "synthetic_taint_repo where the truth is written down"
+        )
+    return out
+
+
 def run_one(variation, repo):
+    if variation == "n7_symbol_domain":
+        return run_n7(repo)
     if variation == "v3_trace_informed_cpg":
         return run_v3(repo)
     tracemalloc.start()
