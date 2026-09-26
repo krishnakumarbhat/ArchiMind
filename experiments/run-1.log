@@ -1,0 +1,16 @@
+[
+  {
+    "variation": "v0_baseline_linear",
+    "repo": "synthetic_bad_repo",
+    "files": 4,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1": 0.6827,
+    "blast_latency_ms": 0.51,
+    "peak_ram_mb": 19.66,
+    "tracemalloc_kb": 21.4,
+    "token_cost_usd": 0.008,
+    "dead_code_acc": 0.5,
+    "harness_score": 80.09,
+    "elapsed_s": 0.01
+  }
+]

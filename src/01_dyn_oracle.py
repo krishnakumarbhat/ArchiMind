@@ -50,9 +50,41 @@ class DynOracle:
     invoked: Set[Symbol] = field(default_factory=set)
     import_failed: Dict[str, str] = field(default_factory=dict)
     timed_out: Set[Symbol] = field(default_factory=set)
+    per_target: Dict[Symbol, Set[Dispatch]] = field(default_factory=dict)
 
-    def covered_symbols(self) -> Set[Symbol]:
-        return {b for _, b in self.dispatches} | self.invoked
+    def covered_symbols(
+        self,
+        dispatches: Optional[Set[Dispatch]] = None,
+        targets: Optional[List[Symbol]] = None,
+    ) -> Set[Symbol]:
+        """Symbols exercised by ``dispatches`` (default: everything observed).
+
+        Both arguments are parameters so a held-out fold can report its OWN
+        coverage. Using the global sets here would silently credit a caller that
+        only ran in the *other* fold, which is exactly the leak a held-out
+        protocol exists to catch.
+        """
+        seen = self.dispatches if dispatches is None else dispatches
+        inv = self.invoked if targets is None else targets
+        return {b for _, b in seen} | set(inv)
+
+    def fold_targets(self, folds: int = 2) -> List[List[Symbol]]:
+        """Deterministic interleaved split of the invoked targets into ``folds``.
+
+        Interleaving on the sorted target list is the laziest split that still
+        balances fold size; the point is only that the two folds share no
+        harness target, so a rule learned on one is scored on genuinely
+        unexercised entry points in the other.
+        """
+        targets = sorted(self.invoked)
+        return [targets[i::folds] for i in range(folds)]
+
+    def dispatches_for(self, targets: List[Symbol]) -> Set[Dispatch]:
+        """Union of the dispatches attributed to each of ``targets``."""
+        out: Set[Dispatch] = set()
+        for t in targets:
+            out |= self.per_target.get(t, set())
+        return out
 
     def precision(self, predicted: Set[Dispatch]) -> float:
         """Share of predicted edges that the runtime actually dispatched.
@@ -173,14 +205,26 @@ def _code_index(module: types.ModuleType) -> Dict[int, str]:
     return index
 
 
-def _harness(module: types.ModuleType, targets: List[Symbol]) -> None:
-    """Invoke every target, swallowing errors -- we want dispatches, not results."""
+def _harness(
+    module: types.ModuleType,
+    targets: List[Symbol],
+    tracer: "_Tracer",
+    oracle: DynOracle,
+) -> None:
+    """Invoke every target, swallowing errors -- we want dispatches, not results.
+
+    Events are attributed *per target*: the tracer is reset before each
+    invocation. Without this split the dispatch set is a single blob and a
+    held-out evaluation is impossible -- a rule trained on one half of the
+    targets would still be scored against dispatches produced by the other.
+    """
     for sym in targets:
         name = sym.split(".", 1)[1]
         func = getattr(module, name, None)
         if func is None:
             continue
         for args in _dummy_args(func):
+            tracer.events = set()
             try:
                 signal.setitimer(signal.ITIMER_REAL, CALL_BUDGET_SECONDS)
                 func(*args)
@@ -191,6 +235,7 @@ def _harness(module: types.ModuleType, targets: List[Symbol]) -> None:
                 continue  # try the next arity
             finally:
                 signal.setitimer(signal.ITIMER_REAL, 0)
+        oracle.per_target[sym] = set(tracer.events)
 
 
 def run_oracle(files: Dict[str, str]) -> DynOracle:
@@ -252,13 +297,23 @@ def run_oracle(files: Dict[str, str]) -> DynOracle:
             for module_name in list(sys.modules):
                 if module_name in local_modules:
                     del sys.modules[module_name]
-    # Only dispatches inside the repo under test count as evidence.
+    # Only dispatches inside the repo under test count as evidence. Collected
+    # from the per-target map, NOT from tracer.events -- the tracer holds only
+    # the last target's events once the loop is done.
     oracle.dispatches = {
         d
-        for d in tracer.events
+        for events in oracle.per_target.values()
+        for d in events
         if d[0].split(".", 1)[0] in local_modules
         and d[1].split(".", 1)[0] in local_modules
     }
+    for t in list(oracle.per_target):
+        oracle.per_target[t] = {
+            d
+            for d in oracle.per_target[t]
+            if d[0].split(".", 1)[0] in local_modules
+            and d[1].split(".", 1)[0] in local_modules
+        }
     return oracle
 
 
@@ -278,7 +333,7 @@ def _traced(
         sys.settrace(None)
         return
     try:
-        _harness(module, targets)
+        _harness(module, targets, tracer, oracle)
     except _Timeout:
         oracle.timed_out.add(module.__name__)
     finally:

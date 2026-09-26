@@ -1,0 +1,370 @@
+[
+  {
+    "variation": "v2_treesitter_cpg",
+    "repo": "synthetic_bad_repo",
+    "files": 4,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": null,
+    "blast_latency_ms": 0.51,
+    "peak_ram_mb": 22.22,
+    "tracemalloc_kb": 77.2,
+    "token_cost_usd": 0.0,
+    "dead_code_acc": 1.0,
+    "harness_score": 69.56,
+    "elapsed_s": 0.01,
+    "metric_def": "dynamic-oracle-v1",
+    "oracle_dispatches": 0,
+    "oracle_invoked": [],
+    "oracle_import_failed": {
+      "broken.py": "unparseable",
+      "repo.py": "ImportError",
+      "routes.py": "ImportError"
+    },
+    "cpg_resolution_rate": 0.6667,
+    "cpg_unresolved": [
+      [
+        "repo",
+        "query"
+      ]
+    ],
+    "cpg_cycles": [],
+    "struct_precision_dyn": 0.0,
+    "struct_recall_dyn": 0.0,
+    "struct_false_edges": [
+      [
+        "routes.get_user",
+        "repo.UserRepo.__init__"
+      ],
+      [
+        "routes.get_user",
+        "repo.UserRepo.fetch"
+      ]
+    ],
+    "struct_missed": [],
+    "dead_predicted": [
+      "repo.UserRepo.dead_method"
+    ],
+    "dead_confirmed": [
+      "repo.UserRepo.dead_method"
+    ],
+    "blast_symbols": 3,
+    "coarse_precision_v0_space": 0.0,
+    "coarse_precision_cpg_space": 0.0,
+    "coarse_truth_size": 0,
+    "coarse_v0_size": 9
+  },
+  {
+    "variation": "v2_treesitter_cpg",
+    "repo": "synthetic_cpg_repo",
+    "files": 4,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": null,
+    "blast_latency_ms": 0.51,
+    "peak_ram_mb": 22.17,
+    "tracemalloc_kb": 104.1,
+    "token_cost_usd": 0.0,
+    "dead_code_acc": 0.3333,
+    "harness_score": 86.23,
+    "elapsed_s": 0.01,
+    "metric_def": "dynamic-oracle-v1",
+    "oracle_dispatches": 4,
+    "oracle_invoked": [
+      "repo.orphan_helper",
+      "routes.get_session",
+      "routes.get_user"
+    ],
+    "oracle_import_failed": {
+      "broken.py": "unparseable"
+    },
+    "cpg_resolution_rate": 0.5,
+    "cpg_unresolved": [
+      [
+        "repo",
+        "close"
+      ],
+      [
+        "repo",
+        "query"
+      ]
+    ],
+    "cpg_cycles": [],
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "struct_false_edges": [],
+    "struct_missed": [
+      [
+        "repo.UserRepo.fetch",
+        "db.Session.query"
+      ],
+      [
+        "repo.orphan_helper",
+        "db.Session.close"
+      ]
+    ],
+    "dead_predicted": [
+      "db.Session.close",
+      "db.Session.query",
+      "repo.UserRepo.dead_method"
+    ],
+    "dead_confirmed": [
+      "repo.UserRepo.dead_method"
+    ],
+    "blast_symbols": 3,
+    "coarse_precision_v0_space": 0.2143,
+    "coarse_precision_cpg_space": 1.0,
+    "coarse_truth_size": 4,
+    "coarse_v0_size": 14
+  },
+  {
+    "variation": "v3_trace_informed_cpg",
+    "repo": "synthetic_promo_repo",
+    "files": 8,
+    "metric_def": "dynamic-oracle-heldout-v2",
+    "fold_a_targets": [
+      "svc_a.get_user",
+      "svc_c.close_store"
+    ],
+    "fold_b_targets": [
+      "svc_b.get_audit",
+      "svc_d.get_cached"
+    ],
+    "fold_a_dispatches": 4,
+    "fold_b_dispatches": 7,
+    "oracle_import_failed": {},
+    "learned_name_rules": [
+      [
+        "__init__",
+        "users.UserRepo.__init__"
+      ],
+      [
+        "close",
+        "store.Store.close"
+      ],
+      [
+        "fetch",
+        "users.UserRepo.fetch"
+      ],
+      [
+        "query",
+        "store.Store.query"
+      ]
+    ],
+    "unresolved_call_sites": [
+      [
+        "audit.AuditRepo.scan",
+        "query"
+      ],
+      [
+        "cache.Cache.load",
+        "query"
+      ],
+      [
+        "svc_c.close_store",
+        "close"
+      ],
+      [
+        "svc_d.get_cached",
+        "commit"
+      ],
+      [
+        "svc_d.get_cached",
+        "load"
+      ],
+      [
+        "users.UserRepo.fetch",
+        "query"
+      ]
+    ],
+    "promotion_coverage_ceiling": 0.5,
+    "rows": {
+      "static_control": {
+        "promoted_edges": 0,
+        "call_edges": 5,
+        "struct_precision_dyn": 0.6,
+        "struct_recall_dyn": 0.4286,
+        "struct_f1_dyn": 0.5,
+        "heldout_recall": 0.4286,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 3,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.0,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.close",
+          "store.Store.commit",
+          "store.Store.query"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit",
+          "store.Store.query"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale",
+          "store.Store.close"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.4,
+        "cpg_resolution_rate": 0.4545,
+        "blast_symbols": 8,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.33,
+        "harness_score": 67.56,
+        "harness_score_f1": 64.56,
+        "in_sample": false
+      },
+      "mode_a": {
+        "promoted_edges": 2,
+        "call_edges": 7,
+        "struct_precision_dyn": 0.4286,
+        "struct_recall_dyn": 0.4286,
+        "struct_f1_dyn": 0.4286,
+        "heldout_recall": 0.4286,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 3,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.0,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.commit"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.3333,
+        "cpg_resolution_rate": 0.5385,
+        "blast_symbols": 11,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.33,
+        "harness_score": 62.42,
+        "harness_score_f1": 62.42,
+        "in_sample": false
+      },
+      "mode_b": {
+        "promoted_edges": 4,
+        "call_edges": 9,
+        "struct_precision_dyn": 0.5556,
+        "struct_recall_dyn": 0.7143,
+        "struct_f1_dyn": 0.625,
+        "heldout_recall": 0.7143,
+        "heldout_precision": 1.0,
+        "heldout_evaluable_edges": 5,
+        "n_dispatch_seen_callers": 0.0,
+        "recall_seen_callers": 0.0,
+        "n_dispatch_unseen_callers": 7.0,
+        "recall_unseen_callers": 0.2857,
+        "dead_predicted": [
+          "cache.Cache.load",
+          "cache.Cache.stale",
+          "store.Store.commit"
+        ],
+        "dead_refuted": [
+          "cache.Cache.load",
+          "store.Store.commit"
+        ],
+        "dead_unexercised": [
+          "cache.Cache.stale"
+        ],
+        "dead_proven": [],
+        "dead_code_acc": 0.0,
+        "dead_code_acc_upper": 0.3333,
+        "cpg_resolution_rate": 0.6,
+        "blast_symbols": 12,
+        "blast_latency_ms": 0.51,
+        "peak_ram_mb": 22.33,
+        "harness_score": 66.23,
+        "harness_score_f1": 68.31,
+        "in_sample": false
+      },
+      "deployed_allfolds": {
+        "promoted_edges": 6,
+        "call_edges": 11,
+        "newly_promoted": [
+          [
+            "audit.AuditRepo.scan",
+            "store.Store.query"
+          ],
+          [
+            "cache.Cache.load",
+            "store.Store.query"
+          ],
+          [
+            "svc_c.close_store",
+            "store.Store.close"
+          ],
+          [
+            "svc_d.get_cached",
+            "cache.Cache.load"
+          ],
+          [
+            "svc_d.get_cached",
+            "store.Store.commit"
+          ],
+          [
+            "users.UserRepo.fetch",
+            "store.Store.query"
+          ]
+        ],
+        "struct_precision_dyn": 1.0,
+        "struct_recall_dyn": 1.0,
+        "cpg_resolution_rate": 0.6471,
+        "dead_predicted": [
+          "cache.Cache.stale"
+        ],
+        "dead_code_acc": null,
+        "dead_code_acc_upper": null,
+        "harness_score": null,
+        "harness_score_f1": null,
+        "in_sample": true,
+        "note": "precision is 1.0 by construction; shape only, not a quality claim"
+      }
+    },
+    "ranked_rows": [
+      "static_control",
+      "mode_a",
+      "mode_b"
+    ],
+    "harness_score": 66.23,
+    "token_cost_usd": 0.0,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": null,
+    "dead_code_acc": 0.0,
+    "harness_score_f1": 68.31,
+    "peak_ram_mb": 22.33,
+    "elapsed_s": 0.01,
+    "caveat": "rows share one process; peak_ram_mb is cumulative"
+  },
+  {
+    "variation": "v3_trace_informed_cpg",
+    "repo": "synthetic_cpg_repo",
+    "files": 4,
+    "metric_def": "dynamic-oracle-heldout-v2",
+    "fold_a_targets": [
+      "repo.orphan_helper",
+      "routes.get_user"
+    ],
+    "fold_b_targets": [
+      "routes.get_session"
+    ],
+    "fold_a_dispatches": 4,
+    "fold_b_dispatches": 0,
+    "oracle_import_failed": {
+      "broken.py": "unparseable"
+    },
+    "status": "unvalidated",
+    "reason": "a fold observed no dispatches; protocol undefined"
+  }
+]
