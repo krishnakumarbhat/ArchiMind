@@ -42,6 +42,7 @@ REPOS = {
     "synthetic_taint_repo": None,  # local fixture, KNOWN dead-code ground truth
     "synthetic_exports_repo": None,  # local fixture, KNOWN ground truth + export surface
     "synthetic_protocol_repo": None,  # local fixture, out-of-corpus protocol driver
+    "synthetic_escape_repo": None,  # run 11 (N13): nine spell-free escape mechanisms
     "pallets/flask": "https://codeload.github.com/pallets/flask/tar.gz/refs/heads/main",
     "psf/requests": "https://codeload.github.com/psf/requests/tar.gz/refs/heads/main",
     "tiangolo/sqlmodel": "https://codeload.github.com/tiangolo/sqlmodel/tar.gz/refs/heads/main",
@@ -398,6 +399,8 @@ def _fixture_dir(repo):
         return build_protocol_fixture()
     if repo == "synthetic_index_repo":
         return build_index_fixture()
+    if repo == "synthetic_escape_repo":
+        return build_escape_fixture()
     return None
 
 
@@ -428,6 +431,18 @@ def build_index_fixture(path="experiments/fixtures/synthetic_index_repo"):
     with open(os.path.join(path, "alpha.py"), "w") as fh:
         fh.write("\n".join(body))
     return path
+
+
+def build_escape_fixture(path="experiments/fixtures/synthetic_escape_repo"):
+    """Fixture whose whole purpose is to REFUTE the spelling condition (N13).
+
+    The nine witnesses live in an on-disk directory rather than in a code template,
+    because this file is the written-down ground truth: the mechanism index in
+    ``witnesses.py``'s docstring is the specification the escape-rate measurement is
+    scored against, and a generated fixture would put the specification and the
+    subject in the same string.
+    """
+    return os.path.abspath(path)
 
 
 def build_protocol_fixture(

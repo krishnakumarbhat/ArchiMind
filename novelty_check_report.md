@@ -188,3 +188,42 @@ marked provisional for that reason.
 ## What the loop claims, in one line
 
 The loop claims **no new mathematics**. It claims one correction, one measured negative, one empty instrument channel, and one methodology note. Novelty **15 → 38/100** is an *increase* on run 9's 15, and it is reported as such rather than as progress: the increase is entirely the retraction's worth, which is not novelty.
+
+---
+
+## Run 11 / N13 — the non-executing adjudicator (2026-09-26 13:24)
+
+**Claim under check.** "An edge (caller, callee) is DEFINITIVELY FALSE if `leaf(callee)` occurs nowhere in the caller's body, so `unadjudicable_edges` can be shrunk on an untrusted tarball without running the oracle."
+
+**Novelty score: 22/100** (prior run 38). Verdict: engineering track, **no paper**.
+
+### Sub-claim verdicts
+
+| sub-claim | verdict | evidence |
+|---|---|---|
+| the necessary condition (name must appear in the caller's file) | **REFUTED as stated** — false under the dynamic reading of a real edge, true only under the direct reading the node did not state | `src/11_name_refuter.py::self_check`, `fault1_dynamic_reading_refuted`, `fault1_direct_reading_holds` |
+| A2, text-faithfulness of the callee | **NOVEL-in-this-loop, coarse** — the tight version needs the resolver's raw text per edge, which the CPG does not record | `fault2_refuted_without_a2` / `fault2_a2_blocks_it`; eq. row 6 manufactured the counterexample |
+| A1, refuse on a dynamic-name-construction site | **INCREMENTAL** — ordinary soundness-precondition practice, the same move as eq. row 20 | `a1_detects_computed_name`, `a1_fstring_detected` |
+| the refuter as a component | **PRIOR-ART-DOMINATED** | Palsberg et al. OOPSLA/ISFE 2022, doi 10.1145/3510003.3510166; ICDM 2022 re-evaluation; Reif et al. |
+| the vacuity measurement (0 of 2014) and its two causes | **NOVEL measurement** | `experiments/run-11-n13.log` |
+
+### Most damaging prior art found (not found by the loop itself)
+
+1. **Utture, Liu, Kalhauge, Palsberg. "Striking a Balance: Pruning False-Positives from Static Call Graphs." OOPSLA/ISFE 2022.** doi 10.1145/3510003.3510166. Prunes WALA/Doop/Petablox call graphs with a learned classifier; WALA 0-CFA precision 23.8% → 66%, null-pointer-analysis false-positive rate 73% → 23%. **Removes false edges and few true edges** — the same task N13 attacks, done with a training phase.
+2. **Same authors, "Is Call Graph Pruning Really Effective?"** (ICDM 2022 preprint, mohpydev.github.io/papers/call-graph-pruning-preprint.pdf). Of 348 NJR1 edges assumed false by the standard protocol, **313 are actually true**. The canonical evaluation of this task's ground truth is itself unreliable.
+3. **Reif, Kübler, Eichberg, Mezini. "Systematic Evaluation of the Unsoundness of Call Graph Construction Algorithms for Java"** (michael-reif.name/publications/JCG.pdf) and **"Judge"** (RKE+ 2019). Call-graph unsoundness is a studied phenomenon with a dedicated methodology.
+
+### NO SOURCE FOUND (logged as unverified-novel, **not** as novel)
+
+- Any publication of the name-occurrence **contrapositive** as a reusable call-graph filter.
+- Any publication of the "refuter touches the denominator only, hence precision-monotone iff sound" statement.
+- Any measured count of how often such a filter is vacuous on a syntactically derived call graph. The 0/2014 figure is **this loop's measurement**, not a prior result.
+
+### Could not verify this iteration
+
+All three literature sub-agents died on provider quota (Gemini free-tier 429 with `retryDelay` 24s; OpenRouter `free-models-per-day` cap; the third returned an empty result). The check above was run directly with two web searches. **Sourcing is shallower than runs 6, 7 and 9 and should be re-run when quota returns** — the verdict is unlikely to improve, since the task is prior art with a 2022 venue paper, but the *sub-claim* table is thinner than it should be.
+
+### Honest note
+
+No paper. Two refutations of the loop's own premise, one soundness audit that passed, and one measurement of exactly zero. The pattern across runs 9–11 is consistent enough to state plainly: **every corpus-derived carrier is either constant on the evidence fibre (so only an oracle can beat the bound) or vacuous (so it needs no oracle and has nothing to do).** N14 is the last shape that escapes both horns — a per-caller binding set — and if it measures zero the carrier search should be closed.
+
