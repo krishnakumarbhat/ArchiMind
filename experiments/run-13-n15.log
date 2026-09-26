@@ -1,0 +1,3609 @@
+[
+ {
+  "variation": "n15_oracle_channel_audit",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the TENTH consecutive run. The dead term is UNSCORED, so harness_score cannot move. Run 12's honest headline stands: the score was never entitled to move on that term.",
+  "parity": {
+   "fixture": "synthetic_cpg_repo",
+   "source": "run_one('v2_treesitter_cpg', 'synthetic_cpg_repo')",
+   "measured": {
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "dead_code_acc": 0.3333,
+    "cpg_resolution_rate": 0.5,
+    "blast_latency_ms": 0.51,
+    "struct_false_edges": []
+   },
+   "identical_to_run7": true,
+   "diffs": {},
+   "composite": null,
+   "note": "Quality fields must be bit-identical; only blast_latency_ms and peak_ram_mb may move. The oracle change CAN move a quality field, and the field to watch is dead_code_acc, which is read off the oracle -- so a non-empty diffs here would be this run's headline rather than a regression."
+  },
+  "in_process_repeatability": {
+   "synthetic_cpg_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       4,
+       4,
+       4
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 4.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 4,
+      "n_trace_events": 5,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      5,
+      5,
+      5
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       4,
+       4,
+       4
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 4.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 4,
+      "n_trace_events": 37,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      37,
+      37,
+      37
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       4,
+       4,
+       4
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 4.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 4,
+      "n_trace_events": 33,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      33,
+      33,
+      33
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       4,
+       4,
+       4
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 4.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 4,
+      "n_trace_events": 33,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      33,
+      33,
+      33
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       4,
+       4,
+       4
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 4.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 4,
+      "n_trace_events": 5,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      5,
+      5,
+      5
+     ]
+    }
+   },
+   "synthetic_promo_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       11,
+       11,
+       11
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 11.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 4,
+      "n_targets_complete": 4,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 4,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 11,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       11,
+       11,
+       11
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 11.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 4,
+      "n_targets_complete": 4,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 4,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 11,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       11,
+       11,
+       11
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 11.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 4,
+      "n_targets_complete": 4,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 4,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 11,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       11,
+       11,
+       11
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 11.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 4,
+      "n_targets_complete": 4,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 4,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 11,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       11,
+       11,
+       11
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 11.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 4,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": true,
+      "all_runs_complete": true
+     },
+     "completeness_first_run": {
+      "status": "COMPLETE",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 4,
+      "n_targets_complete": 4,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 4,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 11,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": true,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "synthetic_taint_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       1,
+       1,
+       1
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 1.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.8333333333333334,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 6,
+      "n_targets_complete": 5,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 1,
+      "status_census": {
+       "COMPLETE": 5,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 1
+      },
+      "timed_out_targets": [],
+      "errored_targets": [
+       "alpha.dispatch"
+      ],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.8333333333333334,
+      "n_dispatches": 1,
+      "n_trace_events": 2,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      2,
+      2,
+      2
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       1,
+       1,
+       1
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 1.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.8333333333333334,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 6,
+      "n_targets_complete": 5,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 1,
+      "status_census": {
+       "COMPLETE": 5,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 1
+      },
+      "timed_out_targets": [],
+      "errored_targets": [
+       "alpha.dispatch"
+      ],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.8333333333333334,
+      "n_dispatches": 1,
+      "n_trace_events": 28,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      28,
+      28,
+      28
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       1,
+       1,
+       1
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 1.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.8333333333333334,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 6,
+      "n_targets_complete": 5,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 1,
+      "status_census": {
+       "COMPLETE": 5,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 1
+      },
+      "timed_out_targets": [],
+      "errored_targets": [
+       "alpha.dispatch"
+      ],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.8333333333333334,
+      "n_dispatches": 1,
+      "n_trace_events": 24,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      24,
+      24,
+      24
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       1,
+       1,
+       1
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 1.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.8333333333333334,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 6,
+      "n_targets_complete": 5,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 1,
+      "status_census": {
+       "COMPLETE": 5,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 1
+      },
+      "timed_out_targets": [],
+      "errored_targets": [
+       "alpha.dispatch"
+      ],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.8333333333333334,
+      "n_dispatches": 1,
+      "n_trace_events": 24,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      24,
+      24,
+      24
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       1,
+       1,
+       1
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 1.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       },
+       {
+        "COMPLETE": 5,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 1
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.8333333333333334,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 6,
+      "n_targets_complete": 5,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 1,
+      "status_census": {
+       "COMPLETE": 5,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 1
+      },
+      "timed_out_targets": [],
+      "errored_targets": [
+       "alpha.dispatch"
+      ],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.8333333333333334,
+      "n_dispatches": 1,
+      "n_trace_events": 2,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      2,
+      2,
+      2
+     ]
+    }
+   },
+   "synthetic_exports_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "synthetic_protocol_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 3,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 1.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 3,
+      "n_targets_complete": 3,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 3,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 1.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "synthetic_index_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 0,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.0,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "EMPTY",
+      "voided": false,
+      "void_on_watchdog": true,
+      "n_targets": 0,
+      "n_targets_complete": 0,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 0,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.0,
+      "n_dispatches": 0,
+      "n_trace_events": 0,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   "synthetic_escape_repo": {
+    "wallclock_INCUMBENT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       10,
+       10,
+       10
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 10.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.9,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 10,
+      "n_targets_complete": 9,
+      "n_targets_cut_by_alarm": 1,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 9,
+       "TRUNCATED_WALLCLOCK": 1,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [
+       "witnesses.w3_iteration"
+      ],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.9,
+      "n_dispatches": 10,
+      "n_trace_events": 1408795,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      1408795,
+      1401131,
+      1408588
+     ]
+    },
+    "events_plus_watchdog": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       10,
+       10,
+       10
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 10.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.9,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 10,
+      "n_targets_complete": 9,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 1,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 9,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 1,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [
+       "witnesses.w3_iteration"
+      ],
+      "truth_coverage": 0.9,
+      "n_dispatches": 10,
+      "n_trace_events": 2000159,
+      "call_budget_seconds": 2,
+      "bound_kind": "events+watchdog:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      2000159,
+      2000159,
+      2000159
+     ]
+    },
+    "events_exclusive": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       10,
+       10,
+       10
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 10.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.9,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 10,
+      "n_targets_complete": 9,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 1,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 9,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 1,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [
+       "witnesses.w3_iteration"
+      ],
+      "truth_coverage": 0.9,
+      "n_dispatches": 10,
+      "n_trace_events": 2000141,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      2000141,
+      2000141,
+      2000141
+     ]
+    },
+    "events_exclusive_TIGHT": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       10,
+       10,
+       10
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 10.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 0,
+        "TRUNCATED_EVENTS": 1,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.9,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "PARTIAL",
+      "voided": false,
+      "void_on_watchdog": false,
+      "n_targets": 10,
+      "n_targets_complete": 9,
+      "n_targets_cut_by_alarm": 0,
+      "n_targets_cut_by_events": 1,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 9,
+       "TRUNCATED_WALLCLOCK": 0,
+       "TRUNCATED_EVENTS": 1,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [],
+      "errored_targets": [],
+      "budget_exhausted_targets": [
+       "witnesses.w3_iteration"
+      ],
+      "truth_coverage": 0.9,
+      "n_dispatches": 10,
+      "n_trace_events": 2141,
+      "call_budget_seconds": 2,
+      "bound_kind": "events:all",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": true,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      2141,
+      2141,
+      2141
+     ]
+    },
+    "wallclock_VOIDS": {
+     "determinism": {
+      "n_repeats": 3,
+      "sizes": [
+       0,
+       0,
+       0
+      ],
+      "n_distinct_dispatch_sets": 1,
+      "spread_in_dispatches": 0,
+      "deterministic": true,
+      "is_a_random_variable": false,
+      "mean_size": 0.0,
+      "note": "A mean over a spread is not a measurement. If is_a_random_variable is true, every number computed against these traces is a random variable and must be reported with its spread, or not at all."
+     },
+     "census": {
+      "per_repeat": [
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       },
+       {
+        "COMPLETE": 9,
+        "TRUNCATED_WALLCLOCK": 1,
+        "TRUNCATED_EVENTS": 0,
+        "ERRORED": 0
+       }
+      ],
+      "statuses": [
+       "COMPLETE",
+       "ERRORED",
+       "TRUNCATED_EVENTS",
+       "TRUNCATED_WALLCLOCK"
+      ],
+      "census_is_stable": true,
+      "mean_truth_coverage": 0.9,
+      "any_run_complete": false,
+      "all_runs_complete": false
+     },
+     "completeness_first_run": {
+      "status": "VOID_WATCHDOG_FIRED",
+      "voided": true,
+      "void_on_watchdog": true,
+      "n_targets": 10,
+      "n_targets_complete": 9,
+      "n_targets_cut_by_alarm": 1,
+      "n_targets_cut_by_events": 0,
+      "n_targets_errored": 0,
+      "status_census": {
+       "COMPLETE": 9,
+       "TRUNCATED_WALLCLOCK": 1,
+       "TRUNCATED_EVENTS": 0,
+       "ERRORED": 0
+      },
+      "timed_out_targets": [
+       "witnesses.w3_iteration"
+      ],
+      "errored_targets": [],
+      "budget_exhausted_targets": [],
+      "truth_coverage": 0.9,
+      "n_dispatches": 0,
+      "n_trace_events": 1419470,
+      "call_budget_seconds": 2,
+      "bound_kind": "wallclock",
+      "supports_dead_claim": false,
+      "supports_liveness_claim": false,
+      "note": "PARTIAL means the trace lost targets to a bound. Its ABSENT dispatches are not evidence of anything, so no 'this symbol is dead' claim may be drawn from it. truth_coverage is the share of targets that finished, and it is the number to gate on."
+     },
+     "n_trace_events": [
+      1419470,
+      1417815,
+      1415800
+     ]
+    }
+   }
+  },
+  "cross_process_repeatability": {
+   "synthetic_escape_repo": {
+    "wallclock_INCUMBENT": {
+     "per_process": [
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 1,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 1400800,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 1,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 1417255,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 1,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 1396341,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 1,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 1394172,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       10,
+       10,
+       10,
+       10
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       10
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    },
+    "events_plus_watchdog": {
+     "per_process": [
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000159,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000159,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000159,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000159,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       10,
+       10,
+       10,
+       10
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       10
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    },
+    "events_exclusive": {
+     "per_process": [
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000141,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000141,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000141,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 10,
+       "n_dispatches_digest": [
+        "witnesses.w1_constructor->witnesses.Plug.__init__",
+        "witnesses.w1_constructor->witnesses.Plug.label",
+        "witnesses.w2_context->witnesses.Ctx.__enter__",
+        "witnesses.w2_context->witnesses.Ctx.__exit__",
+        "witnesses.w4_call->witnesses.CallableObj.__call__",
+        "witnesses.w5_getattr->witnesses.Proxy.__getattr__",
+        "witnesses.w6_generated_caller->witnesses.Rec.use",
+        "witnesses.w7_computed_name->witnesses.Dyn.load",
+        "witnesses.w8_operator->witnesses.Num.__lt__",
+        "witnesses.w9_descriptor->witnesses.Desc.__get__"
+       ],
+       "n_targets": 10,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 1,
+       "n_targets_errored": 0,
+       "n_trace_events": 2000141,
+       "repo": "synthetic_escape_repo",
+       "status": "PARTIAL",
+       "truth_coverage": 0.9
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       10,
+       10,
+       10,
+       10
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       10
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    }
+   },
+   "synthetic_index_repo": {
+    "wallclock_INCUMBENT": {
+     "per_process": [
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "wallclock",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       0
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    },
+    "events_plus_watchdog": {
+     "per_process": [
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events+watchdog:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       0
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    },
+    "events_exclusive": {
+     "per_process": [
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      },
+      {
+       "bound_kind": "events:all",
+       "n_dispatches": 0,
+       "n_dispatches_digest": [],
+       "n_targets": 0,
+       "n_targets_cut_by_alarm": 0,
+       "n_targets_cut_by_events": 0,
+       "n_targets_errored": 0,
+       "n_trace_events": 0,
+       "repo": "synthetic_index_repo",
+       "status": "EMPTY",
+       "truth_coverage": 0.0
+      }
+     ],
+     "verdict": {
+      "sizes_by_process": [
+       0,
+       0,
+       0,
+       0
+      ],
+      "n_processes": 4,
+      "distinct_sizes": [
+       0
+      ],
+      "cross_process_deterministic": true,
+      "spread": 0
+     },
+     "census_stable": true,
+     "status_stable": true
+    }
+   }
+  },
+  "l1_measured": {
+   "synthetic_cpg_repo": {
+    "n_predicted": 2,
+    "n_truth_complete": 4,
+    "n_truth_observed": 4,
+    "n_missed_by_oracle": 0,
+    "false_edges_true": 0,
+    "false_edges_observed": 0,
+    "n_manufactured_false_positives": 0,
+    "manufactured_are_a_superset": true,
+    "precision_true": 1.0,
+    "precision_observed": 1.0,
+    "precision_observed_le_precision_true": true,
+    "deflation": 0.0,
+    "direction": "incompleteness deflates precision, never inflates it",
+    "truth_sets_equal": true,
+    "which_truth_is_the_real_one": "the larger one is a lower bound on the complete truth, because truncation only removes dispatches"
+   },
+   "synthetic_escape_repo": {
+    "n_predicted": 5,
+    "n_truth_complete": 10,
+    "n_truth_observed": 10,
+    "n_missed_by_oracle": 0,
+    "false_edges_true": 3,
+    "false_edges_observed": 3,
+    "n_manufactured_false_positives": 0,
+    "manufactured_are_a_superset": true,
+    "precision_true": 0.4,
+    "precision_observed": 0.4,
+    "precision_observed_le_precision_true": true,
+    "deflation": 0.0,
+    "direction": "incompleteness deflates precision, never inflates it",
+    "truth_sets_equal": true,
+    "which_truth_is_the_real_one": "the larger one is a lower bound on the complete truth, because truncation only removes dispatches"
+   },
+   "synthetic_index_repo": {
+    "n_predicted": 0,
+    "n_truth_complete": 0,
+    "n_truth_observed": 0,
+    "n_missed_by_oracle": 0,
+    "false_edges_true": 0,
+    "false_edges_observed": 0,
+    "n_manufactured_false_positives": 0,
+    "manufactured_are_a_superset": true,
+    "precision_true": 1.0,
+    "precision_observed": 1.0,
+    "precision_observed_le_precision_true": true,
+    "deflation": 0.0,
+    "direction": "incompleteness deflates precision, never inflates it",
+    "truth_sets_equal": true,
+    "which_truth_is_the_real_one": "the larger one is a lower bound on the complete truth, because truncation only removes dispatches"
+   }
+  },
+  "l1b_measured": {
+   "synthetic_cpg_repo": {
+    "observed_subset_of_complete": true,
+    "n_invented_dispatches": 0,
+    "can_invent": false,
+    "dead_claim_supported": true,
+    "liveness_claim_supported": true,
+    "asymmetry": "PARTIAL invalidates every dead claim and no liveness claim. A completeness verdict that does not say which kind of claim it is disqualifying is not a verdict.",
+    "small_completeness": "COMPLETE",
+    "big_completeness": "COMPLETE",
+    "supports_dead_claim_small": true,
+    "supports_liveness_claim_small": true
+   },
+   "synthetic_escape_repo": {
+    "observed_subset_of_complete": true,
+    "n_invented_dispatches": 0,
+    "can_invent": false,
+    "dead_claim_supported": true,
+    "liveness_claim_supported": true,
+    "asymmetry": "PARTIAL invalidates every dead claim and no liveness claim. A completeness verdict that does not say which kind of claim it is disqualifying is not a verdict.",
+    "small_completeness": "PARTIAL",
+    "big_completeness": "PARTIAL",
+    "supports_dead_claim_small": false,
+    "supports_liveness_claim_small": true
+   },
+   "synthetic_index_repo": {
+    "observed_subset_of_complete": true,
+    "n_invented_dispatches": 0,
+    "can_invent": false,
+    "dead_claim_supported": true,
+    "liveness_claim_supported": true,
+    "asymmetry": "PARTIAL invalidates every dead claim and no liveness claim. A completeness verdict that does not say which kind of claim it is disqualifying is not a verdict.",
+    "small_completeness": "EMPTY",
+    "big_completeness": "EMPTY",
+    "supports_dead_claim_small": false,
+    "supports_liveness_claim_small": false
+   }
+  },
+  "l1b_why_it_matters": "Run 12's headline -- eq. row 18's lemma is refuted, because witnesses.Dyn.load is dispatched and therefore live while the incumbent rule certifies it dead -- is a LIVENESS claim resting on a POSITIVE observation. L1b says incompleteness cannot invalidate it. The same PARTIAL trace DOES invalidate every dead claim the loop has published, which is the direction nobody had checked.",
+  "call_counter_is_not_a_work_counter": {
+   "witness_source": "def spin():\n    total = 0\n    for i in range(1000000000):\n        total += i\n    return total\n",
+   "witness_file": "scripts/run_n15_spin.py",
+   "n_calls_in_the_loop_body": 0,
+   "n_line_events_in_the_loop_body": 1,
+   "call_count_exclusive": {
+    "hung": true,
+    "verdict": "the bound was NEVER REACHED in 12s: a call counter does not count this loop, so with the clock disarmed the run is unbounded"
+   },
+   "line_count_exclusive_TIGHT": {
+    "hung": false,
+    "stdout": "EMPTY 0",
+    "verdict": "the bound was REACHED -- this mode bounds the witness"
+   },
+   "conclusion": "A deterministic bound is only as good as the quantity it counts. A call counter does not count a call-free loop, so 'replace the wall clock with a count' is FALSE as stated; it is true only for a counter that grows with work, and no Python-level counter covers work done in C."
+  },
+  "l2": {
+   "n_predicted": 2,
+   "n_false_edges_observed": 0,
+   "case_a_predictor_wrong": {
+    "reading": "each of these edges is fabricated; oracle COMPLETE",
+    "n": 0,
+    "precision": 1.0
+   },
+   "case_b_oracle_incomplete": {
+    "reading": "each of these edges is real and was LOST; predictor CORRECT",
+    "n": 0,
+    "precision_under_this_reading": 1.0
+   },
+   "observation_identical": true,
+   "verdict": "IDENTICAL OBSERVATION, INCOMPATIBLE READINGS: the false-edge residual carries no information about completeness, so completeness must be reported from an independent channel."
+  },
+  "l3": {
+   "n_event_bound": 10,
+   "max_over_wallclock_repeats": 10,
+   "min_over_wallclock_repeats": 10,
+   "event_bound_equals_wallclock_max": true,
+   "event_bound_exceeds_wallclock_max": false,
+   "unused": 0
+  },
+  "n8": {
+   "question": "does a reproducible oracle unblock N8 (unadjudicable_edges -> 0)?",
+   "answer": "NO, and the reason is now measured rather than asserted: an edge the oracle never saw is unjudged whether or not the oracle is deterministic. Reproducibility makes the unjudged SET stable; it does not make it empty. Row 36's monotone argument is untouched by anything in this run.",
+   "n6_still_deferred": "ranking_identifiable is unchanged, so a quality variation still cannot be ranked."
+  },
+  "self_check": {
+   "l1_superset": true,
+   "l1_precision_deflated": true,
+   "l1_manufactured_count": 1,
+   "l1_manufactured_edge_is_a_real_dispatch": true,
+   "l1_one_sided_for_all_completions": true,
+   "l1_fails_when_oracle_invents": true,
+   "l1_precision_can_inflate_when_oracle_invents": true,
+   "l1_precondition_is_OMISSION_ONLY": true,
+   "l1b_partial_hides_but_never_invents": true,
+   "l1b_partial_invalidates_the_dead_claim": true,
+   "l1b_partial_preserves_the_liveness_claim": true,
+   "l1b_fails_if_the_oracle_invents": true,
+   "l2_observation_identical": true,
+   "l2_readings_disagree_on_precision": true,
+   "l2_residual_is_one_in_both_cases": true,
+   "l3_constant_is_deterministic": true,
+   "l3_determinism_is_not_completeness": true,
+   "l3_bound_equals_max_when_not_binding": true,
+   "determinism_verdict_can_fail": true,
+   "mean_is_not_a_measurement": true,
+   "census_can_report_instability": true,
+   "census_mean_coverage": true,
+   "census_all_runs_complete_can_be_false": true,
+   "census_all_runs_complete_can_be_true": true
+  },
+  "self_check_all_pass": true,
+  "novelty": {
+   "score": 34,
+   "track": "engineering",
+   "prior_art": [
+    "rr (Facebook, OOPSLA 2017) 'Deterministic Operational Debugging' is the canonical statement that instrumentation must be a function of the input, not of the scheduler.",
+    "Demsky et al., nondeterminism masking counterexamples in dynamic analysis.",
+    "Doxygen/coverage literature: a partial trace is not evidence of absence."
+   ],
+   "no_source_found": [
+    "a COMPLETENESS/trace-adequacy criterion for a dynamic oracle used as an evaluation gold standard",
+    "the explicit statement that a truncated gold standard MANUFACTURES false positives in the instrument meant to audit it, because the false-edge computation reads every absent dispatch as a predictor error"
+   ],
+   "verdict": "The instrument repair is an engineering note. The transferable content is L1's one-sidedness WITH its precondition (the oracle must be omission-only) plus L2's non-identifiability, which together say the completeness verdict must ride an independent channel.",
+   "subagent_status": "2 of 3 research sub-agents died on provider quota (Gemini free-tier 429). The third returned a summary whose report was written to its own sandbox and never arrived, so the citations above are UNVERIFIED and this score is the run's least-verified."
+  }
+ }
+]

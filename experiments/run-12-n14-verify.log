@@ -1,0 +1,1631 @@
+[
+ {
+  "variation": "n14_binding_carrier_and_escape_channel",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the NINTH consecutive run. The dead term is UNSCORED, so harness_score cannot move. Worse: this run shows the rule generating that term is not sound, so the honest headline is not 'the score did not move' but 'the score was never entitled to move on this term'.",
+  "parity": {
+   "fixture": "synthetic_cpg_repo",
+   "source": "run_one('v2_treesitter_cpg', 'synthetic_cpg_repo')",
+   "measured": {
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "dead_code_acc": 0.3333,
+    "cpg_resolution_rate": 0.5,
+    "blast_latency_ms": 0.52,
+    "struct_false_edges": []
+   },
+   "identical_to_run7": false,
+   "diffs": {
+    "blast_latency_ms": {
+     "run7": 0.51,
+     "run8": 0.52
+    }
+   },
+   "composite": 86.25,
+   "composite_runs_2_to_7": 86.23,
+   "note": "every scored QUALITY quantity must be bit-identical. blast_latency_ms and peak_ram_mb are the resource terms and are the only fields allowed to move; the composite delta is attributed to them alone.",
+   "resource_terms": {
+    "peak_ram_mb": 21.25,
+    "blast_latency_ms": 0.51,
+    "ram_term_points": 9.5849609375,
+    "latency_term_points": 9.99745,
+    "note": "the composite is quality + these two terms, so a composite delta with empty `diffs` is a RESOURCE delta by construction. Reported explicitly because run 6 learned that a composite movement with no attribution is indistinguishable from a quality regression."
+   }
+  },
+  "self_check": {
+   "t1_same_E_class": true,
+   "t1_refuted": true,
+   "t1_carrier": {
+    "alpha.T.beta_dispatched": true,
+    "alpha.T.gamma_mentioned": false
+   },
+   "escape_sites": [
+    {
+     "module": "w7.py",
+     "lineno": 5,
+     "sink": "getattr",
+     "literal": false
+    }
+   ],
+   "escape_effective_sites": 1,
+   "per_module_UNSOUND_certifies": [
+    "alpha.load"
+   ],
+   "completeness_empty": "EMPTY"
+  },
+  "refutation": {
+   "lemma_refuted": "row 18: 'every mechanism that can put a reference to s into a Python program names s somewhere in the source'",
+   "counterexample_mechanism": "W7: getattr(o, \"\".join([\"lo\", \"ad\"]))()",
+   "executed": {
+    "w7": 7,
+    "never_called": 99
+   },
+   "live_by_execution": [
+    "witnesses.Dyn.load"
+   ],
+   "occ_of_escaping_leaf": 1,
+   "n_predicted_dead": 2,
+   "incumbent_certified": [
+    "witnesses.Dyn.load"
+   ],
+   "standing_certified": [
+    "witnesses.Dyn.load"
+   ],
+   "n_false_positives": 1,
+   "false_positives": [
+    "witnesses.Dyn.load"
+   ],
+   "escape_sites": [
+    {
+     "module": "witnesses",
+     "lineno": 177,
+     "sink": "getattr",
+     "literal": false
+    }
+   ],
+   "n_effective_escape_sites": 1,
+   "veto_certifies": [],
+   "veto_closes_the_channel": true,
+   "scope_of_the_refutation": "ONE of the nine witnesses in the fixture yields a certified-dead false positive. The other eight dispatch to dunder leaves, and dead_symbols(dunder_exempt=True) never admits a dunder leaf to the dead set, so they are protected by the CPG's dunder exemption and NOT by row 18's rule. The escape set that matters for the dead-code term is name construction, not the implicit-dispatch family.",
+   "consequence_for_published_numbers": "every real-repo certification count the loop has published since run 5 is a count of CERTIFICATES, and those stand. What does not stand is the adjective: the word 'sound', and the zero-false-positive claim attached to it."
+  },
+  "oracle_repeatability": {
+   "repo": "synthetic_escape_repo",
+   "in_process_repeats": [
+    {
+     "n_dispatches": 4,
+     "completeness": "PARTIAL",
+     "cut": [
+      "witnesses.w3_iteration"
+     ]
+    },
+    {
+     "n_dispatches": 4,
+     "completeness": "PARTIAL",
+     "cut": [
+      "witnesses.w3_iteration"
+     ]
+    },
+    {
+     "n_dispatches": 4,
+     "completeness": "PARTIAL",
+     "cut": [
+      "witnesses.w3_iteration"
+     ]
+    },
+    {
+     "n_dispatches": 4,
+     "completeness": "PARTIAL",
+     "cut": [
+      "witnesses.w3_iteration"
+     ]
+    },
+    {
+     "n_dispatches": 4,
+     "completeness": "PARTIAL",
+     "cut": [
+      "witnesses.w3_iteration"
+     ]
+    }
+   ],
+   "in_process_n_dispatches": [
+    4
+   ],
+   "cross_process_n_dispatches": [
+    4,
+    4,
+    4,
+    4,
+    4
+   ],
+   "cross_process_is_deterministic": true,
+   "n_targets_cut_by_alarm": 1,
+   "completeness_supports_dead_claim": false,
+   "why_it_matters": "the oracle is the loop's only truth channel and it was reporting a truncated trace as a complete one. 4 of 12 dispatches survived on this fixture; the missing target is an infinite for-loop over a Python __next__ under sys.settrace, which is exactly the workload that blows a wall-clock budget on a loaded machine."
+  },
+  "n14_carrier_on_executed_fixture": {
+   "repo": "synthetic_index_repo",
+   "driver_status": "executed",
+   "n_reached_by_execution": 4,
+   "n_class_methods": 8,
+   "n_effective_escape_sites": 0,
+   "n_leaves_in_call_position": 0,
+   "incumbent": {
+    "n_certified": 8,
+    "n_true_positive": 4,
+    "n_false_positive": 4,
+    "precision_1_coverage": 1.0,
+    "false_positives": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_bind_param",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value"
+    ]
+   },
+   "sound_veto": {
+    "n_certified": 8,
+    "n_true_positive": 4,
+    "n_false_positive": 4,
+    "precision_1_coverage": 1.0,
+    "false_positives": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_bind_param",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value"
+    ]
+   },
+   "relaxation_UNSOUND": {
+    "n_certified": 8,
+    "n_true_positive": 4,
+    "n_false_positive": 4,
+    "precision_1_coverage": 1.0,
+    "false_positives": [
+     "alpha.T.coerce_compared_value",
+     "alpha.T.process_bind_param",
+     "alpha.T.process_literal_param",
+     "alpha.T.process_result_value"
+    ]
+   },
+   "criterion_outcome": "MEASURED ZERO, and the zero does NOT close the carrier search: the same carrier splits a distinct-leaf evidence-fibre on the counterexample in src/12_escape_channel.py::t1_counterexample. Both branches of N14's stated success criterion are therefore wrong -- the non-zero branch is unreachable on this fixture and the zero branch's conclusion is not structural."
+  },
+  "audits": [
+   {
+    "repo": "synthetic_cpg_repo",
+    "is_real_repo": false,
+    "n_files": 4,
+    "n_predicted_dead": 3,
+    "escape_channel": {
+     "n_sites": 1,
+     "n_effective_sites": 1,
+     "sinks": [
+      "<unparsed>"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 2,
+     "n_groups_split": 0,
+     "n_groups_constant": 2,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 3,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 1,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 1,
+     "veto_cost": 1
+    },
+    "exposure": {
+     "n_certified": 1,
+     "n_effective_construction_sites": 1,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 1,
+     "exposed_sample": [
+      "repo.UserRepo.dead_method"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "synthetic_promo_repo",
+    "is_real_repo": false,
+    "n_files": 8,
+    "n_predicted_dead": 5,
+    "escape_channel": {
+     "n_sites": 0,
+     "n_effective_sites": 0,
+     "sinks": [],
+     "corpus_can_build_names": false,
+     "veto_is_a_noop": true
+    },
+    "carrier": {
+     "n_groups": 3,
+     "n_groups_split": 0,
+     "n_groups_constant": 3,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 8,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 1,
+     "sound_veto_certified": 1,
+     "refined_blocker_certified": 1,
+     "relaxation_UNSOUND_certified": 1,
+     "veto_cost": 0
+    },
+    "exposure": {
+     "n_certified": 1,
+     "n_effective_construction_sites": 0,
+     "corpus_can_build_names": false,
+     "n_certified_never_spelled_as_string": 1,
+     "exposed_sample": [
+      "cache.Cache.stale"
+     ],
+     "status": "CLEAN",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "synthetic_taint_repo",
+    "is_real_repo": false,
+    "n_files": 2,
+    "n_predicted_dead": 4,
+    "escape_channel": {
+     "n_sites": 1,
+     "n_effective_sites": 0,
+     "sinks": [],
+     "corpus_can_build_names": false,
+     "veto_is_a_noop": true
+    },
+    "carrier": {
+     "n_groups": 3,
+     "n_groups_split": 0,
+     "n_groups_constant": 3,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 3,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 2,
+     "sound_veto_certified": 2,
+     "refined_blocker_certified": 3,
+     "relaxation_UNSOUND_certified": 3,
+     "veto_cost": 0
+    },
+    "exposure": {
+     "n_certified": 2,
+     "n_effective_construction_sites": 0,
+     "corpus_can_build_names": false,
+     "n_certified_never_spelled_as_string": 2,
+     "exposed_sample": [
+      "alpha._alpha_dead",
+      "beta._beta_dead"
+     ],
+     "status": "CLEAN",
+     "is_an_accuracy_claim": false
+    },
+    "adjudication_vs_written_truth": {
+     "n_truth_dead": 2,
+     "incumbent": {
+      "n_certified": 2,
+      "n_true_positive": 2,
+      "n_false_positive": 0,
+      "false_positives": [],
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "sound_veto": {
+      "n_certified": 2,
+      "n_true_positive": 2,
+      "n_false_positive": 0,
+      "false_positives": [],
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "relaxation_UNSOUND": {
+      "n_certified": 3,
+      "n_true_positive": 2,
+      "n_false_positive": 1,
+      "false_positives": [
+       "alpha._alpha_via_string"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0
+     }
+    }
+   },
+   {
+    "repo": "synthetic_exports_repo",
+    "is_real_repo": false,
+    "n_files": 7,
+    "n_predicted_dead": 7,
+    "escape_channel": {
+     "n_sites": 0,
+     "n_effective_sites": 0,
+     "sinks": [],
+     "corpus_can_build_names": false,
+     "veto_is_a_noop": true
+    },
+    "carrier": {
+     "n_groups": 4,
+     "n_groups_split": 1,
+     "n_groups_constant": 3,
+     "split_groups": [
+      {
+       "occ": 2,
+       "size": 2,
+       "carrier": {
+        "lib.api.exported_never_called": false,
+        "lib.legacy.legacy_star_target": true
+       }
+      }
+     ],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 7,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 3,
+     "sound_veto_certified": 3,
+     "refined_blocker_certified": 3,
+     "relaxation_UNSOUND_certified": 3,
+     "veto_cost": 0
+    },
+    "exposure": {
+     "n_certified": 3,
+     "n_effective_construction_sites": 0,
+     "corpus_can_build_names": false,
+     "n_certified_never_spelled_as_string": 3,
+     "exposed_sample": [
+      "lib.core._core_dead",
+      "lib.extra.twin_dead",
+      "lib.legacy._legacy_private"
+     ],
+     "status": "CLEAN",
+     "is_an_accuracy_claim": false
+    },
+    "adjudication_vs_written_truth": {
+     "n_truth_dead": 4,
+     "incumbent": {
+      "n_certified": 3,
+      "n_true_positive": 3,
+      "n_false_positive": 0,
+      "false_positives": [],
+      "precision": 1.0,
+      "recall": 0.75
+     },
+     "sound_veto": {
+      "n_certified": 3,
+      "n_true_positive": 3,
+      "n_false_positive": 0,
+      "false_positives": [],
+      "precision": 1.0,
+      "recall": 0.75
+     },
+     "relaxation_UNSOUND": {
+      "n_certified": 3,
+      "n_true_positive": 3,
+      "n_false_positive": 0,
+      "false_positives": [],
+      "precision": 1.0,
+      "recall": 0.75
+     }
+    }
+   },
+   {
+    "repo": "synthetic_protocol_repo",
+    "is_real_repo": false,
+    "n_files": 3,
+    "n_predicted_dead": 8,
+    "escape_channel": {
+     "n_sites": 0,
+     "n_effective_sites": 0,
+     "sinks": [],
+     "corpus_can_build_names": false,
+     "veto_is_a_noop": true
+    },
+    "carrier": {
+     "n_groups": 2,
+     "n_groups_split": 0,
+     "n_groups_constant": 2,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 3,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 6,
+     "sound_veto_certified": 6,
+     "refined_blocker_certified": 8,
+     "relaxation_UNSOUND_certified": 8,
+     "veto_cost": 0
+    },
+    "exposure": {
+     "n_certified": 6,
+     "n_effective_construction_sites": 0,
+     "corpus_can_build_names": false,
+     "n_certified_never_spelled_as_string": 6,
+     "exposed_sample": [
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value",
+      "alpha._fixture_dead_plain",
+      "beta._beta_dead_immune",
+      "beta._make_iterencode"
+     ],
+     "status": "CLEAN",
+     "is_an_accuracy_claim": false
+    },
+    "adjudication_vs_written_truth": {
+     "n_truth_dead": 4,
+     "incumbent": {
+      "n_certified": 6,
+      "n_true_positive": 3,
+      "n_false_positive": 3,
+      "false_positives": [
+       "alpha.T.coerce_compared_value",
+       "alpha.T.process_literal_param",
+       "alpha.T.process_result_value"
+      ],
+      "precision": 0.5,
+      "recall": 0.75
+     },
+     "sound_veto": {
+      "n_certified": 6,
+      "n_true_positive": 3,
+      "n_false_positive": 3,
+      "false_positives": [
+       "alpha.T.coerce_compared_value",
+       "alpha.T.process_literal_param",
+       "alpha.T.process_result_value"
+      ],
+      "precision": 0.5,
+      "recall": 0.75
+     },
+     "relaxation_UNSOUND": {
+      "n_certified": 8,
+      "n_true_positive": 4,
+      "n_false_positive": 4,
+      "false_positives": [
+       "alpha.T.coerce_compared_value",
+       "alpha.T.process_bind_param",
+       "alpha.T.process_literal_param",
+       "alpha.T.process_result_value"
+      ],
+      "precision": 0.5,
+      "recall": 1.0
+     }
+    }
+   },
+   {
+    "repo": "synthetic_index_repo",
+    "is_real_repo": false,
+    "n_files": 1,
+    "n_predicted_dead": 8,
+    "escape_channel": {
+     "n_sites": 0,
+     "n_effective_sites": 0,
+     "sinks": [],
+     "corpus_can_build_names": false,
+     "veto_is_a_noop": true
+    },
+    "carrier": {
+     "n_groups": 1,
+     "n_groups_split": 0,
+     "n_groups_constant": 1,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 1,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 8,
+     "sound_veto_certified": 8,
+     "refined_blocker_certified": 8,
+     "relaxation_UNSOUND_certified": 8,
+     "veto_cost": 0
+    },
+    "exposure": {
+     "n_certified": 8,
+     "n_effective_construction_sites": 0,
+     "corpus_can_build_names": false,
+     "n_certified_never_spelled_as_string": 8,
+     "exposed_sample": [
+      "alpha.T._dead_never_dispatched_four",
+      "alpha.T._dead_never_dispatched_one",
+      "alpha.T._dead_never_dispatched_three",
+      "alpha.T._dead_never_dispatched_two",
+      "alpha.T.coerce_compared_value",
+      "alpha.T.process_bind_param",
+      "alpha.T.process_literal_param",
+      "alpha.T.process_result_value"
+     ],
+     "status": "CLEAN",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "synthetic_escape_repo",
+    "is_real_repo": false,
+    "n_files": 1,
+    "n_predicted_dead": 2,
+    "escape_channel": {
+     "n_sites": 1,
+     "n_effective_sites": 1,
+     "sinks": [
+      "getattr"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 2,
+     "n_groups_split": 0,
+     "n_groups_constant": 2,
+     "split_groups": [],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 1,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 1,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 1,
+     "veto_cost": 1
+    },
+    "exposure": {
+     "n_certified": 1,
+     "n_effective_construction_sites": 1,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 1,
+     "exposed_sample": [
+      "witnesses.Dyn.load"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "pallets/flask",
+    "is_real_repo": true,
+    "n_files": 24,
+    "n_predicted_dead": 204,
+    "escape_channel": {
+     "n_sites": 23,
+     "n_effective_sites": 12,
+     "sinks": [
+      "eval",
+      "exec",
+      "getattr"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 43,
+     "n_groups_split": 14,
+     "n_groups_constant": 29,
+     "split_groups": [
+      {
+       "occ": 2,
+       "size": 28,
+       "carrier": {
+        "src.flask.app.Flask.make_shell_context": true,
+        "src.flask.cli.FlaskGroup.parse_args": true,
+        "src.flask.cli._env_file_callback": false,
+        "src.flask.cli._set_app": false,
+        "src.flask.cli._set_debug": false,
+        "src.flask.cli._validate_key": false,
+        "src.flask.cli.routes_command": false,
+        "src.flask.cli.shell_command": false,
+        "src.flask.sansio.app.App.select_jinja_autoescape": false,
+        "src.flask.sansio.app.App.trap_http_exception": true,
+        "src.flask.sansio.blueprints.Blueprint.after_app_request": false,
+        "src.flask.sansio.blueprints.Blueprint.app_context_processor": false,
+        "src.flask.sansio.blueprints.Blueprint.app_errorhandler": true,
+        "src.flask.sansio.blueprints.Blueprint.app_url_defaults": false,
+        "src.flask.sansio.blueprints.Blueprint.app_url_value_preprocessor": false,
+        "src.flask.sansio.blueprints.Blueprint.teardown_app_request": false,
+        "src.flask.sessions.SessionInterface.get_cookie_domain": true,
+        "src.flask.sessions.SessionInterface.get_cookie_httponly": true,
+        "src.flask.sessions.SessionInterface.get_cookie_partitioned": true,
+        "src.flask.sessions.SessionInterface.get_cookie_path": true,
+        "src.flask.sessions.SessionInterface.get_cookie_samesite": true,
+        "src.flask.sessions.SessionInterface.get_cookie_secure": true,
+        "src.flask.sessions.SessionInterface.get_expiration_time": true,
+        "src.flask.sessions.SessionInterface.make_null_session": true,
+        "src.flask.sessions.SessionInterface.should_set_cookie": true,
+        "src.flask.sessions._lazy_sha1": false,
+        "src.flask.wrappers.Request._load_form_data": true,
+        "src.flask.wrappers.Request.on_json_loading_failed": true
+       }
+      },
+      {
+       "occ": 3,
+       "size": 28,
+       "carrier": {
+        "src.flask.app.Flask.create_jinja_environment": true,
+        "src.flask.app.Flask.do_teardown_appcontext": true,
+        "src.flask.app.Flask.do_teardown_request": true,
+        "src.flask.app.Flask.update_template_context": true,
+        "src.flask.app._make_timedelta": false,
+        "src.flask.cli.CertParamType.convert": false,
+        "src.flask.cli.FlaskGroup.get_command": true,
+        "src.flask.cli.FlaskGroup.list_commands": true,
+        "src.flask.cli.SeparatedPathType.convert": false,
+        "src.flask.ctx.AppContext.from_environ": true,
+        "src.flask.ctx.has_app_context": false,
+        "src.flask.debughelpers.attach_enctype_error_multidict": true,
+        "src.flask.debughelpers.explain_template_loading_attempts": true,
+        "src.flask.helpers.get_root_path": true,
+        "src.flask.logging.create_logger": true,
+        "src.flask.sansio.app.App.create_global_jinja_loader": true,
+        "src.flask.sansio.app.App.handle_url_build_error": true,
+        "src.flask.sansio.app.App.inject_url_defaults": true,
+        "src.flask.sansio.app.App.iter_blueprints": true,
+        "src.flask.sansio.app._make_timedelta": false,
+        "src.flask.sansio.blueprints.Blueprint.before_app_request": false,
+        "src.flask.sansio.scaffold.Scaffold.patch": false,
+        "src.flask.sansio.scaffold.Scaffold.url_value_preprocessor": false,
+        "src.flask.sansio.scaffold.find_package": true,
+        "src.flask.sessions.NullSession._fail": false,
+        "src.flask.sessions.SessionInterface.is_null_session": true,
+        "src.flask.templating.DispatchingJinjaLoader.get_source": true,
+        "src.flask.templating._default_template_ctx_processor": false
+       }
+      },
+      {
+       "occ": 4,
+       "size": 13,
+       "carrier": {
+        "src.flask.ctx.after_this_request": false,
+        "src.flask.ctx.copy_current_request_context": false,
+        "src.flask.helpers._CollectErrors.raise_any": true,
+        "src.flask.helpers.get_template_attribute": true,
+        "src.flask.sansio.app.App._check_setup_finished": true,
+        "src.flask.sansio.app.App._find_error_handler": true,
+        "src.flask.sansio.blueprints.Blueprint._check_setup_finished": true,
+        "src.flask.sansio.scaffold.Scaffold._check_setup_finished": true,
+        "src.flask.sansio.scaffold.Scaffold.put": true,
+        "src.flask.sansio.scaffold.Scaffold.query": false,
+        "src.flask.templating.DispatchingJinjaLoader.list_templates": true,
+        "src.flask.templating.stream_template_string": true,
+        "src.flask.wrappers.Response.max_cookie_size": false
+       }
+      },
+      {
+       "occ": 5,
+       "size": 17,
+       "carrier": {
+        "src.flask.cli.main": true,
+        "src.flask.config.Config.from_file": true,
+        "src.flask.config.Config.from_prefixed_env": true,
+        "src.flask.config.Config.get_namespace": true,
+        "src.flask.ctx.has_request_context": true,
+        "src.flask.helpers.get_load_dotenv": true,
+        "src.flask.json.__init__.dump": true,
+        "src.flask.json.provider.JSONProvider.dump": true,
+        "src.flask.json.provider._default": false,
+        "src.flask.logging.wsgi_errors_stream": false,
+        "src.flask.sansio.scaffold.Scaffold.has_static_folder": false,
+        "src.flask.sansio.scaffold.Scaffold.jinja_loader": false,
+        "src.flask.sansio.scaffold._endpoint_from_view_func": true,
+        "src.flask.sessions.SecureCookieSessionInterface.save_session": true,
+        "src.flask.sessions.SessionInterface.get_cookie_name": true,
+        "src.flask.sessions.SessionInterface.save_session": true,
+        "src.flask.templating.stream_template": true
+       }
+      },
+      {
+       "occ": 7,
+       "size": 5,
+       "carrier": {
+        "src.flask.app.Flask.open_resource": true,
+        "src.flask.blueprints.Blueprint.open_resource": true,
+        "src.flask.ctx.AppContext.has_request": false,
+        "src.flask.sansio.app.App.template_global": true,
+        "src.flask.sansio.blueprints.Blueprint.app_template_global": true
+       }
+      },
+      {
+       "occ": 9,
+       "size": 7,
+       "carrier": {
+        "src.flask.app.Flask.send_static_file": true,
+        "src.flask.blueprints.Blueprint.send_static_file": true,
+        "src.flask.helpers.send_from_directory": true,
+        "src.flask.sansio.scaffold.Scaffold.delete": true,
+        "src.flask.wrappers.Request.max_content_length": false,
+        "src.flask.wrappers.Request.max_form_memory_size": false,
+        "src.flask.wrappers.Request.max_form_parts": false
+       }
+      },
+      {
+       "occ": 11,
+       "size": 3,
+       "carrier": {
+        "src.flask.sansio.blueprints.Blueprint.app_template_filter": true,
+        "src.flask.sansio.blueprints.Blueprint.app_template_test": true,
+        "src.flask.sansio.scaffold.Scaffold.context_processor": false
+       }
+      },
+      {
+       "occ": 12,
+       "size": 11,
+       "carrier": {
+        "src.flask.helpers.get_flashed_messages": true,
+        "src.flask.json.tag.JSONTag.to_python": true,
+        "src.flask.json.tag.TagBytes.to_python": true,
+        "src.flask.json.tag.TagDateTime.to_python": true,
+        "src.flask.json.tag.TagDict.to_python": true,
+        "src.flask.json.tag.TagMarkup.to_python": true,
+        "src.flask.json.tag.TagTuple.to_python": true,
+        "src.flask.json.tag.TagUUID.to_python": true,
+        "src.flask.sansio.app.App.teardown_appcontext": true,
+        "src.flask.sansio.blueprints.Blueprint.register": true,
+        "src.flask.sessions.SessionMixin.permanent": false
+       }
+      },
+      {
+       "occ": 16,
+       "size": 13,
+       "carrier": {
+        "src.flask.json.tag.JSONTag.check": true,
+        "src.flask.json.tag.PassDict.check": true,
+        "src.flask.json.tag.PassList.check": true,
+        "src.flask.json.tag.TagBytes.check": true,
+        "src.flask.json.tag.TagDateTime.check": true,
+        "src.flask.json.tag.TagDict.check": true,
+        "src.flask.json.tag.TagMarkup.check": true,
+        "src.flask.json.tag.TagTuple.check": true,
+        "src.flask.json.tag.TagUUID.check": true,
+        "src.flask.sansio.scaffold.Scaffold.after_request": false,
+        "src.flask.sansio.scaffold.Scaffold.url_defaults": false,
+        "src.flask.views.MethodView.dispatch_request": true,
+        "src.flask.views.View.dispatch_request": true
+       }
+      },
+      {
+       "occ": 17,
+       "size": 3,
+       "carrier": {
+        "src.flask.cli.ScriptInfo.load_app": true,
+        "src.flask.cli.run_command": false,
+        "src.flask.helpers.make_response": true
+       }
+      },
+      {
+       "occ": 22,
+       "size": 5,
+       "carrier": {
+        "src.flask.app.Flask.run": true,
+        "src.flask.json.__init__.jsonify": true,
+        "src.flask.json.tag.JSONTag.tag": true,
+        "src.flask.sansio.scaffold.Scaffold.teardown_request": false,
+        "src.flask.wrappers.Request.blueprints": false
+       }
+      },
+      {
+       "occ": 23,
+       "size": 3,
+       "carrier": {
+        "src.flask.json.__init__.loads": true,
+        "src.flask.json.provider.DefaultJSONProvider.loads": true,
+        "src.flask.sansio.scaffold.Scaffold.before_request": false
+       }
+      },
+      {
+       "occ": 47,
+       "size": 2,
+       "carrier": {
+        "src.flask.sansio.scaffold.Scaffold.errorhandler": true,
+        "src.flask.sansio.scaffold.setupmethod": false
+       }
+      },
+      {
+       "occ": 103,
+       "size": 3,
+       "carrier": {
+        "src.flask.ctx.AppContext.session": false,
+        "src.flask.sansio.scaffold.Scaffold.endpoint": true,
+        "src.flask.wrappers.Request.endpoint": true
+       }
+      }
+     ],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 83,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 4,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 57,
+     "veto_cost": 4
+    },
+    "exposure": {
+     "n_certified": 4,
+     "n_effective_construction_sites": 12,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 4,
+     "exposed_sample": [
+      "src.flask.app.Flask.open_instance_resource",
+      "src.flask.cli._path_is_ancestor",
+      "src.flask.sansio.app.App.shell_context_processor",
+      "src.flask.testing.EnvironBuilder.json_dumps"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "psf/requests",
+    "is_real_repo": true,
+    "n_files": 20,
+    "n_predicted_dead": 110,
+    "escape_channel": {
+     "n_sites": 28,
+     "n_effective_sites": 9,
+     "sinks": [
+      "getattr",
+      "locals[...]"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 29,
+     "n_groups_split": 8,
+     "n_groups_constant": 21,
+     "split_groups": [
+      {
+       "occ": 2,
+       "size": 11,
+       "carrier": {
+        "src.requests.__init__._check_cryptography": true,
+        "src.requests.__init__.check_compatibility": true,
+        "src.requests.auth.HTTPDigestAuth.handle_401": false,
+        "src.requests.auth.HTTPDigestAuth.handle_redirect": false,
+        "src.requests.compat._resolve_char_detection": true,
+        "src.requests.cookies.MockRequest.get_new_headers": true,
+        "src.requests.cookies.MockResponse.getheaders": true,
+        "src.requests.help.main": true,
+        "src.requests.models.RequestEncodingMixin._encode_files": true,
+        "src.requests.models.Response.apparent_encoding": false,
+        "src.requests.status_codes._init": true
+       }
+      },
+      {
+       "occ": 3,
+       "size": 7,
+       "carrier": {
+        "src.requests.cookies._copy_cookie_jar": true,
+        "src.requests.cookies.get_cookie_header": true,
+        "src.requests.models.RequestEncodingMixin.path_url": false,
+        "src.requests.utils.add_dict_to_cookiejar": true,
+        "src.requests.utils.check_header_validity": true,
+        "src.requests.utils.default_headers": true,
+        "src.requests.utils.stream_decode_response_unicode": true
+       }
+      },
+      {
+       "occ": 4,
+       "size": 4,
+       "carrier": {
+        "src.requests._types.has_read": true,
+        "src.requests._types.is_prepared": false,
+        "src.requests.hooks.dispatch_hook": true,
+        "src.requests.utils.resolve_proxies": true
+       }
+      },
+      {
+       "occ": 5,
+       "size": 10,
+       "carrier": {
+        "src.requests._internal_utils.unicode_is_ascii": true,
+        "src.requests.api.options": false,
+        "src.requests.cookies.merge_cookies": true,
+        "src.requests.models.RequestHooksMixin.register_hook": true,
+        "src.requests.sessions.Session.options": false,
+        "src.requests.utils.extract_zipped_paths": true,
+        "src.requests.utils.get_encodings_from_content": true,
+        "src.requests.utils.parse_dict_header": true,
+        "src.requests.utils.parse_header_links": true,
+        "src.requests.utils.urldefragauth": true
+       }
+      },
+      {
+       "occ": 6,
+       "size": 5,
+       "carrier": {
+        "src.requests.api.delete": false,
+        "src.requests.models.Response.iter_lines": true,
+        "src.requests.sessions.Session.delete": false,
+        "src.requests.utils.guess_filename": true,
+        "src.requests.utils.prepend_scheme_if_needed": true
+       }
+      },
+      {
+       "occ": 8,
+       "size": 6,
+       "carrier": {
+        "src.requests.models.Response.links": false,
+        "src.requests.models.Response.ok": false,
+        "src.requests.sessions.SessionRedirectMixin.resolve_redirects": true,
+        "src.requests.utils.iter_slices": true,
+        "src.requests.utils.requote_uri": true,
+        "src.requests.utils.rewind_body": true
+       }
+      },
+      {
+       "occ": 16,
+       "size": 2,
+       "carrier": {
+        "src.requests._internal_utils.to_native_string": true,
+        "src.requests.models.Response.text": false
+       }
+      },
+      {
+       "occ": 18,
+       "size": 2,
+       "carrier": {
+        "src.requests.cookies.RequestsCookieJar.update": true,
+        "src.requests.models.Response.is_redirect": false
+       }
+      }
+     ],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 37,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 22,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 37,
+     "veto_cost": 22
+    },
+    "exposure": {
+     "n_certified": 22,
+     "n_effective_construction_sites": 9,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 22,
+     "exposed_sample": [
+      "src.requests.adapters.HTTPAdapter.get_connection",
+      "src.requests.cookies.MockRequest.add_header",
+      "src.requests.cookies.MockRequest.add_unredirected_header",
+      "src.requests.cookies.MockRequest.get_full_url",
+      "src.requests.cookies.MockRequest.get_header",
+      "src.requests.cookies.MockRequest.get_type",
+      "src.requests.cookies.MockRequest.has_header",
+      "src.requests.cookies.MockRequest.origin_req_host",
+      "src.requests.cookies.MockRequest.unverifiable",
+      "src.requests.cookies.RequestsCookieJar._find"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "tiangolo/sqlmodel",
+    "is_real_repo": true,
+    "n_files": 171,
+    "n_predicted_dead": 246,
+    "escape_channel": {
+     "n_sites": 129,
+     "n_effective_sites": 119,
+     "sinks": [
+      "exec",
+      "getattr"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 27,
+     "n_groups_split": 4,
+     "n_groups_constant": 23,
+     "split_groups": [
+      {
+       "occ": 2,
+       "size": 18,
+       "carrier": {
+        "docs_src.advanced.datetime.tutorial004_py310.downgrade": true,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.create_team": false,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.read_team": false,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.read_teams": false,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.update_team": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.create_team": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.read_team": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.read_teams": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.update_team": false,
+        "scripts.docs.build": false,
+        "scripts.docs.callback": true,
+        "scripts.docs.serve": false,
+        "sqlmodel.main.SQLModel.from_orm": true,
+        "sqlmodel.main.SQLModel.parse_obj": true,
+        "sqlmodel.sql.expression.bitwise_not": true,
+        "sqlmodel.sql.expression.label": true,
+        "sqlmodel.sql.expression.try_cast": true,
+        "sqlmodel.sql.sqltypes.AutoString.load_dialect_impl": true
+       }
+      },
+      {
+       "occ": 6,
+       "size": 5,
+       "carrier": {
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main.client_fixture": false,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_006.client_fixture": false,
+        "scripts.prepare_release.current_version": false,
+        "sqlmodel._compat.get_model_fields": true,
+        "sqlmodel.sql.expression.or_": true
+       }
+      },
+      {
+       "occ": 9,
+       "size": 13,
+       "carrier": {
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.main.read_hero": false,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main.session_fixture": false,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_005.session_fixture": false,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_006.session_fixture": false,
+        "docs_src.tutorial.fastapi.delete.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.limit_and_offset.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.read_one.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.session_with_dependency.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.update.tutorial001_py310.read_hero": false,
+        "docs_src.tutorial.fastapi.update.tutorial002_py310.read_hero": false,
+        "sqlmodel.sql.expression.col": true
+       }
+      },
+      {
+       "occ": 13,
+       "size": 22,
+       "carrier": {
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.main.read_heroes": false,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_001.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_002.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_003.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_004.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_005.test_create_hero": true,
+        "docs_src.tutorial.fastapi.app_testing.tutorial001_py310.test_main_006.test_create_hero": true,
+        "docs_src.tutorial.fastapi.delete.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.limit_and_offset.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.multiple_models.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.multiple_models.tutorial002_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.read_one.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.delete_team": true,
+        "docs_src.tutorial.fastapi.relationships.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.response_model.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.session_with_dependency.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.simple_hero_api.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.delete_team": true,
+        "docs_src.tutorial.fastapi.teams.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.update.tutorial001_py310.read_heroes": false,
+        "docs_src.tutorial.fastapi.update.tutorial002_py310.read_heroes": false
+       }
+      }
+     ],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 333,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 3,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 3,
+     "veto_cost": 3
+    },
+    "exposure": {
+     "n_certified": 3,
+     "n_effective_construction_sites": 119,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 3,
+     "exposed_sample": [
+      "sqlmodel.sql.sqltypes.UTCDateTime.coerce_compared_value",
+      "sqlmodel.sql.sqltypes.UTCDateTime.process_bind_param",
+      "sqlmodel.sql.sqltypes.UTCDateTime.process_result_value"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   },
+   {
+    "repo": "Textualize/rich",
+    "is_real_repo": true,
+    "n_files": 109,
+    "n_predicted_dead": 452,
+    "escape_channel": {
+     "n_sites": 39,
+     "n_effective_sites": 17,
+     "sinks": [
+      "attrgetter",
+      "eval",
+      "exec",
+      "getattr"
+     ],
+     "corpus_can_build_names": true,
+     "veto_is_a_noop": false
+    },
+    "carrier": {
+     "n_groups": 79,
+     "n_groups_split": 20,
+     "n_groups_constant": 59,
+     "split_groups": [
+      {
+       "occ": 2,
+       "size": 39,
+       "carrier": {
+        "benchmarks.benchmarks.ColorSuite.time_downgrade_to_eight_bit": false,
+        "benchmarks.benchmarks.ColorSuite.time_downgrade_to_standard": false,
+        "benchmarks.benchmarks.ColorSuite.time_downgrade_to_windows": false,
+        "benchmarks.benchmarks.ColorSuiteCached.time_downgrade_to_eight_bit": false,
+        "benchmarks.benchmarks.ColorSuiteCached.time_downgrade_to_standard": false,
+        "benchmarks.benchmarks.ColorSuiteCached.time_downgrade_to_windows": false,
+        "benchmarks.benchmarks.SegmentSuite.test_divide_complex": false,
+        "rich._extension.load_ipython_extension": false,
+        "rich._win32_console.WindowsCoordinates.from_param": true,
+        "rich.box.Box.get_plain_headed_box": true,
+        "rich.console.Console.clear_live": true,
+        "rich.console.Console.pop_render_hook": true,
+        "rich.console.Console.push_render_hook": true,
+        "rich.console.Console.set_live": true,
+        "rich.console.ConsoleOptions.reset_height": true,
+        "rich.control.Control.alt_screen": true,
+        "rich.diagnose.report": true,
+        "rich.file_proxy.FileProxy.rich_proxied_file": false,
+        "rich.jupyter.JupyterMixin._repr_mimebundle_": false,
+        "rich.jupyter.JupyterRenderable._repr_mimebundle_": false,
+        "rich.layout.Layout.add_split": true,
+        "rich.layout.Layout.refresh_screen": true,
+        "rich.layout.Layout.unsplit": true,
+        "rich.live_render.LiveRender.last_render_height": false,
+        "rich.markdown.ListItem.render_bullet": true,
+        "rich.markdown.ListItem.render_number": true,
+        "rich.measure.Measurement.with_minimum": true,
+        "rich.panel.Panel._subtitle": false,
+        "rich.pretty._Line.expandable": false,
+        "rich.pretty._get_braces_for_array": false,
+        "rich.pretty._get_braces_for_defaultdict": false,
+        "rich.pretty._get_braces_for_deque": false,
+        "rich.progress.Progress.remove_task": true,
+        "rich.progress.ProgressColumn.get_table_column": true,
+        "rich.progress.SpinnerColumn.set_spinner": true,
+        "rich.progress._Reader.readinto": true,
+        "rich.syntax.Syntax.default_lexer": false,
+        "rich.text.Text.copy_styles": true,
+        "rich.text.Text.remove_suffix": true
+       }
+      },
+      {
+       "occ": 3,
+       "size": 34,
+       "carrier": {
+        "rich.__init__.reconfigure": true,
+        "rich._inspect.is_object_one_of_types": true,
+        "rich._null_file.NullFile.writable": true,
+        "rich._wrap.divide_line": true,
+        "rich.cells.split_text": true,
+        "rich.color.Color.is_system_defined": false,
+        "rich.color.parse_rgb_hex": true,
+        "rich.columns.Columns.add_renderable": true,
+        "rich.console.Console.save_svg": true,
+        "rich.console.Console.save_text": true,
+        "rich.console.Console.set_window_title": true,
+        "rich.console.Console.use_theme": true,
+        "rich.highlighter._combine_regex": true,
+        "rich.json.JSON.from_data": true,
+        "rich.live.Live.is_started": false,
+        "rich.live_render.LiveRender.set_renderable": true,
+        "rich.markdown.MarkdownElement.on_leave": true,
+        "rich.markdown.TextElement.on_leave": true,
+        "rich.progress.Progress.task_ids": false,
+        "rich.progress.Task._reset": true,
+        "rich.progress.Task.percentage": false,
+        "rich.progress.Task.started": false,
+        "rich.progress._Reader.writable": true,
+        "rich.prompt.Confirm.process_response": true,
+        "rich.prompt.Confirm.render_default": true,
+        "rich.segment.Segment.split_lines": true,
+        "rich.segment.Segment.strip_links": true,
+        "rich.segment.Segment.strip_styles": true,
+        "rich.style.Style.clear_meta_and_links": true,
+        "rich.style.Style.update_link": true,
+        "rich.syntax.Syntax.stylize_range": true,
+        "rich.text.Text.apply_meta": true,
+        "rich.text.Text.rstrip_end": true,
+        "rich.theme.Theme.from_file": true
+       }
+      },
+      {
+       "occ": 4,
+       "size": 40,
+       "carrier": {
+        "rich._null_file.NullFile.readable": true,
+        "rich._null_file.NullFile.readlines": true,
+        "rich._null_file.NullFile.seekable": true,
+        "rich._null_file.NullFile.tell": true,
+        "rich._null_file.NullFile.writelines": true,
+        "rich._win32_console.GetConsoleMode": true,
+        "rich.box.Box.get_bottom": true,
+        "rich.box.Box.get_top": true,
+        "rich.color_triplet.ColorTriplet.normalized": false,
+        "rich.color_triplet.ColorTriplet.rgb": false,
+        "rich.console.Console._theme_stack": false,
+        "rich.console.Console.update_screen": true,
+        "rich.console.ConsoleOptions.update_height": true,
+        "rich.console.RenderHook.process_renderables": true,
+        "rich.control.Control.move_to_column": true,
+        "rich.layout.ColumnSplitter.get_tree_icon": true,
+        "rich.layout.RowSplitter.get_tree_icon": true,
+        "rich.layout.Splitter.get_tree_icon": true,
+        "rich.live.Live.process_renderables": true,
+        "rich.live_render.LiveRender.position_cursor": true,
+        "rich.live_render.LiveRender.restore_cursor": true,
+        "rich.pretty.Node.check_length": true,
+        "rich.pretty._Line.check_length": true,
+        "rich.pretty.is_expandable": true,
+        "rich.progress._Reader.readable": true,
+        "rich.progress._Reader.readlines": true,
+        "rich.progress._Reader.seekable": true,
+        "rich.progress._Reader.tell": true,
+        "rich.progress._Reader.writelines": true,
+        "rich.progress_bar.ProgressBar.percentage_completed": false,
+        "rich.segment.Segment.align_bottom": true,
+        "rich.segment.Segment.align_middle": true,
+        "rich.segment.Segment.align_top": true,
+        "rich.segment.Segment.remove_color": true,
+        "rich.segment.Segment.split_lines_terminator": true,
+        "rich.style.Style.combine": true,
+        "rich.style.Style.pick_first": true,
+        "rich.style.Style.without_color": false,
+        "rich.table.Table._extra_width": false,
+        "rich.text.Text.append_tokens": true
+       }
+      },
+      {
+       "occ": 5,
+       "size": 33,
+       "carrier": {
+        "rich._null_file.NullFile.readline": true,
+        "rich._null_file.NullFile.seek": true,
+        "rich._timer.timer": true,
+        "rich._win32_console.LegacyWindowsTerm.erase_end_of_line": true,
+        "rich._win32_console.LegacyWindowsTerm.erase_line": true,
+        "rich._win32_console.LegacyWindowsTerm.erase_start_of_line": true,
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_forward": true,
+        "rich.color.Color.is_default": false,
+        "rich.console.Console.bell": true,
+        "rich.console.Console.push_theme": true,
+        "rich.console.Console.save_html": true,
+        "rich.console.Console.set_alt_screen": true,
+        "rich.control.Control.bell": true,
+        "rich.control.Control.move": true,
+        "rich.control.Control.move_to": true,
+        "rich.layout.Layout.split_column": true,
+        "rich.live._RefreshThread.run": true,
+        "rich.progress.Progress.stop_task": true,
+        "rich.progress.Task.time_remaining": false,
+        "rich.progress._Reader.readline": true,
+        "rich.progress._Reader.seek": true,
+        "rich.progress._TrackThread.run": true,
+        "rich.protocol.is_renderable": true,
+        "rich.style.Style.from_color": true,
+        "rich.style.Style.from_meta": true,
+        "rich.style.Style.get_html_style": true,
+        "rich.table.Column.flexible": false,
+        "rich.table.Table.add_section": true,
+        "rich.text.Span.move": true,
+        "rich.text.Text.extend_style": true,
+        "rich.text.Text.set_length": true,
+        "rich.text.Text.stylize_before": true,
+        "rich.theme.ThemeStack.push_theme": true
+       }
+      },
+      {
+       "occ": 6,
+       "size": 26,
+       "carrier": {
+        "rich._ratio.ratio_reduce": true,
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_down": true,
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_to_column": true,
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_up": true,
+        "rich._win32_console.LegacyWindowsTerm.set_title": true,
+        "rich.console.Console.is_alt_screen": false,
+        "rich.console.Console.is_dumb_terminal": false,
+        "rich.console.Console.out": true,
+        "rich.console.Console.pop_theme": true,
+        "rich.filesize.pick_unit_and_suffix": true,
+        "rich.markdown.Heading.on_enter": true,
+        "rich.markdown.ImageItem.on_enter": true,
+        "rich.markdown.MarkdownElement.on_enter": true,
+        "rich.markdown.TextElement.on_enter": true,
+        "rich.measure.Measurement.with_maximum": true,
+        "rich.panel.Panel._title": false,
+        "rich.progress.Progress.reset": true,
+        "rich.protocol.rich_cast": true,
+        "rich.scope.render_scope": true,
+        "rich.segment.Segment.filter_control": true,
+        "rich.segment.Segment.set_shape": true,
+        "rich.segment.Segment.split_and_crop_lines": true,
+        "rich.segment.Segment.split_cells": true,
+        "rich.style.Style.link_id": false,
+        "rich.syntax.Syntax.from_path": true,
+        "rich.theme.ThemeStack.pop_theme": true
+       }
+      },
+      {
+       "occ": 7,
+       "size": 16,
+       "carrier": {
+        "rich.__main__.make_test_card": true,
+        "rich._fileno.get_fileno": true,
+        "rich.console.Console._buffer_index": false,
+        "rich.control.escape_control_codes": true,
+        "rich.layout.Layout.map": true,
+        "rich.pager.Pager.show": true,
+        "rich.pager.SystemPager.show": true,
+        "rich.progress.Progress.wrap_file": true,
+        "rich.progress._Reader.closed": false,
+        "rich.progress.wrap_file": true,
+        "rich.segment.Segment.is_control": false,
+        "rich.segment.Segment.simplify": true,
+        "rich.syntax.Syntax._numbers_column_width": false,
+        "rich.syntax.Syntax.guess_lexer": true,
+        "rich.table.Table.row_count": false,
+        "rich.text.Text.styled": true
+       }
+      },
+      {
+       "occ": 8,
+       "size": 19,
+       "carrier": {
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_to": true,
+        "rich.ansi.AnsiDecoder.decode": true,
+        "rich.color.Color.from_triplet": true,
+        "rich.console.ConsoleOptions.ascii_only": false,
+        "rich.layout.Layout.split_row": true,
+        "rich.markdown.MarkdownContext.current_style": false,
+        "rich.markdown.MarkdownContext.leave_style": true,
+        "rich.measure.Measurement.normalize": true,
+        "rich.progress.Task.remaining": false,
+        "rich.segment.Segment.apply_style": true,
+        "rich.segment.Segment.get_shape": true,
+        "rich.style.Style.normalize": true,
+        "rich.style.Style.transparent_background": false,
+        "rich.style.StyleStack.current": false,
+        "rich.syntax.ANSISyntaxTheme.get_background_style": true,
+        "rich.syntax.PygmentsSyntaxTheme.get_background_style": true,
+        "rich.syntax.SyntaxTheme.get_background_style": true,
+        "rich.text.Span.right_crop": true,
+        "rich.text.Text.highlight_words": true
+       }
+      },
+      {
+       "occ": 11,
+       "size": 9,
+       "carrier": {
+        "rich._loop.loop_first": true,
+        "rich._null_file.NullFile.close": true,
+        "rich._ratio.ratio_distribute": true,
+        "rich._win32_console.LegacyWindowsTerm.screen_size": false,
+        "rich.color.blend_rgb": true,
+        "rich.measure.measure_renderables": true,
+        "rich.pretty.pprint": true,
+        "rich.repr.rich_repr": true,
+        "rich.text.Text.rstrip": true
+       }
+      },
+      {
+       "occ": 12,
+       "size": 8,
+       "carrier": {
+        "rich._win32_console.LegacyWindowsTerm.move_cursor_backward": true,
+        "rich._win32_console.LegacyWindowsTerm.write_styled": true,
+        "rich.color.Color.get_ansi_codes": true,
+        "rich.syntax.ANSISyntaxTheme.get_style_for_token": true,
+        "rich.syntax.PygmentsSyntaxTheme.get_style_for_token": true,
+        "rich.syntax.SyntaxTheme.get_style_for_token": true,
+        "rich.text.Text.expand_tabs": true,
+        "rich.theme.Theme.config": false
+       }
+      },
+      {
+       "occ": 13,
+       "size": 5,
+       "carrier": {
+        "rich._win32_console.LegacyWindowsTerm.hide_cursor": true,
+        "rich.color_triplet.ColorTriplet.hex": false,
+        "rich.pretty.install": true,
+        "rich.progress.Task.elapsed": false,
+        "rich.traceback.install": true
+       }
+      },
+      {
+       "occ": 16,
+       "size": 10,
+       "carrier": {
+        "rich._ratio.ratio_resolve": true,
+        "rich._win32_console.LegacyWindowsTerm.show_cursor": true,
+        "rich._windows_renderer.legacy_windows_render": true,
+        "rich.console.Console.show_cursor": true,
+        "rich.console.ConsoleOptions.update_width": true,
+        "rich.control.Control.show_cursor": true,
+        "rich.filesize.decimal": true,
+        "rich.live._RefreshThread.stop": true,
+        "rich.progress.Progress.tasks": false,
+        "rich.prompt.PromptBase.ask": true
+       }
+      },
+      {
+       "occ": 17,
+       "size": 3,
+       "carrier": {
+        "rich._null_file.NullFile.truncate": true,
+        "rich.progress.Progress.finished": false,
+        "rich.progress.Task.finished": false
+       }
+      },
+      {
+       "occ": 19,
+       "size": 6,
+       "carrier": {
+        "rich._pick.pick_bool": true,
+        "rich._stack.Stack.push": true,
+        "rich.color.Color.get_truecolor": true,
+        "rich.console.Console._buffer": false,
+        "rich.progress._Reader.mode": false,
+        "rich.style.StyleStack.push": true
+       }
+      },
+      {
+       "occ": 22,
+       "size": 6,
+       "carrier": {
+        "rich._null_file.NullFile.read": true,
+        "rich._win32_console.LegacyWindowsTerm.cursor_position": false,
+        "rich.cells.set_cell_size": true,
+        "rich.emoji.Emoji.replace": true,
+        "rich.progress._Reader.read": true,
+        "rich.theme.Theme.read": true
+       }
+      },
+      {
+       "occ": 27,
+       "size": 5,
+       "carrier": {
+        "rich.color.Color.downgrade": true,
+        "rich.color.Color.from_ansi": true,
+        "rich.markup.escape": true,
+        "rich.segment.Segment.cell_length": false,
+        "rich.text.Text.from_ansi": true
+       }
+      },
+      {
+       "occ": 28,
+       "size": 3,
+       "carrier": {
+        "rich.__init__.inspect": true,
+        "rich.console.Console.screen": true,
+        "rich.style.Style.background_style": false
+       }
+      },
+      {
+       "occ": 30,
+       "size": 2,
+       "carrier": {
+        "rich._loop.loop_last": true,
+        "rich.console.Console.is_terminal": false
+       }
+      },
+      {
+       "occ": 36,
+       "size": 3,
+       "carrier": {
+        "rich.console.Console.encoding": false,
+        "rich.console.Console.measure": true,
+        "rich.padding.Padding.indent": true
+       }
+      },
+      {
+       "occ": 64,
+       "size": 2,
+       "carrier": {
+        "rich.console.Console.rule": true,
+        "rich.layout.Layout.children": false
+       }
+      },
+      {
+       "occ": 105,
+       "size": 3,
+       "carrier": {
+        "rich.console.Capture.get": true,
+        "rich.console.Console.size": false,
+        "rich.measure.Measurement.get": true
+       }
+      }
+     ],
+     "fibre_approximation": "equal-occ, a coarsening of the E-vector, so these are lower bounds on the split count against true evidence fibres"
+    },
+    "binding_set_is_caller_side": {
+     "n_modules": 213,
+     "why_it_cannot_be_the_carrier": "a binding set is a CALLER property and the certified set is a CALLEE property; connecting them needs a resolver, and the identity resolver is row 18's occurrence count while every other resolver is the alias analysis eq. row 22 priced"
+    },
+    "counts": {
+     "incumbent_run6_7_certified": 1,
+     "sound_veto_certified": 0,
+     "refined_blocker_certified": 0,
+     "relaxation_UNSOUND_certified": 78,
+     "veto_cost": 1
+    },
+    "exposure": {
+     "n_certified": 1,
+     "n_effective_construction_sites": 17,
+     "corpus_can_build_names": true,
+     "n_certified_never_spelled_as_string": 1,
+     "exposed_sample": [
+      "rich.logging.RichHandler.emit"
+     ],
+     "status": "EXPOSED",
+     "is_an_accuracy_claim": false
+    }
+   }
+  ],
+  "n14_verdicts": {
+   "t1_retracted_before_publication": {
+    "claim": "RETRACTED before publication (run 12). Claim: a binding carrier Pi_bind(s) := D(leaf(s)) is CONSTANT on any evidence-fibre whose members have DISTINCT leaves, because the carrier is a function of the leaf. FALSE, and it is a non-sequitur rather than a false premise: D is a function of the leaf, the leaf VARIES across the fibre, so the carrier takes different values on it. What survives is trivial -- a leaf-keyed carrier is constant WITHIN each leaf class, so the number of distinct values is at most the number of distinct leaves -- and it is recorded because the loop's own failure mode is publishing a number measured in one chosen setting as a property of the problem (eq. rows 30, 32, 35, 37).",
+    "surviving": "For any carrier of the form c(s) = f(leaf(s)), the induced partition's number of blocks is at most the number of distinct leaves among the dead symbols, and c is constant on every subset of symbols sharing a leaf. This bounds BLOCK COUNT, not SPLITTING POWER.",
+    "counterexample": {
+     "alpha.T.beta_dispatched": true,
+     "alpha.T.gamma_mentioned": false
+    },
+    "why_it_matters": "the loop was about to publish 'a distinct-leaf evidence-fibre is unsplittable by any corpus-derived carrier'. An adversarial sub-agent told to assume the math was wrong killed it as a NON-SEQUITUR, and t1_counterexample makes it false on demand. This is the FIFTH instance of the loop's own recorded failure mode and the first caught BEFORE publication rather than after."
+   },
+   "binding_set_is_not_the_carrier": {
+    "verdict": "REFUTED as a carrier, kept as a diagnostic",
+    "reason": "caller-side property versus callee-side verdict; the identity resolver is row 18's count and any other resolver is the alias analysis eq. row 22 already priced. The implementation's first draft made exactly this error -- it required a module to BIND the leaf it calls, so `from alpha import T; T().m()` did not count as a dispatch of m -- and the counterexample failed to split because of it."
+   },
+   "what_the_carrier_actually_adds": "the KIND of an occurrence, not its count: a leaf in call position anywhere in the corpus is a different fact from a leaf that is merely mentioned, and the occurrence count cannot tell them apart. That is enough to split an evidence-fibre and it is the first corpus-derived carrier in runs 9-12 that is not constant on one.",
+   "sound_direction_only": "the carrier is usable as a BLOCKER, which over-refuses and is therefore sound: it withholds a symbol the corpus calls. The unblocking direction -- certify a symbol the corpus never calls -- is UNSOUND and is shipped labelled, with its false positives measured on every fixture that has truth.",
+   "the_price_is_stated_not_tuned": "on the four real tarballs the escape veto is a NO-OP wherever the corpus contains no effective construction site, so the refutation does not by itself invalidate the published counts; where it does fire, the price is the whole certified set. That number is in the audits and it is not small.",
+   "reported_against_interest": [
+    "the node was queued as a carrier search and it produced a retraction of the loop's own soundness claim instead. N14's stated payoff -- a precision-1 coverage above the abstain baseline -- is still 0.",
+    "the sound repair is a THIRD global veto. The first two were run 4's <complex> precondition and run 11's A1; each was replaced by a narrower rule that later turned out unsound, and this one is the same shape. The pattern is now three data points and it is evidence that the sound formulation is a taint query, not an enumeration.",
+    "the loop has published six runs of certification counts under the word 'sound'. The counts are unaffected; the word was not earned."
+   ]
+  }
+ }
+]

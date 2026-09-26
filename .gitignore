@@ -70,6 +70,10 @@ Thumbs.db
 *.log
 logs/
 
+# ...but a run's measurement log IS its evidence artifact and must be tracked,
+# so a record in autoresearch_research.jsonl is never unfalsifiable.
+!experiments/*.log
+
 # Temporary files
 *.tmp
 *.temp
