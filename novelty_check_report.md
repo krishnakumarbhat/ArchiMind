@@ -139,3 +139,52 @@ gate that certifies live symbols. Five self-checks missed it because the agreeme
 curves coincide at `j = 0`. The loop's own self-checks assert that the docstring's claims hold;
 they never assert that the *quantity being maximised* is the quantity the deliverable needs.
 Retraction and both repaired curves: `equations.md` row 30.
+
+
+---
+
+# Run 10 / N12 — prior-art and novelty check
+
+**Target.** The corrected law `acc*(Pi) = 1 - |D ∩ mixed(Pi)| / |S|` (row 33), the
+retraction of N11c's flat law (row 32), and the negative carrier result.
+
+**Method, stated first because it is part of the finding.** Two of the three
+dispatched research sub-agents died on provider quota (Gemini free tier
+`429 RESOURCE_EXHAUSTED`, and a second provider's daily free-model cap). A third
+returned a report written to its own sandbox that never reached this workspace, and
+a request to re-emit it inline came back empty. The searches below were therefore run
+directly. **No citation below was produced by a sub-agent**, and every claim that
+could not be verified by a direct search is marked UNVERIFIED. Two providers failing
+is also why this check is thinner than runs 6 and 7's, and the novelty score is
+marked provisional for that reason.
+
+## Verified prior art
+
+| # | Sub-claim | Prior art | Verdict |
+|---|---|---|---|
+| 1 | A classifier constrained to be constant on a partition is optimal by the majority rule per block | **CART** — Breiman, Friedman, Olshen & Stone, *Classification and Regression Trees*, Wadsworth, 1984, DOI `10.1201/9781315139470`. Ch. 3 "Tree Classification", ch. 9 "Bayes Rules and Partitions". The recursive-partitioning literature states the primitive outright: "each split in the tree building process results in daughter nodes that are more 'pure' than the parent node… Pure nodes containing only observations of one class receive an impurity value of zero, while mixed nodes receive higher impurity values" | **PRIOR_ART_STANDARD.** This is the identity, in the language it was invented in. Row 33's law is CART's per-leaf majority rule read under a one-sided (precision-1) constraint, and the loop must not claim it |
+| 2 | The `1 - errors/|S|` shape and the pure/mixed primitive | Same as #1. Impurity **is** the mixed-node fraction, so `acc* = 1 - impurity` is the same identity restated | **PRIOR_ART_STANDARD** |
+| 3 | The trivial information-theoretic floor `log2 C(n, k)` for labelling a class of `n` with `k` dead members | Information theory; not searched separately because row 31's use of it was already standard and is not what this run claims | **PRIOR_ART_STANDARD** |
+| 4 | A partial annotation buys a sound analysis **some** precision, and the amount is worth quantifying | **Aiken, "Soundness and its Role in Bug Detection Systems"** (Stanford, 2005) states the adjacent fact — "it is usually impossible to compute both a sound and reasonably precise… analysis", "most sound systems will assume at least some user annotations" — but does **not** quantify what a partial annotation buys | **NOVEL-but-taxonomic.** The nearest published neighbour stops one step short of the quantity |
+
+## Not found, and therefore claimed as unoccupied rather than as novel
+
+| # | Sub-claim | Search performed | Result |
+|---|---|---|---|
+| 5 | "A declaration is worth nothing unless it makes every equivalence class pure" | `label complexity of class-conditional prediction`, `version space`, `partial label`, `teaching dimension`, `hypothesis class`, `refinement of a partition`, `identifiability` | **Not found.** Partial-label learning is a mature field (Cour et al., JMLR 2011; Zhang et al., NeurIPS 2020 "Provably Consistent Partial-Label Learning"; Alon, Hanneke, Holzman & Moran, FOCS 2021 on partial concept classes) but it counts *labels*, not *purities*. Nothing states the purity-value identity |
+| 6 | The same statement in the program-analysis literature | `static analysis annotation cost`, `price of precision`, `how many annotations does an analyzer need`, `precision of the abstraction lattice` | **Not found.** The precision literature (Klinger, Christakis & Wüstholz, arXiv:1812.05033; Regehr et al., TOPLAS/OOPSLA "Testing Static Analyses for Precision and Soundness"; Møller et al. on TAJS) measures precision as *imprecision to remove*, never as *value of a partial declaration* |
+| 7 | Any dead-code tool using a carrier other than a bare-name allowlist, underscore convention, exclusion globs, or per-class/per-module scoping | Loop's own run-7 finding stands and was not re-run: Vulture's `whitelist` + `vulture/whitelists/` | **PRIOR_ART_STANDARD for the allowlist** (run 7, verified in Vulture's own `core.py`). **UNVERIFIED** for the wider tool survey — `deadcode`, `pyflakes`, `unimport`, `knip`, `cargo-machete`, Rust `dead_code`, `noUnusedLocals` were **not** re-examined this run |
+| 8 | Type-inference-derived deadness for a whole class at once (Pyre / mypy / Pyright) | — | **UNVERIFIED.** Not searched this run |
+| 9 | Sound whole-program points-to / devirtualization for Python (PyCG, Pythia, eta, Scalpel) | — | **UNVERIFIED.** Run 6 already recorded PyCG (arXiv:2103.00587, MSR 2021) as the real Python CPG baseline; nothing this run bears on it |
+| 10 | Abstract interpretation of reflection strings (REFS) as "declare the strings and the property becomes decidable" | — | **UNVERIFIED.** Run 7 already queried the closed-world-assumption line (Reiter 1978) and Cook & Goodwin 1999 |
+| 11 | The negative result: no corpus-derived partition (class / file / module / package / arity / decorated) isolates any dead method in a protocol class | — | **Not found**, but this is the run's own measurement on its own fixture. No prior-art search can be expected to cover it, and it is a fact about `synthetic_index_repo` |
+
+## Scores
+
+- **Corrected law (row 33): 38/100.** The mathematics is CART and scores `PRIOR_ART_STANDARD`; the *dead-code certification* application, the precision-1 residual statistic `|D ∩ mixed|` as the steering quantity, and the carrier enumeration are not published. Engineering track, **no LaTeX paper** — a paper whose theorem is Breiman et al. 1984 chapter 3 will not survive review, and the loop says so rather than reframing it.
+- **The retraction itself (row 32): 55/100.** The specific claim is unoccupied (#5), but a retraction is not a research contribution and is not scored as one. What is defensible is the **transferable methodological finding**, and that is the one thing in this run worth carrying forward: *a law computed inside a chosen hypothesis class was published as a property of the problem, in two consecutive runs, by two different mechanisms.* That is a real and repeatable failure mode of automated research loops, and no published work on that was found.
+- **Provisional.** Three of ten sub-claims are UNVERIFIED because two providers rate-limited and one sub-agent's output was lost. Re-run this check when quota returns; a sub-100 score here should be expected to fall, not rise, as #7–#10 get checked.
+
+## What the loop claims, in one line
+
+The loop claims **no new mathematics**. It claims one correction, one measured negative, one empty instrument channel, and one methodology note. Novelty **15 → 38/100** is an *increase* on run 9's 15, and it is reported as such rather than as progress: the increase is entirely the retraction's worth, which is not novelty.
