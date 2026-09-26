@@ -1,0 +1,500 @@
+[
+ {
+  "variation": "n13_non_executing_adjudicator",
+  "metric_def": "unreferenced-domain-v4",
+  "max_metric": 80,
+  "metric_def_note": "UNCHANGED for the EIGHTH consecutive run. The dead term is UNSCORED, so harness_score cannot move. What N13 can move is unadjudicable_edges, which is a DIAGNOSTIC of the standing metric (eq. row 17) and not a scored term -- so the honest headline is again that the score did not move, and the run is a theorem plus a filter.",
+  "parity": {
+   "fixture": "synthetic_cpg_repo",
+   "source": "run_one('v2_treesitter_cpg', 'synthetic_cpg_repo')",
+   "measured": {
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "dead_code_acc": 0.3333,
+    "cpg_resolution_rate": 0.5,
+    "blast_latency_ms": 0.51,
+    "struct_false_edges": []
+   },
+   "identical_to_run7": true,
+   "diffs": {},
+   "composite": 85.39,
+   "composite_runs_2_to_7": 86.23,
+   "note": "every scored QUALITY quantity must be bit-identical. blast_latency_ms and peak_ram_mb are the resource terms and are the only fields allowed to move; the composite delta is attributed to them alone."
+  },
+  "self_check": {
+   "fault1_dynamic_reading_refuted": true,
+   "fault1_note": "x dispatches y dynamically (h is on x's stack and h calls y) while 'y' is absent from x's file. So the node's lemma is FALSE for the relation a call graph denotes, and TRUE only for the weaker 'a CALL instruction in x's own code object' reading. The node's rationale substituted the second for the first without saying so.",
+   "fault1_direct_reading_holds": true,
+   "fault2_refuted_without_a2": true,
+   "fault2_leaf_absent_from_caller_file": true,
+   "fault2_a2_blocks_it": true,
+   "fault2_alias_is_NOT_a_counterexample": true,
+   "fault2_note": "'return K()' is a real, direct dispatch; eq. row 6 normalises it to K.__init__, whose leaf '__init__' is absent from f's file. Without A2 the refuter certifies a FALSE edge -- the unsound direction. The loop's own run-2 repair manufactures the counterexample. And the loop's first counterexample for this fault, an aliased import, was WRONG: the import statement spells the name, so the lemma holds.",
+   "a1_detects_computed_name": true,
+   "a1_fstring_detected": true,
+   "a1_constant_getattr_is_NOT_a_construction_site": true,
+   "a1_note": "getattr(o, 'query') writes the name as a string, so T(C) already contains it and the token rule is sound; only a NON-constant argument defeats T(C), so only that is flagged.",
+   "vacuity_local_edges": 1,
+   "vacuity_note": "a call site spelling 't' blocks its own edge, so F is empty on a syntactically derived predictor except for the class-call NORMALISATIONS A2 exists to catch -- and those are A2's job, not the refuter's. This is the measurement that decides the node: the refuter is worth nothing on the family of edges the loop has been scoring.",
+   "monotonicity": {
+    "precision_before": 0.3333,
+    "precision_after_sound_refutation": 0.5,
+    "precision_after_UNSOUND_refutation": 0.0,
+    "assertion": "a sound refuter is precision-monotone non-decreasing because it touches the denominator only; an unsound one that removes a true edge LOWERS precision. The loop's own run-4 refusal and run-6 over-approximation are the same asymmetry read the other way."
+   }
+  },
+  "audits": [
+   {
+    "repo": "synthetic_cpg_repo",
+    "is_real_repo": false,
+    "n_files": 4,
+    "n_symbols_defined": 13,
+    "n_predicted_edges": 2,
+    "admissibility": {
+     "n_admissible": 3,
+     "n_inadmissible": 1,
+     "admissible_fraction": 0.75,
+     "n_unparsed": 1,
+     "top_inadmissible_reasons": {
+      "<unparsed>": 1
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 1,
+     "not_refuted_caller_file_inadmissible": 0,
+     "not_refuted_not_text_faithful": 1,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "n_refuted": 0,
+     "n_true_edges": 0,
+     "n_true_edges_removed": 0,
+     "sound": true,
+     "offenders": []
+    },
+    "identifiability": {
+     "n_predicted": 2,
+     "n_evaluable": 0,
+     "n_unadjudicable_before": 2,
+     "n_refuted": 0,
+     "n_refuted_that_were_unadjudicable": 0,
+     "n_unadjudicable_after": 2,
+     "unadjudicable_survivors": [
+      [
+       "routes.get_user",
+       "repo.UserRepo.__init__"
+      ],
+      [
+       "routes.get_user",
+       "repo.UserRepo.fetch"
+      ]
+     ],
+     "identifiable_before": false,
+     "identifiable_after": false,
+     "identifiability_achieved": false,
+     "residual_unadjudicable_names": [
+      "routes.get_user"
+     ],
+     "honest_statement": "refutation SHRINKS the unadjudicable set and does NOT empty it, so eq. row 17's identifiability condition still reads False whenever a survivor remains -- which is the normal case on a real repo. The condition is not repairable by any refuter that needs no liveness, because an unjudged edge stays unjudged once it is not false."
+    },
+    "oracle_note": "executed: true edge set reconstructed as predicted minus the oracle's false edges, so the audit is exact rather than sampled"
+   },
+   {
+    "repo": "synthetic_promo_repo",
+    "is_real_repo": false,
+    "n_files": 8,
+    "n_symbols_defined": 26,
+    "n_predicted_edges": 5,
+    "admissibility": {
+     "n_admissible": 8,
+     "n_inadmissible": 0,
+     "admissible_fraction": 1.0,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {}
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 2,
+     "not_refuted_caller_file_inadmissible": 0,
+     "not_refuted_not_text_faithful": 3,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "n_refuted": 0,
+     "n_true_edges": 0,
+     "n_true_edges_removed": 0,
+     "sound": true,
+     "offenders": []
+    },
+    "identifiability": {
+     "n_predicted": 5,
+     "n_evaluable": 0,
+     "n_unadjudicable_before": 5,
+     "n_refuted": 0,
+     "n_refuted_that_were_unadjudicable": 0,
+     "n_unadjudicable_after": 5,
+     "unadjudicable_survivors": [
+      [
+       "svc_a.get_user",
+       "users.UserRepo.__init__"
+      ],
+      [
+       "svc_a.get_user",
+       "users.UserRepo.fetch"
+      ],
+      [
+       "svc_b.get_audit",
+       "audit.AuditRepo.__init__"
+      ],
+      [
+       "svc_b.get_audit",
+       "audit.AuditRepo.scan"
+      ],
+      [
+       "svc_d.get_cached",
+       "cache.Cache.__init__"
+      ]
+     ],
+     "identifiable_before": false,
+     "identifiable_after": false,
+     "identifiability_achieved": false,
+     "residual_unadjudicable_names": [
+      "svc_a.get_user",
+      "svc_b.get_audit",
+      "svc_d.get_cached"
+     ],
+     "honest_statement": "refutation SHRINKS the unadjudicable set and does NOT empty it, so eq. row 17's identifiability condition still reads False whenever a survivor remains -- which is the normal case on a real repo. The condition is not repairable by any refuter that needs no liveness, because an unjudged edge stays unjudged once it is not false."
+    },
+    "oracle_note": "executed: true edge set reconstructed as predicted minus the oracle's false edges, so the audit is exact rather than sampled"
+   },
+   {
+    "repo": "synthetic_taint_repo",
+    "is_real_repo": false,
+    "n_files": 2,
+    "n_symbols_defined": 8,
+    "n_predicted_edges": 1,
+    "admissibility": {
+     "n_admissible": 1,
+     "n_inadmissible": 1,
+     "admissible_fraction": 0.5,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {
+      "call:globals": 1,
+      "subscript:globals": 1
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 0,
+     "not_refuted_caller_file_inadmissible": 1,
+     "not_refuted_not_text_faithful": 0,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "synthetic_exports_repo",
+    "is_real_repo": false,
+    "n_files": 7,
+    "n_symbols_defined": 17,
+    "n_predicted_edges": 2,
+    "admissibility": {
+     "n_admissible": 7,
+     "n_inadmissible": 0,
+     "admissible_fraction": 1.0,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {}
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 2,
+     "not_refuted_caller_file_inadmissible": 0,
+     "not_refuted_not_text_faithful": 0,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "synthetic_protocol_repo",
+    "is_real_repo": false,
+    "n_files": 3,
+    "n_symbols_defined": 13,
+    "n_predicted_edges": 0,
+    "admissibility": {
+     "n_admissible": 3,
+     "n_inadmissible": 0,
+     "admissible_fraction": 1.0,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {}
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": null,
+     "not_refuted_name_present": 0,
+     "not_refuted_caller_file_inadmissible": 0,
+     "not_refuted_not_text_faithful": 0,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "synthetic_index_repo",
+    "is_real_repo": false,
+    "n_files": 1,
+    "n_symbols_defined": 10,
+    "n_predicted_edges": 0,
+    "admissibility": {
+     "n_admissible": 1,
+     "n_inadmissible": 0,
+     "admissible_fraction": 1.0,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {}
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": null,
+     "not_refuted_name_present": 0,
+     "not_refuted_caller_file_inadmissible": 0,
+     "not_refuted_not_text_faithful": 0,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "pallets/flask",
+    "is_real_repo": true,
+    "n_files": 24,
+    "n_symbols_defined": 403,
+    "n_predicted_edges": 197,
+    "admissibility": {
+     "n_admissible": 10,
+     "n_inadmissible": 14,
+     "admissible_fraction": 0.416667,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {
+      "fstring": 13,
+      "format:join": 8,
+      "call:getattr": 5,
+      "call:hasattr": 4,
+      "call:__import__": 2,
+      "call:compile": 2,
+      "call:setattr": 1,
+      "call:eval": 1
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 17,
+     "not_refuted_caller_file_inadmissible": 175,
+     "not_refuted_not_text_faithful": 5,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "psf/requests",
+    "is_real_repo": true,
+    "n_files": 20,
+    "n_symbols_defined": 303,
+    "n_predicted_edges": 277,
+    "admissibility": {
+     "n_admissible": 6,
+     "n_inadmissible": 14,
+     "admissible_fraction": 0.3,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {
+      "fstring": 11,
+      "call:hasattr": 6,
+      "format:join": 6,
+      "call:setattr": 4,
+      "call:compile": 3,
+      "call:getattr": 3,
+      "call:__import__": 1,
+      "call:locals": 1
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 7,
+     "not_refuted_caller_file_inadmissible": 262,
+     "not_refuted_not_text_faithful": 8,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "tiangolo/sqlmodel",
+    "is_real_repo": true,
+    "n_files": 171,
+    "n_symbols_defined": 861,
+    "n_predicted_edges": 760,
+    "admissibility": {
+     "n_admissible": 74,
+     "n_inadmissible": 97,
+     "admissible_fraction": 0.432749,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {
+      "fstring": 96,
+      "call:exec": 65,
+      "format:join": 4,
+      "call:compile": 3,
+      "call:getattr": 2,
+      "call:setattr": 2,
+      "call:__getattribute__": 1,
+      "call:dir": 1
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 43,
+     "not_refuted_caller_file_inadmissible": 714,
+     "not_refuted_not_text_faithful": 3,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   },
+   {
+    "repo": "Textualize/rich",
+    "is_real_repo": true,
+    "n_files": 109,
+    "n_symbols_defined": 1155,
+    "n_predicted_edges": 780,
+    "admissibility": {
+     "n_admissible": 53,
+     "n_inadmissible": 56,
+     "admissible_fraction": 0.486239,
+     "n_unparsed": 0,
+     "top_inadmissible_reasons": {
+      "fstring": 47,
+      "format:join": 17,
+      "percent_format": 8,
+      "call:hasattr": 7,
+      "call:compile": 6,
+      "call:getattr": 5,
+      "format:format": 5,
+      "call:attrgetter": 3
+     }
+    },
+    "refutation": {
+     "n_refuted": 0,
+     "refuted_fraction": 0.0,
+     "not_refuted_name_present": 74,
+     "not_refuted_caller_file_inadmissible": 613,
+     "not_refuted_not_text_faithful": 93,
+     "not_refuted_caller_file_unknown": 0,
+     "sample_refuted": []
+    },
+    "soundness_audit": {
+     "status": "UNVALIDATED",
+     "reason": "the dynamic oracle does not run on this corpus, so the true edge set does not exist and the refuter's soundness cannot be checked HERE. Refuting an edge is always safe in the sense that the edge is removed from the denominator, but soundness -- that no true edge was removed -- is only checkable where truth is executed. Reported as unvalidated rather than as vacuously sound, because run 10's N12e measured what a vacuous truth looks like."
+    }
+   }
+  ],
+  "claim_audit": {
+   "claim_as_written_in_the_graph": "an edge (caller, callee) is DEFINITIVELY FALSE if leaf(callee) occurs nowhere in the caller's body, so unadjudicable_edges can be shrunk on an untrusted tarball without running the oracle",
+   "fault_1_the_relation_was_substituted": {
+    "verdict": "REFUTED as stated; TRUE under a weaker reading",
+    "false_reading": "y is invoked at some moment while x is on the stack -- the relation a call graph denotes",
+    "true_reading": "a CALL instruction, or an attribute access m.y, appears in x's own code object",
+    "counterexample": "def x(h): return h()   # in x.py\ndef h(): return y()",
+    "measured": "'y' in tokens(h.py) and 'y' not in tokens(x.py), asserted in src/11_name_refuter.py::self_check as fault1_dynamic_reading_refuted",
+    "consequence": "the node's rationale silently substituted the second reading for the first. This is the THIRD instance of the loop's own recorded failure mode -- a claim proved for a chosen hypothesis class and published as a property of the problem (eq. rows 30 and 32)."
+   },
+   "fault_2_the_loops_own_repair_manufactures_the_counterexample": {
+    "verdict": "REFUTED under BOTH readings, by eq. row 6",
+    "mechanism": "row 6 normalised a class-instantiation edge to Cls.__init__ because CPython calls __init__ directly. 'return K()' is a real, direct dispatch whose callee leaf '__init__' appears nowhere in the caller's file, so the un-guarded refuter certifies a FALSE edge.",
+    "asserted": "fault2_refuted_without_a2 and fault2_a2_blocks_it, both true",
+    "wrong_first_counterexample": "the loop's first counterexample was an ALIASED IMPORT, 'from M import y as a; a()'. It is NOT a counterexample: the import statement spells y, so y is in T(C_x) and the lemma holds. A refutation resting on a counterexample that does not refute is worse than none, and the first cut of the module asserted one. alias_bindings() is kept as a diagnostic so the error stays auditable.",
+    "a2_is_coarse": "text_faithful() excludes resolver-supplied leaves only. A tighter test needs the resolver's raw text per edge, which the CPG does not record, and inferring it from the dotted symbol is the string surgery behind run 7's defect (ii)."
+   },
+   "surviving_rule": "admissible(x, y) := A1(no dynamic-name-construction site in C_x) and A2(y is text-faithful). Then leaf(y) not in T(C_x) implies (x, y) is definitively false. Both conditions are CHECKED, both are refusal triggers, and both over-refuse: a false positive costs a refutation, a false negative costs soundness.",
+   "why_this_is_not_run_7s_killed_manifest": "run 7's protocol manifest was an OPEN list of names, so it vetoed only what it listed and failed UNSOUNDLY (precision 0.0, 1 false positive). These sets are refusal triggers, so a wrong entry makes the analysis refuse more, never less. The direction of every error is opposite, and that is the whole difference.",
+   "prior_art_status": "PENDING -- see the run's own note; all three literature sub-agents died on provider quota this iteration (Gemini free-tier 429, OpenRouter free-model daily cap)"
+  },
+  "n13_verdict": {
+   "soundness_audit_on_executed_fixtures": {
+    "synthetic_cpg_repo": true,
+    "synthetic_promo_repo": true
+   },
+   "any_soundness_violation": false,
+   "soundness_audited_on": [
+    "synthetic_cpg_repo",
+    "synthetic_promo_repo"
+   ],
+   "soundness_UNVALIDATED_on": [
+    "synthetic_taint_repo",
+    "synthetic_exports_repo",
+    "synthetic_protocol_repo",
+    "synthetic_index_repo",
+    "pallets/flask",
+    "psf/requests",
+    "tiangolo/sqlmodel",
+    "Textualize/rich"
+   ],
+   "n_predicted_edges_real_repos": 2014,
+   "n_refuted_real_repos": 0,
+   "refuted_fraction_real_repos": 0.0,
+   "identifiability_achieved_anywhere": false,
+   "unadjudicable_before_after": {
+    "synthetic_cpg_repo": [
+     2,
+     2
+    ],
+    "synthetic_promo_repo": [
+     5,
+     5
+    ]
+   },
+   "the_measured_reason_it_is_worth_little": "F is empty on the CPG's own edges, and that is structural rather than unlucky: the CPG adds (sym, callee) only where a resolved ast.Call sits in sym's body, so leaf(callee) is already a token of that body. A necessary condition on an edge that was DERIVED from a call site is almost always already satisfied. The refuter can only bite on edges predicted WITHOUT a call site in the caller's body, which is run 3's name-promotion family (mode B) -- and those were never scored on a real repo either, because the structural term has been withheld there since run 4.",
+   "reported_against_interest": [
+    "the node's stated purpose was to unblock N8, and it does not: identifiable_after is still False everywhere, because a refuter shrinks the unadjudicable set without emptying it. N8 stays blocked, now with the mechanism of the block measured rather than asserted.",
+    "A2's exclusion of __init__ edges removes exactly the edges a call graph care about most, so the filter is weakest where call graphs are most used. This is the price of soundness and it is not tunable away.",
+    "soundness is checkable on 2 of 10 corpora. The other 8 are reported UNVALIDATED, not vacuously sound -- run 10's N12e is the precedent for what happens when a vacuous truth is published as a result."
+   ],
+   "monotonicity": {
+    "precision_before": 0.3333,
+    "precision_after_sound_refutation": 0.5,
+    "precision_after_UNSOUND_refutation": 0.0,
+    "assertion": "a sound refuter is precision-monotone non-decreasing because it touches the denominator only; an unsound one that removes a true edge LOWERS precision. The loop's own run-4 refusal and run-6 over-approximation are the same asymmetry read the other way."
+   }
+  }
+ }
+]
