@@ -16,9 +16,9 @@
 | 9 | 7b1c36c | 79.52/80 (same def) | keep | N11 bound derived not asserted (19,683 gates enumerated, max acc 0.5) + 2 self-retractions |
 | 10 | 17d7dce | 79.52/80 (same def) | keep | N12 law retraction + carrier enumeration; parity bit-identical to run 7 |
 | 11 | db0e6ef | 79.52/80 (same def) | keep | N13 non-executing adjudicator refuted twice; vacuity on 2014 real edges |
-| 12 | PENDING | 79.52/80 (same def) | keep | N14 eq. row 18 REFUTED; word "sound" withdrawn from 6 runs of counts; call-position carrier splits a fibre |
-| 13 | PENDING | 79.52/80 (same def) | keep, L1 flagged VACUOUS | N15 truth-channel audit; L1 measured at 0 on 3/3 fixtures; 24/24 self-checks green over a vacuous law |
-| 14 | PENDING | 79.52/80 (same def) | keep | N16 ablation: L1 non-vacuous (n_mfg=2), "strictly" RETRACTED, headroom law: truncation also PROTECTS the direction |
+| 12 | 05430bd | 79.52/80 (same def) | keep | N14 eq. row 18 REFUTED; word "sound" withdrawn from 6 runs of counts; call-position carrier splits a fibre |
+| 13 | 05430bd | 79.52/80 (same def) | keep, L1 flagged VACUOUS | N15 truth-channel audit; L1 measured at 0 on 3/3 fixtures; 24/24 self-checks green over a vacuous law |
+| 14 | 05430bd | 79.52/80 (same def) | keep | N16 ablation: L1 non-vacuous (n_mfg=2), "strictly" RETRACTED, headroom law: truncation also PROTECTS the direction |
 
 Head-to-head that matters: **v0 regex precision 0.2143 → CPG precision 1.0** (same fixture, same oracle, run 2). Honest costs: recall 0.5, resolution 0.5, root cause attribute-on-instance. Real-repo scale: flask/requests/sqlmodel/rich (≤333 files), peak RSS ≤72.63MB, $0 tokens. Score frozen runs 7–14 by construction (dead term unscored) — work moved to soundness proofs + impossibility result (≤1/2 bound, UNVERIFIED-novel).
 
