@@ -1,0 +1,9 @@
+<mxfile host="ArchiMind" version="1.0"><diagram name="HLD" id="hld1"><mxGraphModel dx="800" dy="500" grid="1" gridSize="10" guides="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>
+<mxCell id="ing" value="Tarball Ingestion&#xa;(stream, ≤60MB, filter)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="40" y="200" width="150" height="60" as="geometry"/></mxCell>
+<mxCell id="cpg" value="Static CPG Builder&#xa;(00: ast resolve, SCC)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="230" y="200" width="150" height="60" as="geometry"/></mxCell>
+<mxCell id="or" value="Dynamic Oracle&#xa;(01: settrace harness)" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="420" y="110" width="150" height="60" as="geometry"/></mxCell>
+<mxCell id="gate" value="Metric Gate + Certifier&#xa;(03/04/05/07)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="290" width="150" height="60" as="geometry"/></mxCell>
+<mxCell id="out" value="Leaderboard + Docs&#xa;(evidence logs)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1"><mxGeometry x="610" y="200" width="150" height="60" as="geometry"/></mxCell>
+<mxCell id="con" value="Constraints: RSS≤380MB, $0 tokens,&#xa;no clone, 1 job, .env ignored" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="230" y="340" width="340" height="50" as="geometry"/></mxCell>
+<mxCell id="e1" edge="1" parent="1" source="ing" target="cpg"/><mxCell id="e2" edge="1" parent="1" source="cpg" target="or"/><mxCell id="e3" edge="1" parent="1" source="cpg" target="gate"/><mxCell id="e4" edge="1" parent="1" source="or" target="gate"/><mxCell id="e5" edge="1" parent="1" source="gate" target="out"/>
+</root></mxGraphModel></diagram></mxfile>

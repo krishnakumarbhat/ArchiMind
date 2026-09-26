@@ -286,3 +286,22 @@
   - **Reported against interest, three ways.** The node produced a retraction of the loop's own soundness claim instead of the carrier it was queued for, and its stated payoff — precision-1 coverage above the abstain baseline — is **still 0**. The sound repair is a **third** global veto (after run 4's `<complex>` precondition and run 11's A1), each a narrowing of the previous failure, which is evidence that the sound formulation is a **taint query, not an enumeration**. And the loop has published six runs of certification counts under the word "sound": the **counts are unaffected; the word was not earned.**
   - **N8 is NOT unblocked, sixth consecutive run**, and N6 stays deferred for the unchanged reason.
   - **Novelty 38 → 31, engineering track, no paper.** Refuted on prior art and on its own measurement; re-checked in run 14's cascade (Vulture README VERIFIED, documents the same `getattr` false positive and claims no soundness).
+
+### Run 12: N14 event-budget oracle + binding-set carrier — keep, 79.52/80 (RETRACTION OF "SOUND")
+- Timestamp: 2026-09-26 | Evidence: `experiments/run-12-n14.log`, `run-12-n14-verify.log` | Code: `src/01_dyn_oracle.py` (deterministic `DEFAULT_EVENT_BUDGET`, `_BudgetExhausted`), `src/14_ablation.py` groundwork
+- **eq. row 18 REFUTED by execution:** `getattr(o, "".join(["lo","ad"]))()` dispatches live to `witnesses.Dyn.load` whose leaf occurs nowhere in the corpus; the incumbent rule certifies it dead — **1 measured false positive**. The word "sound" is withdrawn from six runs of certification counts (counts stand, zero-FP claim does not).
+- Binding-set carrier refuted as callee-side verdict input (caller-side property); kept as diagnostic. What survives: **call-POSITION carrier** — first corpus-derived carrier not constant on the evidence fibre.
+- Next: N15 laws L1/L1b/L2/L3.
+
+### Run 13: N15 oracle-truncation laws — keep_with_a_vacuous_law_flagged, 79.52/80 (VACUOUS TRUTH FOUND BY ITS OWN CHECKS)
+- Timestamp: 2026-09-26 | Evidence: `experiments/run-13-n15.log` | Code: `scripts/run_n15_*.py`, `src/12_escape_channel.py`, `src/13_oracle_channel.py`
+- L1/L1b/L2/L3 stated; L1 measured at `n_manufactured = 0`, deflation 0.0, truth-sets equal on all three fixtures — **vacuous**: the truncated side was the wall-clock oracle, which never expires on fixtures this size. 24/24 self-checks passed over a vacuous law — that is the finding. L1b, L2, call-counter falsification sound and non-vacuous.
+- Defects fixed by running, not reasoning: `_traced` installed the tracer then called `signal.signal` (tracer-visible) so binding budgets died in the sweep; verdict printer keyed `REVERSES` on the precondition instead of the measurement (6th instance of the loop's failure mode, now asserted impossible by two self-checks).
+- Next: N16 ablation to make L1 non-vacuous.
+
+### Run 14: N16 event-budget ablation — keep, 79.52/80 (NON-VACUOUS LAW + HEADROOM RESULT)
+- Timestamp: 2026-09-26 | Evidence: `experiments/run-14-n16.log` | Code: `src/14_ablation.py`
+- Sweeping a deterministic event budget until it binds: `n_manufactured = 2`, deflation 0.4/1.0 — L1 non-vacuous, omission-only precondition and set identity hold at all 33 rows. **"Strictly" retracted:** law is the iff `measured − true = |predicted & omitted|`, tight whenever omission misses prediction (unwitnessed branch recorded, not papered over).
+- Transferable result: **HEADROOM** — `O ⊆ T` necessary but NOT sufficient for L1 failure; exact condition `|D & O| > |D & T|`. A truncating oracle that manufactures FPs is also what shields against an inventing oracle flattering the predictor. No source found.
+- Novelty 34 → 46, engineering track, no paper (L1–L3 restated measurement theory per review cascade; 46 carried by headroom alone). Two sub-agents died on provider quota; cascade rotated, verdicts checked.
+- Next (queued, unexecuted): N17 near-complete-regime headroom.

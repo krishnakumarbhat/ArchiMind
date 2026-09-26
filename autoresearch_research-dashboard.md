@@ -1,4 +1,9 @@
-# Autoresearch Research Dashboard: archimind-cpg-harness
+# Autoresearch Research Dashboard: archimind-cpg-harness — CLOSED 2026-09-26
+
+**Runs:** 13 logged (run 8 absorbed into 9) | **Kept:** 12 | **Keep-with-flag:** 1 (run 13, vacuous law) | **Discarded:** 0 | **Crashed:** 0
+**Baseline:** harness_score: 80.09pts (#1, static-F1 def)
+**Best:** harness_score: 86.23pts (#2, dynamic-oracle-v1) — **NOT comparable across metric defs (4 defs used). Decision-grade numbers are the within-run head-to-heads.**
+**Close-out:** driver stopped (4 watchdog exits, provider quota hit); orphan worker killed; docs written by hand from logged evidence. Deliverables: `docs/leaderboard.md`, `docs/architecture.md`, `docs/profiling.md`, `docs/hld.drawio`, `docs/lld.drawio`.
 
 **Runs:** 14 | **Kept:** 14 | **Discarded:** 0 | **Crashed:** 0 (run 8 has no record — recovered inside run 9; iters 8–10 first stall + iters 7–9 second stall hit the 20-min watchdog with no state change)
 **Baseline:** harness_score: 80.09pts (#1, static-F1 def)
@@ -16,6 +21,9 @@
 | 9 | 7b1c36c | 79.52/80 (same def) | keep | N11 bound derived not asserted (19,683 gates enumerated, max acc 0.5) + 2 self-retractions |
 | 10 | 17d7dce | 79.52/80 (same def) | keep | N12 law retraction + carrier enumeration; parity bit-identical to run 7 |
 | 11 | db0e6ef | 79.52/80 (same def) | keep | N13 non-executing adjudicator refuted twice; vacuity on 2014 real edges |
+| 12 | 05430bd | 79.52/80 (same def) | keep | N14 event budget; row 18 "sound" retracted (1 measured FP via crafted getattr) |
+| 13 | 05430bd | 79.52/80 (same def) | keep_with_a_vacuous_law_flagged | N15 L1 vacuous (wall-clock never binds); L1b/L2 survive |
+| 14 | 05430bd | 79.52/80 (same def) | keep | N16 ablation: L1 witnessed (n_manufactured=2); headroom law, no source found |
 | 12 | 05430bd | 79.52/80 (same def) | keep | N14 eq. row 18 REFUTED; word "sound" withdrawn from 6 runs of counts; call-position carrier splits a fibre |
 | 13 | 05430bd | 79.52/80 (same def) | keep, L1 flagged VACUOUS | N15 truth-channel audit; L1 measured at 0 on 3/3 fixtures; 24/24 self-checks green over a vacuous law |
 | 14 | 05430bd | 79.52/80 (same def) | keep | N16 ablation: L1 non-vacuous (n_mfg=2), "strictly" RETRACTED, headroom law: truncation also PROTECTS the direction |
