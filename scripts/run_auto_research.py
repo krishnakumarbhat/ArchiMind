@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # is a syntax error), so they are resolved through importlib once here.
 CPG_MOD = importlib.import_module("src.00_cpg_static")
 DYN_MOD = importlib.import_module("src.01_dyn_oracle")
+PROMOTE_MOD = importlib.import_module("src.02_trace_promote")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("auto_research")
@@ -33,6 +34,7 @@ log = logging.getLogger("auto_research")
 REPOS = {
     "synthetic_bad_repo": None,  # local fixture, built on demand
     "synthetic_cpg_repo": None,  # local fixture, acyclic + dynamic-oracle friendly
+    "synthetic_promo_repo": None,  # local fixture, disjoint callers across folds
     "pallets/flask": "https://codeload.github.com/pallets/flask/tar.gz/refs/heads/main",
     "psf/requests": "https://codeload.github.com/psf/requests/tar.gz/refs/heads/main",
     "tiangolo/sqlmodel": "https://codeload.github.com/tiangolo/sqlmodel/tar.gz/refs/heads/main",
@@ -40,7 +42,8 @@ REPOS = {
 }
 
 VARIATIONS = ["v0_baseline_linear", "v1_eval_optimizer", "v2_treesitter_cpg",
-              "v3_hybrid_cpg_rag", "v4_governance_harness", "v5_full_agentic_system"]
+              "v3_trace_informed_cpg", "v3_hybrid_cpg_rag",
+              "v4_governance_harness", "v5_full_agentic_system"]
 
 SKIP_DIRS = {"tests", "test", "docs", "examples", "vendor", "node_modules", ".git", "__pycache__"}
 SKIP_EXT = {".png", ".jpg", ".mp4", ".gif", ".ico", ".woff", ".ttf", ".bin", ".so"}
@@ -118,6 +121,92 @@ def build_cpg_fixture(path="experiments/fixtures/synthetic_cpg_repo"):
     return path
 
 
+def build_promo_fixture(path="experiments/fixtures/synthetic_promo_repo"):
+    """Fixture whose two harness folds contain DISJOINT call sites.
+
+    Trace-informed promotion is only worth measuring if the training fold and
+    the evaluation fold share no caller, otherwise a rule that memorised the
+    trace is indistinguishable from one that generalised. Every entry point
+    lives in its own module (`svc_a`..`svc_d`) so `fold_targets(2)` splits the
+    four of them two-and-two, and the attribute-on-instance callers
+    (`UserRepo.fetch`, `AuditRepo.scan`, `Cache.load`) land in different folds.
+
+    Two further deliberate features:
+      * `store.commit()` is called ONLY from `svc_d` (fold B), so its name is
+        never seen in training -> it bounds the promotion coverage ceiling.
+      * `Cache.stale()` is called by nobody -> a genuinely dead symbol, so
+        dead-code accuracy is measured against a confirmed true positive.
+    """
+    os.makedirs(path, exist_ok=True)
+    files = {
+        "store.py": (
+            "class Store:\n"
+            "    def query(self, uid):\n"
+            "        return {'uid': uid}\n"
+            "    def close(self):\n"
+            "        return None\n"
+            "    def commit(self):\n"
+            "        return None\n"
+            "store = Store()\n"
+        ),
+        "users.py": (
+            "from store import store\n"
+            "class UserRepo:\n"
+            "    def __init__(self, s):\n"
+            "        self.s = s\n"
+            "    def fetch(self, uid):\n"
+            "        return self.s.query(uid)\n"
+        ),
+        "audit.py": (
+            "from store import store\n"
+            "class AuditRepo:\n"
+            "    def __init__(self, s):\n"
+            "        self.s = s\n"
+            "    def scan(self, uid):\n"
+            "        return self.s.query(uid)\n"
+        ),
+        "cache.py": (
+            "from store import store\n"
+            "class Cache:\n"
+            "    def __init__(self, s):\n"
+            "        self.s = s\n"
+            "    def load(self, uid):\n"
+            "        return self.s.query(uid)\n"
+            "    def stale(self):\n"
+            "        return None\n"
+        ),
+        "svc_a.py": (
+            "from store import store\n"
+            "from users import UserRepo\n"
+            "def get_user(uid):\n"
+            "    return UserRepo(store).fetch(uid)\n"
+        ),
+        "svc_b.py": (
+            "from store import store\n"
+            "from audit import AuditRepo\n"
+            "def get_audit(uid):\n"
+            "    return AuditRepo(store).scan(uid)\n"
+        ),
+        "svc_c.py": (
+            "from store import store\n"
+            "def close_store():\n"
+            "    return store.close()\n"
+        ),
+        "svc_d.py": (
+            "from store import store\n"
+            "from cache import Cache\n"
+            "def get_cached(uid):\n"
+            "    c = Cache(store)\n"
+            "    c.load(uid)\n"
+            "    return store.commit()\n"
+        ),
+    }
+    for name, content in files.items():
+        with open(os.path.join(path, name), "w") as fh:
+            fh.write(content)
+    return path
+
+
 def stream_tarball(url):
     req = urllib.request.Request(url, headers={"User-Agent": "archimind-research"})
     buf = io.BytesIO()
@@ -144,6 +233,14 @@ def load_repo_files(repo):
         return out
     if repo == "synthetic_cpg_repo":
         root = build_cpg_fixture()
+        out = {}
+        for name in os.listdir(root):
+            if name.endswith(".py"):
+                with open(os.path.join(root, name)) as fh:
+                    out[name] = fh.read()
+        return out
+    if repo == "synthetic_promo_repo":
+        root = build_promo_fixture()
         out = {}
         for name in os.listdir(root):
             if name.endswith(".py"):
@@ -253,7 +350,199 @@ def peak_rss_mb():
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
 
 
+def classify_dead(dead, cpg, dispatches, covered):
+    """Split the predicted-dead set into the three states a trace can distinguish.
+
+    * **refuted** -- dispatched in the evaluation fold. A false "dead" verdict,
+      proven.
+    * **proven** -- not dispatched, AND it has a static caller that the fold
+      actually exercised, so the fold's silence is informative.
+    * **unexercised** -- not dispatched, but every potential caller was either
+      invisible to the static resolver (the very bug being measured) or never
+      invoked in this fold. The trace's silence here proves nothing.
+
+    Collapsing the third bucket into "confirmed dead" is what made run 2's
+    `dead_code_acc=0.3333` look better than it was: a half-fold oracle cannot
+    distinguish dead code from unrun code, and only the first two buckets carry
+    information. Returns (strict, upper, refuted, unexercised, proven).
+    """
+    callees = {b for _, b in dispatches}
+    reverse = {}
+    for a, b in cpg.call_edges:
+        reverse.setdefault(b, set()).add(a)
+    refuted = dead & callees
+    unexercised = {
+        s
+        for s in dead - refuted
+        if not (reverse.get(s, set()) and (reverse[s] & covered))
+    }
+    proven = dead - refuted - unexercised
+    n = len(dead)
+    strict = len(proven) / n if n else 1.0
+    upper = (len(proven) + len(unexercised)) / n if n else 1.0
+    return strict, upper, sorted(refuted), sorted(unexercised), sorted(proven)
+
+
+def run_v3(repo):
+    """Two-fold HELD-OUT evaluation of trace-informed edge promotion (v3).
+
+    `metric_def = dynamic-oracle-heldout-v2`. The promotion rule is learned
+    from fold A's dispatches ONLY; every reported number is scored against
+    fold B's dispatches ONLY. Neither the promoted graph nor its score has seen
+    the evaluation fold, so unlike run 2's in-sample numbers this is a real
+    generalisation measurement.
+
+    Three rows are always produced on the SAME fold so the comparison is
+    paired: the unpromoted static control, MODE A, and MODE B. A single-number
+    run would be unreadable -- the whole point is that A and B differ.
+    """
+    files = load_repo_files(repo)
+    t_start = time.time()
+    oracle = DYN_MOD.run_oracle(files)
+    if oracle.import_failed:
+        log.warning("oracle import failures: %s", oracle.import_failed)
+    fold_a, fold_b = oracle.fold_targets(2)
+    d_a = oracle.dispatches_for(fold_a)
+    d_b = oracle.dispatches_for(fold_b)
+    covered_b = oracle.covered_symbols(d_b, fold_b)
+    out = {
+        "variation": "v3_trace_informed_cpg", "repo": repo, "files": len(files),
+        "metric_def": "dynamic-oracle-heldout-v2",
+        "fold_a_targets": fold_a, "fold_b_targets": fold_b,
+        "fold_a_dispatches": len(d_a), "fold_b_dispatches": len(d_b),
+        "oracle_import_failed": oracle.import_failed,
+    }
+    if not d_a or not d_b:
+        # One honest failure beats a fabricated 0.0: with an empty fold there is
+        # nothing to generalise to and every recall number is undefined.
+        out["status"] = "unvalidated"
+        out["reason"] = "a fold observed no dispatches; protocol undefined"
+        return out
+
+    static_probe = CPG_MOD.build_cpg(files)
+    rules = PROMOTE_MOD.learn_name_rules(d_a)
+    edge_a = PROMOTE_MOD.promote_mode_a(static_probe, d_a)
+    edge_b = PROMOTE_MOD.promote_mode_b(static_probe, rules)
+    out["learned_name_rules"] = sorted(rules.items())
+    out["unresolved_call_sites"] = sorted(map(list, static_probe.unresolved_calls))
+    out["promotion_coverage_ceiling"] = round(
+        PROMOTE_MOD.coverage_ceiling(static_probe, rules), 4
+    )
+
+    rows = {}
+    for label, promoted in (
+        ("static_control", set()),
+        ("mode_a", edge_a),
+        ("mode_b", edge_b),
+    ):
+        # Rebuilt from source every time: apply_promotion mutates in place, so a
+        # shared instance would leak one mode's edges into the next row.
+        cpg = CPG_MOD.build_cpg(files)
+        static_edges = set(cpg.call_edges)
+        if promoted:
+            PROMOTE_MOD.apply_promotion(cpg, promoted)
+        t1 = time.time()
+        seeds = {b for _, b in cpg.call_edges} or set(cpg.nodes)
+        blast = cpg.blast_radius(seeds)
+        blast_ms = (time.time() - t1) * 1000 + 0.5
+        dead = cpg.dead_symbols(dunder_exempt=True)
+        prec = PROMOTE_MOD.precision_of(cpg.call_edges, d_b)
+        rec = PROMOTE_MOD.recall_of(cpg.call_edges, d_b)
+        d_strict, d_upper, d_ref, d_unex, d_prov = classify_dead(
+            dead, cpg, d_b, covered_b
+        )
+        peak = peak_rss_mb()
+        lat = max(0.0, 1 - blast_ms / 2000)
+        ram = max(0.0, 1 - peak / 512)
+        validity = mermaid_validity()
+        score = 30 * validity + 30 * prec + 20 * d_strict + 10 * lat + 10 * ram
+        # Candidate metric fix, reported alongside rather than substituted: the
+        # standing 30-point structural term is PRECISION-ONLY and therefore
+        # cannot reward a recall improvement at all. Both are emitted so the
+        # decision is visible instead of being baked in.
+        f1 = 0.0 if prec + rec == 0 else 2 * prec * rec / (prec + rec)
+        score_f1 = 30 * validity + 30 * f1 + 20 * d_strict + 10 * lat + 10 * ram
+        ho = PROMOTE_MOD.heldout(cpg.call_edges, d_b, covered_b)
+        # Newly-added edges only. `promoted - cpg.call_edges` is always empty
+        # because promotion was already applied -- the caller-blind split would
+        # then report 0 recall for a mode that generalised perfectly.
+        split = PROMOTE_MOD.split_caller_recall(
+            promoted - static_edges, d_a, d_b
+        )
+        rows[label] = dict(
+            promoted_edges=len(promoted),
+            call_edges=len(cpg.call_edges),
+            struct_precision_dyn=round(prec, 4),
+            struct_recall_dyn=round(rec, 4),
+            struct_f1_dyn=round(f1, 4),
+            **ho,
+            **split,
+            dead_predicted=sorted(dead),
+            dead_refuted=d_ref,
+            dead_unexercised=d_unex,
+            dead_proven=d_prov,
+            dead_code_acc=round(d_strict, 4),
+            dead_code_acc_upper=round(d_upper, 4),
+            cpg_resolution_rate=round(cpg.resolution_rate(), 4),
+            blast_symbols=len(blast),
+            blast_latency_ms=round(blast_ms, 2),
+            peak_ram_mb=round(peak, 2),
+            harness_score=round(score, 2),
+            harness_score_f1=round(score_f1, 2),
+            in_sample=False,
+        )
+    # Deployment-shaped row: what a real deployment emits, with the rule learned
+    # from ALL available traces. Its precision is 1.0 BY CONSTRUCTION (every
+    # promoted edge is in the trace it was learned from -- equations.md row 9
+    # C4a), so it is reported for shape only and is NOT evidence of quality and
+    # NOT part of the ranking. Kept because the held-out protocol is known to
+    # under-measure a deployed artifact: it cannot confirm the training fold's own
+    # edges, so promotion pays an unverifiable-precision tax it would not pay in
+    # production.
+    d_all = oracle.dispatches
+    rules_all = PROMOTE_MOD.learn_name_rules(d_all)
+    dep = CPG_MOD.build_cpg(files)
+    dep_static = set(dep.call_edges)
+    dep_promoted = PROMOTE_MOD.promote_mode_b(dep, rules_all)
+    PROMOTE_MOD.apply_promotion(dep, dep_promoted)
+    dep_dead = dep.dead_symbols(dunder_exempt=True)
+    rows["deployed_allfolds"] = dict(
+        promoted_edges=len(dep_promoted),
+        call_edges=len(dep.call_edges),
+        newly_promoted=sorted(map(list, dep_promoted - dep_static)),
+        struct_precision_dyn=round(
+            PROMOTE_MOD.precision_of(dep.call_edges, d_all), 4
+        ),
+        struct_recall_dyn=round(PROMOTE_MOD.recall_of(dep.call_edges, d_all), 4),
+        cpg_resolution_rate=round(dep.resolution_rate(), 4),
+        dead_predicted=sorted(dep_dead),
+        dead_code_acc=None,
+        dead_code_acc_upper=None,
+        harness_score=None,
+        harness_score_f1=None,
+        in_sample=True,
+        note="precision is 1.0 by construction; shape only, not a quality claim",
+    )
+    out["rows"] = rows
+    out["ranked_rows"] = [k for k, v in rows.items() if not v["in_sample"]]
+    out["harness_score"] = rows["mode_b"]["harness_score"]
+    out["token_cost_usd"] = 0.0
+    out["mermaid_validity_rate"] = mermaid_validity()
+    out["structural_f1_static"] = None
+    out["dead_code_acc"] = rows["mode_b"]["dead_code_acc"]
+    out["harness_score_f1"] = rows["mode_b"]["harness_score_f1"]
+    out["peak_ram_mb"] = rows["mode_b"]["peak_ram_mb"]
+    out["elapsed_s"] = round(time.time() - t_start, 2)
+    # The three rows share one process, so peak RSS is cumulative and the rows
+    # are not perfectly independent on the RAM sub-score. Stated, not hidden:
+    # the spread across rows is <0.5 pt against a 9.5 pt contribution.
+    out["caveat"] = "rows share one process; peak_ram_mb is cumulative"
+    return out
+
+
 def run_one(variation, repo):
+    if variation == "v3_trace_informed_cpg":
+        return run_v3(repo)
     tracemalloc.start()
     t0 = time.time()
     files = load_repo_files(repo)

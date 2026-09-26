@@ -1,0 +1,78 @@
+[
+  {
+    "variation": "v2_treesitter_cpg",
+    "repo": "synthetic_cpg_repo",
+    "files": 4,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": null,
+    "blast_latency_ms": 0.51,
+    "peak_ram_mb": 22.4,
+    "tracemalloc_kb": 99.1,
+    "token_cost_usd": 0.0,
+    "dead_code_acc": 0.3333,
+    "harness_score": 86.23,
+    "elapsed_s": 0.01,
+    "metric_def": "dynamic-oracle-v1",
+    "oracle_dispatches": 4,
+    "oracle_invoked": [
+      "repo.orphan_helper",
+      "routes.get_session",
+      "routes.get_user"
+    ],
+    "oracle_import_failed": {
+      "broken.py": "unparseable"
+    },
+    "cpg_resolution_rate": 0.5,
+    "cpg_unresolved": [
+      [
+        "repo",
+        "close"
+      ],
+      [
+        "repo",
+        "query"
+      ]
+    ],
+    "cpg_cycles": [],
+    "struct_precision_dyn": 1.0,
+    "struct_recall_dyn": 0.5,
+    "struct_false_edges": [],
+    "struct_missed": [
+      [
+        "repo.UserRepo.fetch",
+        "db.Session.query"
+      ],
+      [
+        "repo.orphan_helper",
+        "db.Session.close"
+      ]
+    ],
+    "dead_predicted": [
+      "db.Session.close",
+      "db.Session.query",
+      "repo.UserRepo.dead_method"
+    ],
+    "dead_confirmed": [
+      "repo.UserRepo.dead_method"
+    ],
+    "blast_symbols": 3,
+    "coarse_precision_v0_space": 0.2143,
+    "coarse_precision_cpg_space": 1.0,
+    "coarse_truth_size": 4,
+    "coarse_v0_size": 14
+  },
+  {
+    "variation": "v0_baseline_linear",
+    "repo": "synthetic_cpg_repo",
+    "files": 4,
+    "mermaid_validity_rate": 1.0,
+    "structural_f1_static": 0.5965,
+    "blast_latency_ms": 0.51,
+    "peak_ram_mb": 22.4,
+    "tracemalloc_kb": 19.7,
+    "token_cost_usd": 0.008,
+    "dead_code_acc": 0.5,
+    "harness_score": 77.45,
+    "elapsed_s": 0.0
+  }
+]

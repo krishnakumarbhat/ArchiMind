@@ -46,6 +46,10 @@ class CPG:
     call_edges: Set[Tuple[Symbol, Symbol]] = field(default_factory=set)
     import_edges: Set[Tuple[Symbol, Symbol]] = field(default_factory=set)
     unresolved: Set[Tuple[str, str]] = field(default_factory=set)  # (module, callee)
+    # (caller symbol, raw callee name) -- the promotion operator needs to know
+    # WHICH scope could not resolve the call, not just which module. `unresolved`
+    # is kept as the (module, name) projection so run-1/run-2 parity holds.
+    unresolved_calls: Set[Tuple[Symbol, str]] = field(default_factory=set)
     parse_errors: Set[str] = field(default_factory=set)
     symbols: Dict[Symbol, str] = field(default_factory=dict)  # symbol -> kind
     _adj: Dict[Symbol, Set[Symbol]] = field(default_factory=dict, repr=False)
@@ -375,6 +379,7 @@ def build_cpg(files: Dict[str, str]) -> CPG:
                 )
                 if callee is None or raw is None:
                     cpg.unresolved.add((module, raw or "<complex>"))
+                    cpg.unresolved_calls.add((sym, raw or "<complex>"))
                     continue
                 cpg.call_edges.add((sym, callee))
                 cpg.nodes.add(callee)
