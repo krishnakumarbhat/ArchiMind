@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CPG_MOD = importlib.import_module("src.00_cpg_static")
 DYN_MOD = importlib.import_module("src.01_dyn_oracle")
 PROMOTE_MOD = importlib.import_module("src.02_trace_promote")
+GATE_MOD = importlib.import_module("src.03_metric_gate")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("auto_research")
@@ -463,6 +464,10 @@ def run_v3(repo):
         f1 = 0.0 if prec + rec == 0 else 2 * prec * rec / (prec + rec)
         score_f1 = 30 * validity + 30 * f1 + 20 * d_strict + 10 * lat + 10 * ram
         ho = PROMOTE_MOD.heldout(cpg.call_edges, d_b, covered_b)
+        # Run 4: re-score the SAME row under the corrected metric definition.
+        # Both dead terms are emitted side by side -- the standing one and the
+        # certified one -- so the repair is visible as a delta, not asserted.
+        gate = GATE_MOD.assess(cpg, d_b, covered_b, validity, lat, ram)
         # Newly-added edges only. `promoted - cpg.call_edges` is always empty
         # because promotion was already applied -- the caller-blind split would
         # then report 0 recall for a mode that generalised perfectly.
@@ -488,8 +493,12 @@ def run_v3(repo):
             blast_latency_ms=round(blast_ms, 2),
             peak_ram_mb=round(peak, 2),
             harness_score=round(score, 2),
-            harness_score_f1=round(score_f1, 2),
+            # RETRACTED in run 4: F1 mixes in a recall term that is not a
+            # sound bound against a partial oracle (equations.md row 16). Kept
+            # in the log at its run-3 value so the retraction is auditable.
+            harness_score_f1_RETRACTED=round(score_f1, 2),
             in_sample=False,
+            **gate,
         )
     # Deployment-shaped row: what a real deployment emits, with the rule learned
     # from ALL available traces. Its precision is 1.0 BY CONSTRUCTION (every
@@ -519,18 +528,52 @@ def run_v3(repo):
         dead_code_acc=None,
         dead_code_acc_upper=None,
         harness_score=None,
-        harness_score_f1=None,
+        harness_score_f1_RETRACTED=None,
+        harness_score_v3=None,
         in_sample=True,
         note="precision is 1.0 by construction; shape only, not a quality claim",
     )
     out["rows"] = rows
     out["ranked_rows"] = [k for k, v in rows.items() if not v["in_sample"]]
     out["harness_score"] = rows["mode_b"]["harness_score"]
+    out["metric_def_v3"] = "certified-dead-v3"
+    out["max_score_v3"] = GATE_MOD.MAX_GATED_SCORE
+    out["harness_score_v3"] = rows["mode_b"]["harness_score_v3"]
+    out["ranking_v3"] = sorted(
+        (k for k in out["ranked_rows"]),
+        key=lambda k: -rows[k]["harness_score_v3"],
+    )
+    out["ranking_standing"] = sorted(
+        (k for k in out["ranked_rows"]),
+        key=lambda k: -rows[k]["harness_score"],
+    )
+    # The repair's whole arithmetic claim: the 20 dead points were contributing
+    # EXACTLY zero, so deleting them changes no row's score and only changes
+    # the scale. Verified by subtraction, not asserted.
+    out["score_unchanged_by_repair"] = all(
+        abs(rows[k]["harness_score"] - rows[k]["harness_score_v3"]
+            - 20 * rows[k]["dead_code_acc_strict"]) < 1e-9
+        for k in out["ranked_rows"]
+    )
+    # ...and the honest caveat that outranks the caveat: the variants are NOT
+    # separable by any sound structural term on this fixture, so neither
+    # ranking may be acted on.
+    out["ranking_identifiable"] = all(
+        rows[k]["structural_identifiable"] for k in out["ranked_rows"]
+    )
+    out["ranking_caveat"] = (
+        "NOT identifiable: precision is a sound lower bound but conflates "
+        "'wrong' with 'unjudged'. Evaluable precision is 1.0 for every row, so "
+        "no sound structural term ranks these variants. The ordering below is "
+        "produced entirely by edges the oracle never adjudicated."
+    )
     out["token_cost_usd"] = 0.0
     out["mermaid_validity_rate"] = mermaid_validity()
     out["structural_f1_static"] = None
     out["dead_code_acc"] = rows["mode_b"]["dead_code_acc"]
-    out["harness_score_f1"] = rows["mode_b"]["harness_score_f1"]
+    out["harness_score_f1_RETRACTED"] = rows["mode_b"][
+        "harness_score_f1_RETRACTED"
+    ]
     out["peak_ram_mb"] = rows["mode_b"]["peak_ram_mb"]
     out["elapsed_s"] = round(time.time() - t_start, 2)
     # The three rows share one process, so peak RSS is cumulative and the rows
@@ -552,6 +595,25 @@ def run_one(variation, repo):
         p_imp, p_call = naive_regex_edges(files)
         validity = mermaid_validity()
         tokens_usd = 0.002 * len(files)
+        # Run 4: v0's dead_code_acc is a HARDCODED 0.5 (see the
+        # `synthetic_bad_repo` special case below), so it is not a measurement
+        # at all -- a strictly worse defect than run 2's, which at least
+        # measured something. It carries no certification and is removed from
+        # the gated scale for the same reason as the others.
+        dyn["assessment_v3"] = {
+            "dead_predicted": None,
+            "dead_certified": [],
+            "dead_unadjudicable": None,
+            "dead_term_v3": 0.0,
+            "dead_code_acc_strict": None,
+            "dead_term_defect": "hardcoded constant, not measured",
+            "n_certified": 0,
+            "n_predicted_dead": None,
+            "structural_identifiable": False,
+            "harness_score_v3": None,
+            "max_score_v3": GATE_MOD.MAX_GATED_SCORE,
+            "in_sample": True,
+        }
     elif variation == "v2_treesitter_cpg":
         cpg = CPG_MOD.build_cpg(files)
         oracle = DYN_MOD.run_oracle(files)
@@ -601,6 +663,18 @@ def run_one(variation, repo):
         dead_acc = (
             len(dyn["dead_confirmed"]) / len(dead_pred) if dead_pred else 1.0
         )
+        # Run 4: v2 under the corrected definition. The full oracle is its own
+        # single fold, so this row is IN-SAMPLE and is not comparable to the
+        # held-out rows -- it is here to show what the 20 removed points were
+        # contributing, not to be ranked against anything.
+        peak_pre = peak_rss_mb()
+        lat_pre = max(0.0, 1 - blast_ms / 2000)
+        ram_pre = max(0.0, 1 - peak_pre / 512)
+        dyn["assessment_v3"] = dict(
+            GATE_MOD.assess(cpg, oracle.dispatches, oracle.covered_symbols(),
+                            1.0, lat_pre, ram_pre),
+            in_sample=True,
+        )
     else:
         # Placeholders driver iterations replace with real variation impls.
         p_imp, p_call = naive_regex_edges(files)
@@ -636,6 +710,11 @@ def run_one(variation, repo):
         "elapsed_s": round(time.time() - t0, 2),
     }
     out.update(dyn)
+    if variation == "v2_treesitter_cpg":
+        v3 = dyn["assessment_v3"]
+        out["metric_def_v3"] = "certified-dead-v3"
+        out["harness_score_v3"] = v3["harness_score_v3"]
+        out["max_score_v3"] = GATE_MOD.MAX_GATED_SCORE
     return out
 
 
