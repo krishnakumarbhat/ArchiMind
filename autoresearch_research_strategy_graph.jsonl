@@ -5,3 +5,9 @@
 {"type": "edge", "from": "N0", "to": "N2", "kind": "branch"}
 {"type": "node", "id": "N3", "strategy": "frontier: v2 deterministic treesitter CPG", "parent": "N0", "status": "frontier", "metric": 0.0, "timestamp": 1758840600}
 {"type": "edge", "from": "N0", "to": "N3", "kind": "branch"}
+{"type": "node", "id": "N3", "strategy": "frontier: v2 deterministic CPG", "parent": "N0", "status": "kept", "metric": 86.23, "metric_def": "dynamic-oracle-v1", "timestamp": 1790362130}
+{"type": "edge", "from": "N0", "to": "N3", "kind": "branch", "note": "expanded run 2"}
+{"type": "node", "id": "N4", "strategy": "frontier: v3 trace-informed edge promotion (bind cpg_unresolved to trace dispatches)", "parent": "N3", "status": "frontier", "metric": 0.0, "rationale": "run-2 evidence: recall 0.5, dead_code_acc 0.333, resolution 0.5 all share one root cause (attribute-on-instance calls); 30 F1 points gated behind it", "timestamp": 1790362130}
+{"type": "edge", "from": "N3", "to": "N4", "kind": "derived"}
+{"type": "node", "id": "N2", "strategy": "frontier: v1 evaluator-optimizer reflection", "parent": "N0", "status": "deprioritised", "metric": 0.0, "rationale": "run-2 potency audit: v0 already scores mermaid_validity_rate=1.0 on the fixture, so reflection is provably worth 0 of 100 points and costs tokens; requeue against a fixture that actually fails validation", "timestamp": 1790362130}
+{"type": "edge", "from": "N0", "to": "N2", "kind": "branch", "note": "not expanded; reason recorded"}
