@@ -131,3 +131,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+# autoresearch web-fetch cache (runtime artifact, same class as .autoresearch-loop.log)
+webcache/
