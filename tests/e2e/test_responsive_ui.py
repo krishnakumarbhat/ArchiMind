@@ -27,10 +27,10 @@ def server():
     app.config.update(TESTING=True)
     with app.app_context():
         db.create_all()
-    httpd = make_server("127.0.0.1", 5123, app)
+    httpd = make_server("127.0.0.1", 5124, app)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
-    yield "http://127.0.0.1:5123"
+    yield "http://127.0.0.1:5124"
     httpd.shutdown()
 
 

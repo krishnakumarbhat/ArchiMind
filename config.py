@@ -24,6 +24,8 @@ def _get_bool(name: str, default: bool) -> bool:
 
 
 def _normalize_database_url(raw_url: str) -> str:
+    if "://" not in raw_url:
+        return SQLITE_URL  # ponytail: schemeless values (tokens, bare paths) are never valid DB URLs
     if raw_url.startswith("postgres://"):
         return f"postgresql+psycopg://{raw_url[len('postgres://'):]}"
 

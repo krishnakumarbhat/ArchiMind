@@ -1,4 +1,6 @@
 """Context-scoped technical handbook builder (CPG-grounded prompt context)."""
+from __future__ import annotations
+
 import logging
 from typing import Any, Callable, Dict
 

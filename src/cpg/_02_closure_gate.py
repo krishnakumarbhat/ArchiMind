@@ -1,4 +1,6 @@
 """Base-class inheritance closure gate (no hand-curated allowlists)."""
+from __future__ import annotations
+
 from typing import Any, Dict, List, Set
 
 import networkx as nx

@@ -1,4 +1,6 @@
 """Structural Clean Architecture rule verifier (3 invariants)."""
+from __future__ import annotations
+
 from typing import Any, Dict, List
 
 import networkx as nx
