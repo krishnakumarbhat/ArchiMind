@@ -110,7 +110,11 @@ class AnalysisWorker:
         try:
             obj = json.loads(self._clean_json_response(raw or ""))
             code = obj.get("mermaid_code", "") if isinstance(obj, dict) else ""
-            return code if isinstance(code, str) else ""
+            if not isinstance(code, str):
+                return ""
+            from src.orchestration._01_eval_optimizer import normalize_mermaid
+
+            return normalize_mermaid(code)
         except (json.JSONDecodeError, AttributeError):
             return ""
 
@@ -255,7 +259,11 @@ class AnalysisWorker:
             parsed = json.loads(normalized)
             if isinstance(parsed, dict):
                 if isinstance(parsed.get("mermaid_code"), str):
-                    parsed["mermaid_code"] = self._sanitize_mermaid_code(parsed["mermaid_code"])
+                    from src.orchestration._01_eval_optimizer import normalize_mermaid
+
+                    parsed["mermaid_code"] = self._sanitize_mermaid_code(
+                        normalize_mermaid(parsed["mermaid_code"])
+                    )
                 return {"status": "ok", "graph": parsed}
 
             return {
