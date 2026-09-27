@@ -222,7 +222,6 @@ class ArchiMindApplication:
     def _register_routes(self):
         """Registers all application routes."""
         self.app.route("/")(self._landing)
-        self.app.route("/workbench")(self._index)  # legacy workbench, kept for compat
         self.app.route("/workspace")(self._workspace)
         self.app.route("/workspace/<path:ref>")(self._workspace)
         self.app.route("/doc")(self._documentation)
@@ -234,6 +233,7 @@ class ArchiMindApplication:
         self.app.route("/api/chat", methods=["POST"])(self._api_chat)
         self.app.route("/api/challenge")(self._api_challenge)
         self.app.route("/api/golden")(self._api_golden)
+        self.app.route("/api/golden/<golden_id>")(self._api_golden_detail)
         self.app.route("/api/blast-radius")(self._api_blast_radius)
         self.app.route("/api/history")(self._logout_required(self._api_get_history))
         self.app.route("/api/history/<int:repo_id>")(self._logout_required(self._api_get_repository_details))
@@ -250,9 +250,6 @@ class ArchiMindApplication:
 
     def _workspace(self, ref=None):
         return render_template("02_studio.html", user=current_user, ref=ref or "")
-
-    def _index(self):
-        return render_template("index.html", user=current_user)
 
     def _documentation(self):
         analysis_id = request.args.get("analysis_id", type=int)
@@ -422,17 +419,18 @@ class ArchiMindApplication:
 
     def _load_cpg_artifact(self, golden_id, analysis_id):
         """Load a compact CPG artifact from golden cache or a completed analysis."""
-        from src.config._00_settings import SETTINGS
-        from src.storage._00_sqlite_cache import CacheStore
-
         if golden_id:
-            doc = CacheStore(os.path.join(SETTINGS.data_path, "golden.db")).get(f"golden:{golden_id}")
-            return (doc or {}).get("cpg_artifact")
+            from src.storage._01_golden_repos import load_golden
+
+            return (load_golden(golden_id) or {}).get("cpg_artifact")
         if analysis_id:
             try:
-                with open(self._status_file_for_analysis(analysis_id), "r", encoding="utf-8") as handle:
+                safe_id = int(analysis_id)  # blocks path traversal via string ids
+                with open(self._status_file_for_analysis(safe_id), "r", encoding="utf-8") as handle:
                     status = json.load(handle)
                 return (status.get("result") or {}).get("cpg_artifact")
+            except (ValueError, TypeError):
+                return None
             except (FileNotFoundError, json.JSONDecodeError):
                 return None
         return None
@@ -447,7 +445,7 @@ class ArchiMindApplication:
         )
         if not artifact:
             return jsonify({"error": "No architecture graph available. Analyze the repo first or use a golden demo."}), 404
-        challenge = generate_challenge(from_compact(artifact))
+        challenge = generate_challenge(from_compact(artifact), index=request.args.get("n", default=0, type=int))
         if not challenge:
             return jsonify({"error": "No untested seams found — this codebase is well covered."}), 404
         return jsonify({"challenge": challenge})
@@ -479,20 +477,32 @@ class ArchiMindApplication:
                 return jsonify({"error": "Assistant limit reached (5 questions). Please login to continue."}), 403
             session["chat_count"] = used + 1
 
-        artifact = self._load_cpg_artifact((payload.get("golden") or "").strip(), payload.get("analysis_id"))
+        golden_id = (payload.get("golden") or "").strip()
+        artifact = self._load_cpg_artifact(golden_id, payload.get("analysis_id"))
+        tools_used = []
         tool_note = ""
-        if artifact:
-            graph = from_compact(artifact)
+        graph = from_compact(artifact) if artifact else None
+        if graph is not None:
+            names = {str(d.get("name") or "").split(".")[-1]: str(d.get("name")) for _, d in graph.nodes(data=True)}
+            tokens = re.findall(r"[A-Za-z_][\w.]*", question)
+            symbol = next((t for t in tokens if t.split(".")[-1] in names and len(t) > 2), "")
             lowered = question.lower()
-            impact_match = re.search(r"impact(?: of |:)?([A-Za-z_][\w.]*)", lowered)
-            if "blast" in lowered or impact_match:
-                symbol = impact_match.group(1) if impact_match else lowered.split()[-1]
-                tool_note = f"\nTOOL trace_symbol_impact({symbol}): {trace_symbol_impact(symbol, graph)}\n"
-            elif "invariant" in lowered or "rule" in lowered or "clean architecture" in lowered:
-                tool_note = f"\nTOOL verify_architecture_rules: {verify_architecture_rules(graph)}\n"
-            elif "signature" in lowered or "definition of" in lowered:
-                symbol = lowered.split()[-1].strip("?.")
-                tool_note = f"\nTOOL get_symbol_ast({symbol}): {get_symbol_ast(symbol, graph)}\n"
+            calls = []
+            if symbol and re.search(r"impact|blast|affect|break|depend|change|caller|who uses", lowered):
+                calls.append(("trace_symbol_impact", symbol, trace_symbol_impact(symbol, graph)))
+            if re.search(r"invariant|rule|layer|cycle|clean architecture|violat", lowered):
+                calls.append(("verify_architecture_rules", "", verify_architecture_rules(graph)))
+            if symbol and not calls:
+                calls.append(("get_symbol_ast", symbol, get_symbol_ast(symbol, graph)))
+            for name, arg, result in calls:
+                if name == "trace_symbol_impact":
+                    summary = f"{result['edges']} impacted: " + ", ".join(result["impacted"][:8])
+                elif name == "verify_architecture_rules":
+                    summary = ", ".join(f"{r['id']}={'pass' if r['passed'] else 'FAIL'}" for r in result["rules"])
+                else:
+                    summary = f"{len(result['matches'])} match(es); called by {len(result['called_by'])}"
+                tools_used.append({"tool": name, "input": arg, "summary": summary})
+                tool_note += f"\nTOOL {name}({arg}) -> {json.dumps(result)[:1500]}\n"
 
         vector_service = VectorStoreService(
             db_path=config.VECTOR_STORE_PATH,
@@ -500,53 +510,51 @@ class ArchiMindApplication:
             embedding_model=config.EMBEDDING_MODEL,
             repo_url=repo_url,
         )
-        if vector_service.is_empty():
-            if tool_note:
-                return jsonify({"answer": scrub(tool_note.strip()), "engine": engine_label(), "tools": True})
+        context = ""
+        if not vector_service.is_empty():
+            context = vector_service.query_similar_documents(question, n_results=10) or ""
+        if not context and graph is not None:
+            from src.orchestration._02_doc_synthesizer import cpg_context_block
+            from src.storage._01_golden_repos import load_golden
+
+            handbook = str((load_golden(golden_id) or {}).get("chat_response", ""))[:3000] if golden_id else ""
+            context = cpg_context_block(graph) + "\n\nHANDBOOK:\n" + handbook
+        if not context:
             return jsonify({"error": "No index found for this repository. Analyze it first."}), 404
 
-        context = vector_service.query_similar_documents(question, n_results=10)
-        if not context:
-            return jsonify({"error": "No relevant context was found for that question."}), 404
-
         documentation_service = self._build_documentation_service()
-        answer = documentation_service.generate_chat_answer(tool_note + context, repo_name, question)
-        return jsonify({"answer": scrub(answer), "engine": engine_label()})
+        try:
+            answer = documentation_service.generate_chat_answer(tool_note + context, repo_name, question)
+        except Exception as exc:  # model outage must not hide deterministic tool results
+            self.app.logger.warning("Chat generation failed: %s", exc)
+            answer = "Here is what the code graph shows:\n" + "\n".join(t["summary"] for t in tools_used)
+        return jsonify({"answer": scrub(answer), "engine": engine_label(), "tools_used": tools_used})
 
     def _api_golden(self):
-        """Serve instant pre-computed golden demos (no analysis run needed)."""
-        from src.config._00_settings import SETTINGS
-        from src.storage._00_sqlite_cache import CacheStore
+        """Light list of bundled golden demos (no graph payload)."""
         from src.storage._01_golden_repos import list_golden
 
-        store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
-        return jsonify({"golden": list_golden(store)})
+        return jsonify({"golden": list_golden()})
+
+    def _api_golden_detail(self, golden_id):
+        """Full golden workspace (diagrams, handbook, invariants) minus the raw CPG."""
+        from src.storage._01_golden_repos import load_golden, public_view
+
+        doc = load_golden(golden_id)
+        if not doc:
+            return jsonify({"error": "Unknown demo."}), 404
+        return jsonify(public_view(doc))
 
     def _api_blast_radius(self):
-        """Downstream impact of a symbol from a golden or completed analysis CPG."""
-        from src.config._00_settings import SETTINGS
+        """Transitive impact (callers, instantiators, subclasses) of changing a symbol."""
         from src.governance._00_blast_radius import impact
-        from src.storage._00_sqlite_cache import CacheStore
 
-        symbol = (request.args.get("symbol") or "").strip()
+        symbol = (request.args.get("symbol") or "").strip()[:120]
         if not symbol:
             return jsonify({"error": "Query parameter 'symbol' is required."}), 400
-
-        artifact = None
-        golden_id = (request.args.get("golden") or "").strip()
-        analysis_id = request.args.get("analysis_id", type=int)
-        if golden_id:
-            store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
-            doc = store.get(f"golden:{golden_id}")
-            if doc:
-                artifact = doc.get("cpg_artifact")
-        elif analysis_id:
-            try:
-                with open(self._status_file_for_analysis(analysis_id), "r", encoding="utf-8") as handle:
-                    status = json.load(handle)
-                artifact = (status.get("result") or {}).get("cpg_artifact")
-            except (FileNotFoundError, json.JSONDecodeError):
-                artifact = None
+        artifact = self._load_cpg_artifact(
+            (request.args.get("golden") or "").strip(), request.args.get("analysis_id", type=int)
+        )
         if not artifact:
             return jsonify({"error": "No architecture graph available. Analyze the repo first or use a golden demo."}), 404
         return jsonify(impact(symbol, artifact))
@@ -578,7 +586,7 @@ class ArchiMindApplication:
             if user and user.password and check_password_hash(user.password, password_value):
                 flash("Logged in successfully!", category="success")
                 login_user(user, remember=True)
-                return redirect(url_for("_index"))
+                return redirect(url_for("_landing"))
             if user:
                 flash("Incorrect password, try again.", category="error")
             else:
@@ -588,7 +596,7 @@ class ArchiMindApplication:
 
     def _logout(self):
         logout_user()
-        return redirect(url_for("_index"))
+        return redirect(url_for("_landing"))
 
     def _sign_up(self):
         if request.method == "POST":
@@ -617,7 +625,7 @@ class ArchiMindApplication:
                 db.session.commit()
                 login_user(new_user, remember=True)
                 flash("Account created successfully!", category="success")
-                return redirect(url_for("_index"))
+                return redirect(url_for("_landing"))
 
         return render_template("sign_up.html", user=current_user)
 

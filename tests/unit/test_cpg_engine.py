@@ -38,11 +38,30 @@ def test_builder_precision_no_false_edges():
             assert g.nodes[v].get("name") in declared
 
 
-def test_blast_radius_traces_downstream():
-    """get_user change impacts UserRepo.fetch; dead code impacts nothing."""
+def test_blast_radius_is_reverse_reachability():
+    """Changing UserRepo.fetch affects its caller get_user; dead code affects nothing."""
     g = build_graph(FILES)
-    assert any(n.endswith("UserRepo::fetch") for n in blast_radius(g, "get_user"))
+    assert any(n.endswith("get_user") for n in blast_radius(g, "UserRepo.fetch"))
     assert blast_radius(g, "dead_method") == []
+
+
+def test_self_calls_bind_to_owner_class():
+    """self.helper() resolves to the same class only, not every helper in the corpus."""
+    files = {
+        "a.py": "class A:\n    def run(self):\n        return self.helper()\n    def helper(self): return 1\n",
+        "b.py": "class B:\n    def helper(self): return 2\n",
+    }
+    g = build_graph(files)
+    assert any(n.endswith("A::run") for n in blast_radius(g, "A.helper"))
+    assert blast_radius(g, "B.helper") == []
+
+
+def test_typescript_extraction():
+    """TS classes, methods, extends and imports are extracted via tree-sitter."""
+    src = "import { Base } from './base.js';\nexport class Runner extends Base {\n  start() { return this.step(); }\n  step() { return 1; }\n}\nexport function boot() { return new Runner().start(); }\n"
+    m = extract_module(src, "runner.ts")
+    assert m.classes == {"Runner": ["Base"]} and m.methods["Runner"] == ["start", "step"]
+    assert "boot" in m.functions and m.imports["Base"] == "./base.js"
 
 
 def test_closure_withholds_out_of_corpus_protocol():
@@ -61,7 +80,7 @@ def test_compact_roundtrip():
     g = build_graph(FILES)
     g2 = from_compact(to_compact(g))
     assert g2.number_of_nodes() == g.number_of_nodes()
-    assert blast_radius(g2, "get_user") == blast_radius(g, "get_user")
+    assert blast_radius(g2, "UserRepo.fetch") == blast_radius(g, "UserRepo.fetch")
 
 
 def test_invariants_shape():
@@ -111,5 +130,5 @@ def test_tarball_url_rejects_non_github():
 
 def test_impact_report_shape_and_timing():
     """Blast API helper returns names, count, and sub-second timing."""
-    rep = impact("get_user", to_compact(build_graph(FILES)))
-    assert rep["symbol"] == "get_user" and rep["edges"] >= 1 and rep["ms"] < 1000
+    rep = impact("UserRepo.fetch", to_compact(build_graph(FILES)))
+    assert rep["symbol"] == "UserRepo.fetch" and rep["edges"] >= 1 and rep["ms"] < 1000

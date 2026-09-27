@@ -5,8 +5,7 @@ import tempfile
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
-from services import DocumentationService, VectorStoreService, _SimpleCollection
-from services import RepositoryService
+from services import DocumentationService, RepositoryService, VectorStoreService, _SimpleCollection
 
 
 def test_simple_collection_add_and_query():

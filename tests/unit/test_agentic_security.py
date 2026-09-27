@@ -37,7 +37,7 @@ def test_scrubber_masks_fingerprints():
 def test_tools_answer_from_graph():
     """Tool calls resolve deterministically against the CPG."""
     g = build_graph(FILES)
-    hit = trace_symbol_impact("go", g)
+    hit = trace_symbol_impact("A.m", g)
     assert hit["tool"] == "trace_symbol_impact" and hit["edges"] >= 1
     rules = verify_architecture_rules(g)
     assert rules["tool"] == "verify_architecture_rules" and "rules" in rules

@@ -51,3 +51,10 @@
   .search .btn { width: 100%; }
   .cards { grid-template-columns: minmax(0, 1fr); }
 }
+.btn { background: var(--accent); color: #04121c; border: 0; border-radius: 999px; padding: 0.8rem 1.3rem;
+  font-weight: 600; font-size: var(--fs-sm); cursor: pointer; transition: transform 0.12s ease; }
+.btn:active { transform: scale(0.97); }
+.status-card { margin-top: 0.8rem; color: var(--muted); font-size: var(--fs-sm); }
+.skeleton { border-radius: 12px; background: linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 50%, var(--panel) 75%);
+  background-size: 200% 100%; animation: shimmer 1.2s infinite linear; }
+@keyframes shimmer { to { background-position: -200% 0; } }

@@ -1,42 +1,47 @@
-/* 02_studio_tabs.js — tab switching + drawer/backdrop/Escape (transform-only CSS). */
+/* 02_studio_tabs.js — tabs + off-canvas drawers (assistant, TOC) with backdrop/Escape. */
 (function (global) {
   "use strict";
+  var DRAWERS = ["chat-open", "toc-open"];
 
-  function closeDrawers() {
-    document.body.classList.remove("nav-open");
+  function sync() {
     var bd = document.getElementById("backdrop");
-    if (bd) bd.classList.remove("show");
+    var open = DRAWERS.some(function (c) { return document.body.classList.contains(c); });
+    if (bd) bd.classList.toggle("show", open);
   }
-
+  function closeDrawers() {
+    DRAWERS.forEach(function (c) { document.body.classList.remove(c); });
+    sync();
+  }
+  function open(cls) {
+    closeDrawers();
+    document.body.classList.add(cls);
+    sync();
+  }
+  function show(tab) {
+    document.querySelectorAll(".tabs button").forEach(function (x) {
+      x.classList.toggle("active", x.dataset.stab === tab);
+    });
+    document.querySelectorAll(".tabpage").forEach(function (p) {
+      p.classList.toggle("active", p.dataset.page === tab);
+    });
+    closeDrawers();
+    document.dispatchEvent(new CustomEvent("studio:tab", { detail: tab }));
+  }
   function init() {
     document.querySelectorAll(".tabs button").forEach(function (b) {
-      b.addEventListener("click", function () {
-        document.querySelectorAll(".tabs button").forEach(function (x) {
-          x.classList.toggle("active", x === b);
-        });
-        document.querySelectorAll(".tabpage").forEach(function (p) {
-          p.classList.toggle("active", p.dataset.page === b.dataset.stab);
-        });
-        closeDrawers();
-      });
+      b.addEventListener("click", function () { show(b.dataset.stab); });
     });
-    var nav = document.getElementById("studioNavToggle");
-    if (nav) {
-      nav.addEventListener("click", function () {
-        document.body.classList.toggle("nav-open");
-        var bd = document.getElementById("backdrop");
-        if (bd) bd.classList.toggle("show", document.body.classList.contains("nav-open"));
-      });
-    }
+    var fab = document.getElementById("chatFab");
+    if (fab) fab.addEventListener("click", function () { open("chat-open"); });
+    var close = document.getElementById("chatClose");
+    if (close) close.addEventListener("click", closeDrawers);
+    var toc = document.getElementById("tocBtn");
+    if (toc) toc.addEventListener("click", function () { open("toc-open"); });
     var bd = document.getElementById("backdrop");
     if (bd) bd.addEventListener("click", closeDrawers);
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeDrawers();
-    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDrawers(); });
     var mq = window.matchMedia("(min-width: 1024px)");
-    function onChange(e) { if (e.matches) closeDrawers(); }
-    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    if (mq.addEventListener) mq.addEventListener("change", function (e) { if (e.matches) closeDrawers(); });
   }
-
-  global.StudioTabs = { init: init, closeDrawers: closeDrawers };
+  global.StudioTabs = { init: init, show: show, open: open, closeDrawers: closeDrawers };
 })(window);

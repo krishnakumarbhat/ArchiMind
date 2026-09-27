@@ -56,7 +56,7 @@ def google_callback():
         
         if not user_info:
             flash('Failed to get user information from Google.', 'error')
-            return redirect(url_for('_index'))
+            return redirect(url_for('_landing'))
         
         # Check if user exists
         user = User.query.filter_by(oauth_id=user_info['sub']).first()
@@ -84,11 +84,11 @@ def google_callback():
         # Log in the user
         login_user(user, remember=True)
         flash('Logged in successfully with Google!', 'success')
-        return redirect(url_for('_index'))
+        return redirect(url_for('_landing'))
         
     except Exception as e:
         flash(f'Authentication failed: {str(e)}', 'error')
-        return redirect(url_for('_index'))
+        return redirect(url_for('_landing'))
 
 
 # ============ Local Caching Functions ============

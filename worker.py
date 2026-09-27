@@ -402,13 +402,19 @@ class AnalysisWorker:
             )
             cpg_artifact: dict = {}
             invariant_results: list = []
+            cpg_diagrams: Dict[str, str] = {}
             try:
+                from src.config._01_constants import CPG_EXTENSIONS
                 from src.cpg._01_cpg_builder import build_graph, to_compact
                 from src.governance._01_invariants import check_invariants
                 from src.orchestration._02_doc_synthesizer import cpg_context_block
+                from src.orchestration._03_cpg_diagrams import flow as cpg_flow
+                from src.orchestration._03_cpg_diagrams import hld as cpg_hld
+                from src.orchestration._03_cpg_diagrams import lld as cpg_lld
 
-                py_files = {k: v for k, v in file_contents.items() if k.endswith(".py")}
-                cpg = build_graph(dict(list(py_files.items())[:300]))
+                src_files = {k: v for k, v in file_contents.items() if k.endswith(CPG_EXTENSIONS)}
+                cpg = build_graph(dict(list(src_files.items())[:300]))
+                cpg_diagrams = {"hld": cpg_hld(cpg), "lld": cpg_lld(cpg), "flow": cpg_flow(cpg)}
                 context = cpg_context_block(cpg) + "\n\nRETRIEVED CONTEXT:\n" + context
                 nodes = cpg.number_of_nodes()
                 if nodes > 5000:  # ponytail: cap status payload; analysis itself used the full graph
@@ -439,9 +445,19 @@ class AnalysisWorker:
             )
             docs, repair_log = self._generate_with_repair(doc_service, context, repo_name)
 
-            hld_result = self._parse_graph_data(docs.get("hld"), "HLD")
-            lld_result = self._parse_graph_data(docs.get("lld"), "LLD")
-            flow_result = self._parse_graph_data(docs.get("flow"), "Flow")
+            from src.orchestration._01_eval_optimizer import validate_mermaid
+
+            parsed = {}
+            for kind, label in (("hld", "HLD"), ("lld", "LLD"), ("flow", "Flow")):
+                res = self._parse_graph_data(docs.get(kind), label)
+                code = ((res.get("graph") or {}).get("mermaid_code") or "") if res.get("status") == "ok" else ""
+                if (not code or validate_mermaid(code)) and cpg_diagrams.get(kind):
+                    # guaranteed-valid fallback: diagram rebuilt from the code graph
+                    res = {"status": "ok", "graph": {"title": label, "description": "Rebuilt from the code graph.",
+                                                     "mermaid_code": cpg_diagrams[kind]}}
+                    repair_log[kind] = 0
+                parsed[kind] = res
+            hld_result, lld_result, flow_result = parsed["hld"], parsed["lld"], parsed["flow"]
 
             status["status"] = "completed"
             status["stage"] = "completed"
@@ -461,6 +477,7 @@ class AnalysisWorker:
                 "repair_log": repair_log,
                 "cpg_artifact": cpg_artifact,
                 "invariants": invariant_results,
+                "cpg_diagrams": cpg_diagrams,
             }
 
             self._update_database_log(analysis_log_id, "completed")

@@ -2,7 +2,6 @@
 {% block title %}ArchiMind — Understand Any Codebase{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/01_landing.css') }}">
-<script src="{{ url_for('static', filename='js/00_app.js') }}" defer></script>
 {% endblock %}
 {% block body %}
 <header class="mini-top">
@@ -20,8 +19,8 @@
   <h1>Understand any codebase in minutes</h1>
   <p class="sub">Architecture diagrams, handbooks, and impact tracing — grounded in the code graph.</p>
   <form class="search" id="landingForm">
-    <input id="landingUrl" type="url" placeholder="Paste any public GitHub URL (e.g., https://github.com/psf/requests)" autocomplete="off">
-    <button class="btn" type="submit">⚡ Analyze Architecture</button>
+    <input id="landingUrl" type="url" placeholder="Paste any GitHub URL (e.g., https://github.com/pytorch/pytorch)" autocomplete="off">
+    <button class="btn" type="submit">⚡ Analyze</button>
   </form>
   <div class="status-card" id="landingNotice" style="display:none"></div>
   <section class="showcase">
@@ -53,7 +52,9 @@
       a.href = "/workspace/golden:" + encodeURIComponent(g.id);
       var t = document.createElement("b"); t.textContent = g.title || g.name || g.id;
       var s = document.createElement("span"); s.textContent = g.subtitle || g.description || "";
-      var c = document.createElement("em"); c.textContent = g.cached ? "Instant demo →" : "Builds on first open →";
+      var st = g.stats || {};
+      var c = document.createElement("em");
+      c.textContent = g.cached ? (st.files ? st.files + " files · " + st.classes + " classes · open instantly →" : "Open instantly →") : "Unavailable";
       a.appendChild(t); a.appendChild(s); a.appendChild(c);
       wrap.appendChild(a);
     });
