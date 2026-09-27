@@ -16,7 +16,31 @@ logger = logging.getLogger(__name__)
 
 GenerateFn = Callable[[str, str, str, Optional[str]], str]  # (kind, repo, ctx, err) -> mermaid
 
-_MERMAID_BAD = re.compile(r"```|<script|-->.*-->|\{\{|\}\}|\[\[|\]\]|#\w")
+_MERMAID_BAD = re.compile(r"```|<script|\{\{|\}\}|\[\[|\]\]|#(?!\d+;)")
+
+_PAREN_IN_LABEL = re.compile(r"\[[^\[\]\n]*[()][^\[\]\n]*\]")
+_SUBGRAPH_TITLE = re.compile(r"(?m)^\s*subgraph\s+([A-Za-z0-9_]+)\s+\[([^\]]+)\]")
+
+
+def normalize_mermaid(code: str) -> str:
+    """Make LLM output parseable before validation.
+
+    - Unescape literal backslash-n sequences (double-encoded JSON payloads).
+    - Quote bare subgraph titles: v11 rejects `subgraph Id [Words Here]`.
+    - Entity-encode parentheses inside [...] labels: v11 flowchart chokes on
+      `Init[init()]` (expects shape-end, finds `)`).
+    """
+    text = (code or "").replace("\\r\n", "\n").replace("\\n", "\n").replace("\r\n", "\n")
+
+    def _parens(match: re.Match[str]) -> str:
+        return match.group(0).replace("(", "#40;").replace(")", "#41;")
+
+    lines = text.split("\n")
+    head = lines[0].strip() if lines else ""
+    if head.startswith(("graph ", "flowchart ")):
+        text = _PAREN_IN_LABEL.sub(_parens, text)
+        text = _SUBGRAPH_TITLE.sub(lambda m: f"subgraph {m.group(1)}[{m.group(2)}]", text)
+    return text
 
 
 def validate_mermaid(code: str) -> str:
@@ -24,9 +48,17 @@ def validate_mermaid(code: str) -> str:
     text = (code or "").strip()
     if not text:
         return "empty diagram"
+    if "\\n" in text and "\n" not in text:
+        return "escaped newlines: payload needs unescaping, not reflection"
     first = text.splitlines()[0].strip()
     if not first.startswith(("graph ", "flowchart ", "sequenceDiagram", "classDiagram", "stateDiagram")):
         return f"bad header: {first[:60]!r}"
+    if text.count("[") != text.count("]"):
+        return "unbalanced square brackets"
+    if text.count("(") != text.count(")"):
+        return "unbalanced parentheses"
+    if first.startswith(("graph ", "flowchart ")) and _PAREN_IN_LABEL.search(text):
+        return "parentheses inside [] label break the flowchart parser"
     bad = _MERMAID_BAD.search(text)
     if bad:
         return f"illegal token near: {text[max(0, bad.start()-20):bad.end()+20]!r}"

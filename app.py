@@ -350,6 +350,15 @@ class ArchiMindApplication:
 
             analysis_log = query.first()
             if not analysis_log:
+                # ponytail: completed analyses are shareable (public repo results);
+                # in-flight work stays session-scoped so quotas can't be probed.
+                try:
+                    with open(self._status_file_for_analysis(analysis_id), "r", encoding="utf-8") as handle:
+                        shared = json.load(handle)
+                    if shared.get("status") == "completed":
+                        return jsonify(shared)
+                except (FileNotFoundError, json.JSONDecodeError):
+                    pass
                 return jsonify({"error": "Analysis not found for this user/session."}), 404
 
             status_file = self._status_file_for_analysis(analysis_id)
