@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 GenerateFn = Callable[[str, str, str, Optional[str]], str]  # (kind, repo, ctx, err) -> mermaid
 
-_MERMAID_BAD = re.compile(r"```|<script|\{\{|\}\}|\[\[|\]\]|#(?!\d+;)")
+_MERMAID_BAD = re.compile(r"```|<script|\{\{|\}\}|\[\[|\]\]|#(?!\d+;|[0-9a-fA-F]{3,8}\b)")
 
 _PAREN_IN_LABEL = re.compile(r"\[[^\[\]\n]*[()][^\[\]\n]*\]")
 _SUBGRAPH_TITLE = re.compile(r"(?m)^\s*subgraph\s+([A-Za-z0-9_]+)\s+\[([^\]]+)\]")

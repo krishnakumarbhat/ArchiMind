@@ -9,7 +9,7 @@ from werkzeug.serving import make_server
 
 pw = pytest.importorskip("playwright.sync_api", reason="playwright not installed")
 
-VIEWPORTS = [(390, 844, "mobile"), (768, 1024, "tablet"), (1440, 900, "desktop")]
+VIEWPORTS = [(390, 844, "mobile"), (768, 1024, "tablet"), (1440, 900, "desktop"), (2560, 1440, "ultrawide")]
 
 
 @pytest.fixture(scope="module")
@@ -50,7 +50,7 @@ def test_landing_no_hscroll_and_cards(server, w, h, name):
 
 @pytest.mark.parametrize("w,h,name", VIEWPORTS)
 def test_golden_to_workspace_renders_diagram(server, w, h, name):
-    """Golden card -> workspace renders an SVG with no blank-canvas text."""
+    """PyTorch + OpenClaw demos render all three diagrams with no blank/syntax-error canvas."""
     with pw.sync_playwright() as p:
         browser = _browser(p)
         page = browser.new_page(viewport={"width": w, "height": h})
@@ -60,7 +60,14 @@ def test_golden_to_workspace_renders_diagram(server, w, h, name):
             page.click(".card >> nth=0")
         assert "/workspace/" in page.url
         page.wait_for_selector("#mermaidHost svg", timeout=20000)
-        assert "No diagram" not in page.inner_text("#mermaidHost")
+        for gid in ("pytorch", "openclaw"):
+            page.goto(server + "/workspace/golden:" + gid, wait_until="networkidle")
+            for tab in ("hld", "lld", "flow"):
+                page.click(f'.diagram-tabs button[data-tab="{tab}"]')
+                page.wait_for_selector("#mermaidHost svg", timeout=20000)
+                text = page.inner_text("#mermaidHost")
+                assert "Syntax error" not in text and "could not be rendered" not in text, (gid, tab)
+            assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), (gid, name)
         browser.close()
 
 
@@ -98,7 +105,7 @@ def test_challenge_and_guardrail_chat(server):
         page.wait_for_selector("#mermaidHost svg", timeout=20000)
         page.click('button[data-stab="agent"]')
         page.click("#challengeBtn")
-        page.wait_for_selector("#challengeOut .challenge, #challengeOut .hint", timeout=15000)
+        page.wait_for_selector("#challengeOut .challenge", timeout=15000)
         page.fill("#chatQ", "Write an essay about Napoleon")
         page.click('#chatForm button[type="submit"]')
         page.wait_for_function(

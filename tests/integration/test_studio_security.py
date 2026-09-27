@@ -15,12 +15,12 @@ def test_landing_renders_search_hero():
     resp = _client().get("/")
     assert resp.status_code == 200
     html = resp.get_data(as_text=True)
-    assert "landingUrl" in html and "demoCards" in html and "Analyze Architecture" in html
+    assert "landingUrl" in html and "demoCards" in html and "Analyze" in html
 
 
 def test_workspace_renders_five_tabs():
     """Studio route serves all five tab anchors."""
-    html = _client().get("/workspace/golden:requests").get_data(as_text=True)
+    html = _client().get("/workspace/golden:pytorch").get_data(as_text=True)
     for tab in ("data-stab=\"canvas\"", "data-stab=\"handbook\"", "data-stab=\"govern\"",
                 "data-stab=\"agent\"", "data-stab=\"telemetry\""):
         assert tab in html
@@ -52,20 +52,11 @@ def test_chat_enforces_length_and_anon_quota():
 
 
 def test_challenge_endpoint_needs_graph():
-    """Challenge requires a graph; golden cache serves instantly when built."""
-    from src.config._00_settings import SETTINGS
-    from src.storage._00_sqlite_cache import CacheStore
-    import os
-
+    """Challenge requires a graph; bundled fixtures serve one instantly."""
     client = _client()
     assert client.get("/api/challenge").status_code == 404
-    store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
-    if store.get("golden:requests") is None:
-        return  # cache not built here; covered by golden integration test
-    resp = client.get("/api/challenge?golden=requests")
-    assert resp.status_code in (200, 404)
-    if resp.status_code == 200:
-        assert "starter_code" in resp.get_json()["challenge"]
+    resp = client.get("/api/challenge?golden=pytorch")
+    assert resp.status_code == 200 and "starter_code" in resp.get_json()["challenge"]
 
 
 def test_no_model_names_leak_in_chat():

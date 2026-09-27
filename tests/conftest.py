@@ -3,7 +3,6 @@
 import os
 import tempfile
 
-
 TEST_DB_PATH = os.path.join(tempfile.gettempdir(), "archimind_test_suite.db")
 
 os.environ["SECRET_KEY"] = "test-secret-key"

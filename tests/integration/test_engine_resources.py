@@ -1,6 +1,5 @@
 """Integration: memory ceiling, concurrency guard, golden + blast endpoints."""
 import json
-import os
 import resource
 import tracemalloc
 
@@ -48,11 +47,13 @@ def test_concurrency_guard_429_when_busy():
 
 
 def test_golden_endpoint_shape():
-    """Golden endpoint serves descriptors even with an empty cache."""
+    """Golden list is light (no graph payload) and detail omits the raw CPG."""
     client = _client()
-    resp = client.get("/api/golden")
-    assert resp.status_code == 200
-    assert len(resp.get_json()["golden"]) == 3
+    items = client.get("/api/golden").get_json()["golden"]
+    assert [i["id"] for i in items][:2] == ["pytorch", "openclaw"]
+    detail = client.get("/api/golden/pytorch").get_json()
+    assert "hld_mermaid" in detail and "cpg_artifact" not in detail
+    assert client.get("/api/golden/nope").status_code == 404
 
 
 def test_blast_radius_needs_symbol_and_graph():
@@ -62,18 +63,9 @@ def test_blast_radius_needs_symbol_and_graph():
     assert client.get("/api/blast-radius?symbol=X&golden=nope").status_code == 404
 
 
-def test_blast_radius_over_golden_cache():
-    """Golden blast-radius traces instantly when the cache is built."""
-    from src.config._00_settings import SETTINGS
-    from src.storage._00_sqlite_cache import CacheStore
-
-    store = CacheStore(os.path.join(SETTINGS.data_path, "golden.db"))
-    doc = store.get("golden:requests")
-    if doc is None:
-        raise AssertionError("golden cache not built; run scripts/build_golden_cache.py")
+def test_blast_radius_over_golden_fixture():
+    """Golden blast-radius traces from the bundled fixture well under budget."""
     client = _client()
-    resp = client.get("/api/blast-radius?symbol=Session&golden=requests")
-    assert resp.status_code == 200
-    body = resp.get_json()
-    assert body["symbol"] == "Session" and body["ms"] < 2000
-    assert json.dumps(body)  # serializable
+    body = client.get("/api/blast-radius?symbol=Module&golden=pytorch").get_json()
+    assert body["symbol"] == "Module" and body["edges"] > 0 and body["ms"] < 2000
+    assert json.dumps(body)

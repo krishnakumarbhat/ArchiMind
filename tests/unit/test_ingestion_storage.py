@@ -45,9 +45,18 @@ def test_cache_roundtrip_tmp():
     assert "k" in store.keys()
 
 
-def test_golden_lists_descriptors_when_unbuilt():
-    """Unbuilt golden repos degrade to descriptors (instant, compute-free)."""
-    store = CacheStore(os.path.join(tempfile.mkdtemp(), "g.db"))
-    items = list_golden(store)
-    assert len(items) == 3 and all(i["cached"] is False for i in items)
-    assert golden_key("flask") == "golden:flask"
+def test_golden_fixtures_bundled_and_valid():
+    """PyTorch + OpenClaw + Requests ship as fixtures with valid diagrams (zero blank canvases)."""
+    from src.orchestration._01_eval_optimizer import validate_mermaid
+    from src.storage._01_golden_repos import load_golden
+
+    items = list_golden()
+    assert [i["id"] for i in items][:2] == ["pytorch", "openclaw"]
+    assert all(i["cached"] for i in items)
+    for i in items:
+        doc = load_golden(i["id"])
+        for k in ("hld_mermaid", "lld_mermaid", "flow_mermaid"):
+            assert validate_mermaid(doc[k]) == "", (i["id"], k)
+        assert doc["cpg_artifact"]["nodes"] and "## Executive Summary" in doc["chat_response"]
+    assert golden_key("pytorch") == "golden:pytorch"
+    assert load_golden("../etc") is None
