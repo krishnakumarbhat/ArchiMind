@@ -114,15 +114,19 @@ class AnalysisWorker:
         except (json.JSONDecodeError, AttributeError):
             return ""
 
-    def _generate_with_repair(self, doc_service: DocumentationService, context: str, repo_name: str) -> Dict[str, str]:
+    def _generate_with_repair(
+        self, doc_service: DocumentationService, context: str, repo_name: str
+    ) -> tuple[Dict[str, str], Dict[str, int]]:
         """Evaluator-optimizer: validate each diagram, reflect with error feedback."""
         from src.orchestration._01_eval_optimizer import run_eval_optimizer
 
         docs = doc_service.generate_all_documentation(context, repo_name)
         if not doc_service._can_use_gemini():
-            return docs  # local backend is deterministic; nothing to reflect on
+            return docs, {}  # local backend is deterministic; nothing to reflect on
+        repair_log: Dict[str, int] = {}
         for kind, label in (("hld", "HLD"), ("lld", "LLD"), ("flow", "Flow")):
             if self._parse_graph_data(docs.get(kind), label).get("status") == "ok":
+                repair_log[kind] = 1
                 continue
             self.logger.info("Repairing %s diagram via reflection loop", label)
             state = run_eval_optimizer(
@@ -130,8 +134,9 @@ class AnalysisWorker:
                 lambda k, r, c, e: self._regen_diagram(doc_service, c, r, k, e or ""),
                 first_draft=docs.get(kind),
             )
+            repair_log[kind] = int(state.get("attempts", 1))
             docs[kind] = json.dumps({"mermaid_code": state.get("mermaid", "")})
-        return docs
+        return docs, repair_log
 
     def _update_database_log(self, analysis_log_id: Optional[int], status: str) -> None:
         """Record status transitions in the `AnalysisLog` table."""
@@ -424,7 +429,7 @@ class AnalysisWorker:
                 progress=82,
                 status_file_path=status_file_path,
             )
-            docs = self._generate_with_repair(doc_service, context, repo_name)
+            docs, repair_log = self._generate_with_repair(doc_service, context, repo_name)
 
             hld_result = self._parse_graph_data(docs.get("hld"), "HLD")
             lld_result = self._parse_graph_data(docs.get("lld"), "LLD")
@@ -443,8 +448,9 @@ class AnalysisWorker:
                 "repo_name": repo_name,
                 "repo_url": repo_url,
                 "repo_collection": repo_collection,
-                "generation_backend": doc_service.describe_backend(),
-                "engine": "cpg-grounded+eval-optimizer",
+                "generation_backend": "ArchiMind v2 CPG Harness",
+                "engine": "ArchiMind v2 CPG Harness",
+                "repair_log": repair_log,
                 "cpg_artifact": cpg_artifact,
                 "invariants": invariant_results,
             }

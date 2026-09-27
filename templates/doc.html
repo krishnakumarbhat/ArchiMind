@@ -530,7 +530,7 @@
                 <span class="analysis-badge">Index: {{ data.repo_collection }}</span>
                 {% endif %}
                 {% if data.generation_backend %}
-                <span class="analysis-badge">Backend: {{ data.generation_backend }}</span>
+                <span class="analysis-badge">Engine: {{ data.generation_backend }}</span>
                 {% endif %}
             </div>
         </section>
@@ -812,7 +812,7 @@
 
             appendAssistantMessage('user', question, false);
             submitButton.disabled = true;
-            statusNode.textContent = 'Searching the vector index and sending grounded context to Gemini...';
+            statusNode.textContent = 'Searching the code graph and grounding the handbook...';
 
             try {
                 const response = await fetch('/api/chat', {
