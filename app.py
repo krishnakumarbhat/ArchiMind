@@ -449,6 +449,60 @@ class ArchiMindApplication:
         from src.security._00_guardrail import check_scope
         from src.security._01_scrubber import engine_label, scrub
 
+        payload = request.get_json(silent=True) or {}
+        repo_url = (payload.get("repo_url") or "").strip()
+        repo_name = (payload.get("repo_name") or self._extract_repo_name(repo_url)).strip()
+        question = (payload.get("question") or "").strip()
+        repo_collection = self._extract_repo_collection(repo_url) if repo_url else ""
+
+        if not repo_url or not repo_name:
+            return jsonify({"error": "Repository context is required."}), 400
+        if not question or len(question) > 250:
+            return jsonify({"error": "Ask a concrete repository question under 250 characters."}), 400
+
+        blocked = check_scope(question)
+        if blocked:
+            return jsonify({"answer": blocked, "guardrail": True, "engine": engine_label()})
+
+        if not current_user.is_authenticated:
+            used = int(session.get("chat_count", 0))
+            if used >= 5:
+                return jsonify({"error": "Assistant limit reached (5 questions). Please login to continue."}), 403
+            session["chat_count"] = used + 1
+
+        artifact = self._load_cpg_artifact((payload.get("golden") or "").strip(), payload.get("analysis_id"))
+        tool_note = ""
+        if artifact:
+            graph = from_compact(artifact)
+            lowered = question.lower()
+            impact_match = re.search(r"impact(?: of |:)?([A-Za-z_][\w.]*)", lowered)
+            if "blast" in lowered or impact_match:
+                symbol = impact_match.group(1) if impact_match else lowered.split()[-1]
+                tool_note = f"\nTOOL trace_symbol_impact({symbol}): {trace_symbol_impact(symbol, graph)}\n"
+            elif "invariant" in lowered or "rule" in lowered or "clean architecture" in lowered:
+                tool_note = f"\nTOOL verify_architecture_rules: {verify_architecture_rules(graph)}\n"
+            elif "signature" in lowered or "definition of" in lowered:
+                symbol = lowered.split()[-1].strip("?.")
+                tool_note = f"\nTOOL get_symbol_ast({symbol}): {get_symbol_ast(symbol, graph)}\n"
+
+        vector_service = VectorStoreService(
+            db_path=config.VECTOR_STORE_PATH,
+            collection_name=repo_collection,
+            embedding_model=config.EMBEDDING_MODEL,
+            repo_url=repo_url,
+        )
+        if vector_service.is_empty():
+            if tool_note:
+                return jsonify({"answer": scrub(tool_note.strip()), "engine": engine_label(), "tools": True})
+            return jsonify({"error": "No index found for this repository. Analyze it first."}), 404
+
+        context = vector_service.query_similar_documents(question, n_results=10)
+        if not context:
+            return jsonify({"error": "No relevant context was found for that question."}), 404
+
+        documentation_service = self._build_documentation_service()
+        answer = documentation_service.generate_chat_answer(tool_note + context, repo_name, question)
+        return jsonify({"answer": scrub(answer), "engine": engine_label()})
 
     def _api_golden(self):
         """Serve instant pre-computed golden demos (no analysis run needed)."""

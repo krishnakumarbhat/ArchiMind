@@ -1,0 +1,64 @@
+{% extends "00_base.html" %}
+{% block title %}ArchiMind — Understand Any Codebase{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/01_landing.css') }}">
+<script src="{{ url_for('static', filename='js/00_app.js') }}" defer></script>
+{% endblock %}
+{% block body %}
+<header class="mini-top">
+  <div class="brand">Archi<span>Mind</span></div>
+  <div class="spacer"></div>
+  {% if user.is_authenticated %}
+    <span class="who">Welcome, {{ user.first_name }}</span>
+    <a class="toplink" href="/logout">Logout</a>
+  {% else %}
+    <a class="toplink" href="/login">Sign In</a>
+  {% endif %}
+</header>
+<main class="hero">
+  <div class="logo">AM</div>
+  <h1>Understand any codebase in minutes</h1>
+  <p class="sub">Architecture diagrams, handbooks, and impact tracing — grounded in the code graph.</p>
+  <form class="search" id="landingForm">
+    <input id="landingUrl" type="url" placeholder="Paste any public GitHub URL (e.g., https://github.com/psf/requests)" autocomplete="off">
+    <button class="btn" type="submit">⚡ Analyze Architecture</button>
+  </form>
+  <div class="status-card" id="landingNotice" style="display:none"></div>
+  <section class="showcase">
+    <h2>Or explore an instant demo</h2>
+    <div class="cards" id="demoCards"><div class="skeleton" style="height:120px"></div></div>
+  </section>
+</main>
+<script>
+  document.getElementById("landingForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var url = document.getElementById("landingUrl").value.trim();
+    var note = document.getElementById("landingNotice");
+    if (!url) { note.style.display = "block"; note.textContent = "Paste a public GitHub repository URL first."; return; }
+    note.style.display = "block"; note.textContent = "Starting analysis…";
+    fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repo_url: url }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) { note.textContent = res.j.error || res.j.message || "Could not start analysis."; return; }
+        window.location.href = "/workspace/" + encodeURIComponent(res.j.analysis_id);
+      })
+      .catch(function () { note.textContent = "Could not reach the server."; });
+  });
+  fetch("/api/golden").then(function (r) { return r.json(); }).then(function (data) {
+    var wrap = document.getElementById("demoCards");
+    wrap.innerHTML = "";
+    (data.golden || []).forEach(function (g) {
+      var a = document.createElement("a");
+      a.className = "card";
+      a.href = "/workspace/golden:" + encodeURIComponent(g.id);
+      var t = document.createElement("b"); t.textContent = g.title || g.name || g.id;
+      var s = document.createElement("span"); s.textContent = g.subtitle || g.description || "";
+      var c = document.createElement("em"); c.textContent = g.cached ? "Instant demo →" : "Builds on first open →";
+      a.appendChild(t); a.appendChild(s); a.appendChild(c);
+      wrap.appendChild(a);
+    });
+  }).catch(function () {
+    document.getElementById("demoCards").innerHTML = "<p>Demos unavailable right now.</p>";
+  });
+</script>
+{% endblock %}

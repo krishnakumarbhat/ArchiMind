@@ -1,0 +1,96 @@
+{% extends "00_base.html" %}
+{% block title %}ArchiMind Studio{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/01_layout.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/03_canvas.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/02_studio.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js" defer></script>
+<script src="{{ url_for('static', filename='js/01_pan_zoom.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/02_studio_tabs.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/03_challenge_ui.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/00_studio.js') }}" defer></script>
+{% endblock %}
+{% block body %}
+<header class="topbar">
+  <button class="icon-btn" id="studioNavToggle" aria-label="Open panels">☰</button>
+  <a class="brand" href="/" style="text-decoration:none;color:inherit">Archi<span>Mind</span></a>
+  <span class="crumb" id="crumb">Studio</span>
+  <div class="spacer"></div>
+  {% if user.is_authenticated %}
+    <span class="auth-link">Welcome, {{ user.first_name }}</span>
+    <a class="auth-link" href="/logout">Logout</a>
+  {% else %}
+    <a class="auth-link" href="/login">Sign In</a>
+  {% endif %}
+</header>
+<div class="studio" data-ref="{{ ref }}">
+  <nav class="tabs" role="tablist" aria-label="Studio views">
+    <button role="tab" data-stab="canvas" class="active">🗺️ Canvas</button>
+    <button role="tab" data-stab="handbook">📖 Handbook</button>
+    <button role="tab" data-stab="govern">🛡️ Govern</button>
+    <button role="tab" data-stab="agent">🤖 Assistant</button>
+    <button role="tab" data-stab="telemetry">🔬 Telemetry</button>
+  </nav>
+  <section class="tabpage active" data-page="canvas">
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="viewport" id="viewport"><div class="stage" id="stage">
+        <div class="mermaid-host" id="mermaidHost"><div class="canvas-empty">Loading diagram…</div></div>
+      </div></div>
+      <div class="canvas-toolbar" id="canvasToolbar" role="toolbar" aria-label="Canvas controls">
+        <button type="button" data-act="zin" aria-label="Zoom in">+</button>
+        <button type="button" data-act="zout" aria-label="Zoom out">−</button>
+        <button type="button" data-act="fit" aria-label="Fit">⤢</button>
+        <button type="button" data-act="reset" aria-label="Reset">⟲</button>
+        <button type="button" data-act="full" aria-label="Fullscreen">⛶</button>
+        <button type="button" data-act="svg" aria-label="Export SVG">📥</button>
+      </div>
+    </div>
+    <nav class="diagram-tabs" aria-label="Diagram views">
+      <button type="button" data-tab="hld" class="active">HLD</button>
+      <button type="button" data-tab="lld">LLD</button>
+      <button type="button" data-tab="flow">Flow</button>
+    </nav>
+  </section>
+  <section class="tabpage" data-page="handbook">
+    <div class="split">
+      <aside class="drawer-left" id="chapterDrawer"><h2>Chapters</h2><ul class="chapter-list" id="chapterList"></ul></aside>
+      <article class="doc-body" id="handbookBody"><div class="skeleton" style="height:240px"></div></article>
+    </div>
+  </section>
+  <section class="tabpage" data-page="govern">
+    <div class="split single"><div class="gov">
+      <h2>Downstream impact tracer</h2>
+      <div class="analyze-form" style="flex-direction:row">
+        <input id="blastSymbol" type="text" placeholder="Symbol, e.g. Session" style="flex:1">
+        <button class="btn" id="blastBtn" type="button">Trace</button>
+      </div>
+      <div id="blastOut"><p class="hint">Type a class or function name. Traversal runs in milliseconds.</p></div>
+      <h2>Invariant compliance</h2>
+      <div id="invariantCards"></div>
+    </div></div>
+  </section>
+  <section class="tabpage" data-page="agent">
+    <div class="split single"><div class="gov">
+      <h2>Repository assistant</h2>
+      <div id="chatLog" class="chat-log"></div>
+      <form class="analyze-form" style="flex-direction:row" id="chatForm">
+        <input id="chatQ" type="text" maxlength="250" placeholder="Ask about this repo (250 chars)" style="flex:1">
+        <button class="btn" type="submit">Ask</button>
+      </form>
+      <h2>Challenge me</h2>
+      <p class="hint">Onboarding simulator: a real untested seam from this codebase, with a failing test to fix.</p>
+      <button class="btn btn-ghost" id="challengeBtn" type="button">Generate challenge</button>
+      <div id="challengeOut"></div>
+    </div></div>
+  </section>
+  <section class="tabpage" data-page="telemetry">
+    <div class="split single"><div class="gov" id="telemetryBody">
+      <h2>Benchmark provenance</h2>
+      <div class="stat-grid" id="telemetryStats"></div>
+      <h2>Self-healing</h2>
+      <div id="repairBadges"></div>
+    </div></div>
+  </section>
+</div>
+<div class="backdrop" id="backdrop"></div>
+{% endblock %}

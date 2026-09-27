@@ -47,7 +47,7 @@ def test_index_renders_without_hscroll(server, w, h, name):
         except Exception:
             pytest.skip("chromium unavailable")
         page = browser.new_page(viewport={"width": w, "height": h})
-        page.goto(server + "/", wait_until="networkidle")
+        page.goto(server + "/workbench", wait_until="networkidle")
         assert _no_hscroll(page), f"hscroll at {name} {w}x{h}"
         browser.close()
 
@@ -61,7 +61,7 @@ def test_golden_demo_instant_load(server, w, h, name):
         except Exception:
             pytest.skip("chromium unavailable")
         page = browser.new_page(viewport={"width": w, "height": h})
-        page.goto(server + "/", wait_until="networkidle")
+        page.goto(server + "/workbench", wait_until="networkidle")
         page.wait_for_selector(".pill", timeout=15000)
         page.click(".pill >> nth=0")
         page.wait_for_selector("#mermaidHost svg", timeout=20000)
@@ -77,7 +77,7 @@ def test_mobile_drawer_opens_and_navigates(server):
         except Exception:
             pytest.skip("chromium unavailable")
         page = browser.new_page(viewport={"width": 390, "height": 844})
-        page.goto(server + "/", wait_until="networkidle")
+        page.goto(server + "/workbench", wait_until="networkidle")
         page.click("#navToggle")
         assert page.evaluate("document.body.classList.contains('nav-open')")
         page.click('[data-goto="lld"]')
@@ -93,7 +93,7 @@ def test_zoom_controls_change_transform(server):
         except Exception:
             pytest.skip("chromium unavailable")
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(server + "/", wait_until="networkidle")
+        page.goto(server + "/workbench", wait_until="networkidle")
         page.wait_for_selector(".pill", timeout=15000)
         page.click(".pill >> nth=0")
         page.wait_for_selector("#mermaidHost svg", timeout=20000)
