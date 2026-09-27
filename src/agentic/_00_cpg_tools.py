@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 
 import networkx as nx
 
@@ -41,7 +41,7 @@ def get_symbol_ast(symbol: str, g: nx.DiGraph[Any]) -> Dict[str, Any]:
         for n, d in g.nodes(data=True)
         if d.get("name") == symbol or str(n).endswith("::" + symbol)
     ]
-    callers = set()
+    callers: Set[str] = set()
     for m in matches:
         callers.update(str(p) for p in g.predecessors(m["id"]))
     return {"tool": "get_symbol_ast", "symbol": symbol, "matches": matches[:10], "called_by": sorted(callers)[:20]}

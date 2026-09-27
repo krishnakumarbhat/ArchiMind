@@ -67,14 +67,15 @@ def test_api_chat_returns_grounded_answer(mock_vector_cls, mock_doc_cls):
         json={
             "repo_url": "https://github.com/example/repo",
             "repo_name": "repo",
-            "question": "How is the app created?",
+            "question": "Explain the architecture: how is the app created?",
         },
     )
 
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["answer"] == "The app factory creates the Flask application."
-    assert payload["backend"] == "local"
+    assert payload["engine"] == "ArchiMind Neural Graph Core"
+    assert "backend" not in payload
     assert mock_vector_cls.call_args.kwargs["collection_name"] == "example__repo"
 
 

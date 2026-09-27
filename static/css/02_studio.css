@@ -1,0 +1,39 @@
+/* 02_studio.css — 5-tab studio, split panes, chat + challenge widgets. */
+.crumb { color: var(--faint); font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.studio { height: calc(100dvh - var(--topbar-h)); display: flex; flex-direction: column; min-height: 0; }
+.tabs { display: flex; gap: 0.35rem; padding: 0.55rem clamp(0.75rem, 2vw, 1.5rem); border-bottom: 1px solid var(--border); background: var(--bg-soft); overflow-x: auto; }
+.tabs button {
+  flex: none; background: transparent; border: 1px solid transparent;
+  color: var(--muted); border-radius: 999px; padding: 0.4rem 0.9rem;
+  font-size: var(--fs-sm); cursor: pointer;
+}
+.tabs button.active { background: var(--accent-dim); color: var(--text); border-color: var(--accent); }
+.tabpage { display: none; flex: 1; min-height: 0; flex-direction: column; }
+.tabpage.active { display: flex; }
+.tabpage[data-page="canvas"] { overflow: hidden; }
+.split { display: grid; grid-template-columns: 260px minmax(0, 1fr); flex: 1; min-height: 0; }
+.split.single { grid-template-columns: minmax(0, 1fr); }
+.drawer-left { border-right: 1px solid var(--border); background: var(--bg-soft); padding: 1rem; overflow-y: auto; }
+.doc-body { padding: 1.25rem clamp(1rem, 3vw, 2.5rem); overflow-y: auto; max-width: 60rem; }
+.doc-body h3 { margin-top: 1.4rem; }
+.doc-body pre { background: #0a0d12; border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem; overflow-x: auto; }
+.gov { padding: 1.25rem clamp(1rem, 3vw, 2.5rem); overflow-y: auto; max-width: 60rem; }
+.gov h2 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); }
+.hint { color: var(--faint); font-size: var(--fs-sm); }
+.inv-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem; margin-bottom: 0.6rem; background: var(--panel); font-size: var(--fs-sm); }
+.chat-log { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem; max-height: 40vh; overflow-y: auto; }
+.chat-msg { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: var(--fs-sm); }
+.chat-msg.q { border-color: var(--accent); }
+.challenge { border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 1rem; margin-top: 0.8rem; background: var(--panel); }
+.challenge pre { background: #0a0d12; border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem; overflow-x: auto; font-size: var(--fs-xs); }
+.badge { display: inline-block; border-radius: 999px; padding: 0.25rem 0.7rem; font-size: var(--fs-xs); margin: 0.15rem 0.25rem 0.15rem 0; }
+.badge.ok { background: rgba(52, 211, 153, 0.15); color: var(--good); border: 1px solid rgba(52, 211, 153, 0.4); }
+.badge.healed { background: rgba(251, 191, 36, 0.13); color: var(--warn); border: 1px solid rgba(251, 191, 36, 0.4); }
+@media (max-width: 1023px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .drawer-left {
+    position: fixed; top: 0; bottom: 0; left: 0; width: var(--drawer-w); z-index: 50;
+    transform: translateX(-105%); transition: transform 0.22s ease;
+  }
+  body.nav-open .drawer-left { transform: none; }
+}

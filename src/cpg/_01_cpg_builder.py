@@ -22,7 +22,7 @@ def _qid(*parts: str) -> str:
 def build_graph(files: Dict[str, str]) -> nx.DiGraph[Any]:
     """Build typed CPG from {path: source}. Nodes File/Class/Function."""
     mods = {p: extract_module(s, p) for p, s in files.items()}
-    g = nx.DiGraph()
+    g: nx.DiGraph[Any] = nx.DiGraph()
     for path, m in mods.items():
         g.add_node(_qid("f", path), kind=NODE_FILE, path=path, parse_ok=m.parse_ok)
         for cls, bases in m.classes.items():
@@ -102,7 +102,7 @@ def to_compact(g: nx.DiGraph[Any]) -> Dict[str, Any]:
 
 def from_compact(doc: Dict[str, Any]) -> nx.DiGraph[Any]:
     """Rebuild graph from a compact artifact."""
-    g = nx.DiGraph()
+    g: nx.DiGraph[Any] = nx.DiGraph()
     for n in doc.get("nodes", []):
         g.add_node(n["id"], kind=n.get("kind"), name=n.get("name"), path=n.get("path"))
     for e in doc.get("edges", []):
