@@ -221,7 +221,10 @@ class ArchiMindApplication:
 
     def _register_routes(self):
         """Registers all application routes."""
-        self.app.route("/")(self._index)
+        self.app.route("/")(self._landing)
+        self.app.route("/workbench")(self._index)  # legacy workbench, kept for compat
+        self.app.route("/workspace")(self._workspace)
+        self.app.route("/workspace/<path:ref>")(self._workspace)
         self.app.route("/doc")(self._documentation)
 
         self.app.route("/api/analyze", methods=["POST"])(self._api_analyze)
@@ -229,6 +232,7 @@ class ArchiMindApplication:
         self.app.route("/api/check-limit")(self._api_check_limit)
         self.app.route("/api/preview")(self._api_preview)
         self.app.route("/api/chat", methods=["POST"])(self._api_chat)
+        self.app.route("/api/challenge")(self._api_challenge)
         self.app.route("/api/golden")(self._api_golden)
         self.app.route("/api/blast-radius")(self._api_blast_radius)
         self.app.route("/api/history")(self._logout_required(self._api_get_history))
@@ -240,6 +244,12 @@ class ArchiMindApplication:
 
     def _logout_required(self, func):
         return login_required(func)
+
+    def _landing(self):
+        return render_template("01_landing.html", user=current_user)
+
+    def _workspace(self, ref=None):
+        return render_template("02_studio.html", user=current_user, ref=ref or "")
 
     def _index(self):
         return render_template("index.html", user=current_user)
@@ -401,34 +411,44 @@ class ArchiMindApplication:
             return jsonify({"error": "Repository preview could not be loaded."}), 404
         return jsonify(preview)
 
-    def _api_chat(self):
-        payload = request.get_json(silent=True) or {}
-        repo_url = (payload.get("repo_url") or "").strip()
-        repo_name = (payload.get("repo_name") or self._extract_repo_name(repo_url)).strip()
-        question = (payload.get("question") or "").strip()
-        repo_collection = self._extract_repo_collection(repo_url) if repo_url else ""
+    def _load_cpg_artifact(self, golden_id, analysis_id):
+        """Load a compact CPG artifact from golden cache or a completed analysis."""
+        from src.config._00_settings import SETTINGS
+        from src.storage._00_sqlite_cache import CacheStore
 
-        if not repo_url or not repo_name:
-            return jsonify({"error": "Repository context is required."}), 400
-        if not question or len(question) > 600:
-            return jsonify({"error": "Ask a concrete question under 600 characters."}), 400
+        if golden_id:
+            doc = CacheStore(os.path.join(SETTINGS.data_path, "golden.db")).get(f"golden:{golden_id}")
+            return (doc or {}).get("cpg_artifact")
+        if analysis_id:
+            try:
+                with open(self._status_file_for_analysis(analysis_id), "r", encoding="utf-8") as handle:
+                    status = json.load(handle)
+                return (status.get("result") or {}).get("cpg_artifact")
+            except (FileNotFoundError, json.JSONDecodeError):
+                return None
+        return None
 
-        vector_service = VectorStoreService(
-            db_path=config.VECTOR_STORE_PATH,
-            collection_name=repo_collection,
-            embedding_model=config.EMBEDDING_MODEL,
-            repo_url=repo_url,
+    def _api_challenge(self):
+        """Generate one onboarding challenge from CPG seams (SWE-harness style)."""
+        from src.agentic._01_challenge import generate_challenge
+        from src.cpg._01_cpg_builder import from_compact
+
+        artifact = self._load_cpg_artifact(
+            (request.args.get("golden") or "").strip(), request.args.get("analysis_id", type=int)
         )
-        if vector_service.is_empty():
-            return jsonify({"error": "No index found for this repository. Analyze it first."}), 404
+        if not artifact:
+            return jsonify({"error": "No architecture graph available. Analyze the repo first or use a golden demo."}), 404
+        challenge = generate_challenge(from_compact(artifact))
+        if not challenge:
+            return jsonify({"error": "No untested seams found — this codebase is well covered."}), 404
+        return jsonify({"challenge": challenge})
 
-        context = vector_service.query_similar_documents(question, n_results=10)
-        if not context:
-            return jsonify({"error": "No relevant context was found for that question."}), 404
+    def _api_chat(self):
+        from src.agentic._00_cpg_tools import get_symbol_ast, trace_symbol_impact, verify_architecture_rules
+        from src.cpg._01_cpg_builder import from_compact
+        from src.security._00_guardrail import check_scope
+        from src.security._01_scrubber import engine_label, scrub
 
-        documentation_service = self._build_documentation_service()
-        answer = documentation_service.generate_chat_answer(context, repo_name, question)
-        return jsonify({"answer": answer, "backend": documentation_service.describe_backend()})
 
     def _api_golden(self):
         """Serve instant pre-computed golden demos (no analysis run needed)."""

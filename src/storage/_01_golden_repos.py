@@ -13,15 +13,30 @@ def golden_key(repo_id: str) -> str:
     return f"golden:{repo_id}"
 
 
+GOLDEN_DISPLAY = {
+    "flask": ("Flask Core", "Web framework engine"),
+    "requests": ("Requests HTTP", "Distributed client architecture"),
+    "sqlmodel": ("SQLModel", "Data models & ORM layer"),
+}
+
+
 def list_golden(store: CacheStore) -> List[Dict[str, Any]]:
     """Return cached golden artifacts with fallback descriptors when unbuilt."""
     out: List[Dict[str, Any]] = []
     for repo_id, url, desc in GOLDEN_REPOS:
+        title, subtitle = GOLDEN_DISPLAY.get(repo_id, (repo_id, desc))
         doc = store.get(golden_key(repo_id))
         if doc is None:
-            out.append({"id": repo_id, "repo_url": url, "description": desc, "cached": False})
+            out.append(
+                {
+                    "id": repo_id, "title": title, "subtitle": subtitle,
+                    "repo_url": url, "description": desc, "cached": False,
+                }
+            )
         else:
             doc = dict(doc)
             doc["cached"] = True
+            doc.setdefault("title", title)
+            doc.setdefault("subtitle", subtitle)
             out.append(doc)
     return out
