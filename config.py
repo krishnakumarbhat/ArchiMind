@@ -60,7 +60,7 @@ def uses_sqlite(database_url: str | None = None) -> bool:
 
 # --- Local model/indexing settings ---
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
-VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "pinecone" if os.getenv("PINECONE_API_KEY") else "local")
+VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "chroma")  # chroma (disk-backed) > pinecone (managed) > local (json)
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "archimind")
 PINECONE_NAMESPACE = os.getenv("PINECONE_NAMESPACE", "default")
