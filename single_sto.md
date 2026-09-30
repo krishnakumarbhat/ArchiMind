@@ -150,3 +150,126 @@ Recall 0.5 on attribute-on-instance calls; dead-code gate sound-but-conservative
 (0 certificates on some repos); structural term unmeasurable on real repos by design
 (oracle executes code); golden slices are subsystems, not full repos; chat needs a
 model key for open-ended answers (tools answer deterministically regardless).
+
+---
+
+# APPENDIX — Exhaustive file inventory (for the architecture/directory redesign)
+
+123 tracked files on `build/production-reengineering`, 162 on
+`research/archimind-cpg-harness-20260925`. Untracked on disk: `PROJECT_STORY.md`
+(1225-line user-side walkthrough of an older snapshot — not part of either branch),
+`.env` (your Gemini key, gitignored), `data/` (sqlite, status JSONs, vector store,
+gitignored), `experiments/soak.log` (gitignored), `experiments/fixtures/` (leftover
+research-run outputs, untracked).
+
+## A. Build branch — root (23 files)
+
+| File | Purpose |
+|---|---|
+| `00_main.py` | Production entrypoint; re-exports `create_app` so gunicorn/Docker keep working |
+| `app.py` | Flask app factory + all routes: `/`, `/workspace`, `/workspace/<ref>`, `/doc`, `/api/*` (analyze/status/preview/chat/history/golden/blast-radius/challenge), login/logout/signup, CSP headers, 429 concurrency guard |
+| `auth.py` | Email/password user helpers (hashing, lookup) used by login/signup |
+| `config.py` | Legacy env config (paths, models, limits); fixed schemeless-DATABASE_URL fallback |
+| `models.py` | SQLAlchemy: `User`, `AnalysisLog` (rate limits + job states), `RepositoryHistory` |
+| `oauth_utils.py` | Google OAuth blueprint (`/login/google`, callback), history cache + history queries |
+| `services.py` | `RepositoryService` (fetch/clone/read), `VectorStoreService` (Pinecone/Chroma/local), `DocumentationService` (Gemini + local-heuristic handbook/diagrams/chat) |
+| `worker.py` | Subprocess analysis pipeline: tarball-first ingest → index → retrieve → CPG ground → generate → per-diagram eval-optimizer repair → status JSON + DB |
+| `requirements.txt` | Pinned runtime deps (Flask, LangGraph, Pinecone, tree-sitter≥0.25, tree-sitter-python, networkx, pydantic) |
+| `requirements-dev.txt` | Lint/test tooling |
+| `pyproject.toml` | ruff/black/mypy-strict configs |
+| `Dockerfile` | Multi-stage build; gunicorn `app:create_app()` |
+| `docker-compose.yml` / `docker-compose.pi.yml` | Prod + Raspberry Pi services |
+| `.env.example` | Placeholder-only config template (incl. new MAX_CONCURRENT_JOBS, MERMAID_*, TARBALL_* vars) |
+| `.gitignore` | Secrets, data/, logs, driver artifacts, caches |
+| `.dockerignore` | Docker build context exclusions |
+| `.coveragerc` | Coverage config |
+| `README.md` | Project readme (OAuth vars table, troubleshooting) |
+| `opencode.json` | OpenCode agent config for this repo |
+| `setup.sh` | Bootstrap script |
+| `single_sto.md` | This file |
+| `.autoresearch-stop` | Sentinel stopping the dead research driver loop |
+
+## B. Build branch — `src/` engine (29 files)
+
+- `src/__init__.py`, `src/{config,ingestion,cpg,orchestration,governance,agentic,security,storage}/__init__.py` — package markers.
+- `src/config/_00_settings.py` — Pydantic v2 `Settings` singleton (all engine env vars).
+- `src/config/_01_constants.py` — extensions (py/ts/js), ignore dirs, 60MB/400-file caps, invariant ids, golden repo specs (PyTorch/OpenClaw/Requests subsystem slices).
+- `src/ingestion/_00_tarball_client.py` — zero-clone tarball stream (64KB chunks, cap-guarded).
+- `src/ingestion/_01_file_filter.py` — member keep/drop rules, basename decode with file cap.
+- `src/ingestion/_02_subtree_client.py` — bounded contents-API subtree fetch for GB monorepos (per-dir + total caps, test-file exclusion, optional GITHUB_TOKEN).
+- `src/cpg/_00_ts_ast.py` — tree-sitter Python+TS/JS symbol extractor: classes/bases/methods/functions/imports/**scoped** calls with receivers; stdlib-ast fallback; error-tolerant `parse_ok`.
+- `src/cpg/_01_cpg_builder.py` — NetworkX DiGraph; per-scope CALLS resolution (self/this→owner, same-file wins, import narrowing, >3 ambiguous refused); INSTANTIATES/INHERITS/IMPORTS/DEFINES; SCC; **reverse** blast radius (callers/instantiators/subclasses); compact JSON artifact + loader.
+- `src/cpg/_02_closure_gate.py` — out-of-corpus base witness; one-directional method withholding; `certified_dead` filter.
+- `src/orchestration/_00_agent_state.py` — LangGraph `DiagramState` TypedDict.
+- `src/orchestration/_01_eval_optimizer.py` — generate→validate→reflect cycle (cap 3); `validate_mermaid` (headers, bracket/paren balance, parens-in-`[]`, escaped-newline payloads, entity/hex-aware `#` rule); `normalize_mermaid` (unescape, subgraph quoting, paren→`#40;#41;`).
+- `src/orchestration/_02_doc_synthesizer.py` — `cpg_context_block` grounding + `synthesize` wrapper.
+- `src/orchestration/_03_cpg_diagrams.py` — valid-by-construction HLD (edge-driven package map + hub styling), LLD (class diagram + inheritance), flow (hottest cross-module call chain), deterministic chaptered handbook.
+- `src/governance/_00_blast_radius.py` — `impact()` API helper (names, count, ms).
+- `src/governance/_01_invariants.py` — presentation-isolation, acyclicity, domain-purity checks.
+- `src/agentic/_00_cpg_tools.py` — deterministic assistant tools: `trace_symbol_impact`, `verify_architecture_rules`, `get_symbol_ast`.
+- `src/agentic/_01_challenge.py` — Challenge-Me synthesis from zero-caller seams (schema + starter + failing test + hints).
+- `src/security/_00_guardrail.py` — repo-scope prompt filter + exact trigger message.
+- `src/security/_01_scrubber.py` — provider/model masking → "ArchiMind Neural Graph Core".
+- `src/storage/_00_sqlite_cache.py` — SQLite JSON artifact store (golden.db legacy path).
+- `src/storage/_01_golden_repos.py` — bundled fixture loader (`lru_cache`, traversal guard, `public_view` minus CPG blob, light card list).
+- `src/storage/golden_fixtures/{pytorch,openclaw,requests}.json` — committed demos: stats, summary, handbook, 3 validated diagrams, invariants, repair_log, full CPG.
+
+## C. Build branch — frontend (13 files)
+
+- `templates/00_base.html` — doctype/head/viewport/fonts/variables + Jinja blocks.
+- `templates/01_landing.html` — hero search (prefilled example), 3 demo cards with live counts, inline boot JS.
+- `templates/02_studio.html` — topbar, 5 tabs, canvas+toolbar, reader+TOC, govern, challenge+tools, telemetry, docked assistant, FAB, backdrop.
+- `templates/doc.html` — legacy full-handbook page (Engine label scrubbed, Gemini string removed).
+- `templates/login.html` / `sign_up.html` — auth forms (viewport missing — known issue; personal UPI donate links removed).
+- `static/css/00_variables.css` — slate/zinc tokens, `clamp()` type scale, drawer width.
+- `static/css/01_landing.css` — hero/cards/mobile stacking (+btn/skeleton appended).
+- `static/css/02_studio.css` — shell grid, tabs w/ fade, reader, governance, docked assistant/chat bubbles/tool badges/typing/chips/composer, pipeline steps, badges, drawers ≤1023px, icon-tabs ≤560px.
+- `static/css/03_canvas.css` — glass toolbar/tabs, transform-only viewport, `.hit` blast highlight, empty/error states.
+- `static/js/00_studio.js` — boot, golden/analysis load, diagram render + validator + code-graph fallback + note, chapter TOC, invariants, blast + highlight, chat + tools badges + chips, challenge hookup, telemetry/repair badges, polling progress, toolbar actions, `studio:tab` event.
+- `static/js/01_pan_zoom.js` — wheel/drag/dblclick/pinch, fit clamped ≥0.55 for legibility, SVG export.
+- `static/js/02_studio_tabs.js` — tab switching, chat/TOC drawers, backdrop/Escape/media-query reset.
+- `static/js/03_challenge_ui.js` — challenge fetch/render/copy/next (random seam index).
+- `static/doc.css` / `static/doc.js` — legacy doc page assets (untouched).
+
+## D. Build branch — tests + scripts + docs + misc
+
+- `tests/conftest.py` — sqlite test DB + safe env defaults; `tests/__init__.py`, `tests/{unit,integration,e2e}/__init__.py` — package markers.
+- `tests/unit/test_cpg_engine.py` — extractor/builder/precision/self-bind/TS/blast/closure/roundtrip/invariants/eval-optimizer/tarball-URL/impact (13 tests).
+- `tests/unit/test_ingestion_storage.py` — filter bounds, decode caps, URL rejection, cache roundtrip, **bundled-fixture validity incl. validator on all 9 diagrams + traversal-guard**.
+- `tests/unit/test_agentic_security.py` — guardrail accept/reject, scrubber, tools, challenge schema.
+- `tests/unit/test_mermaid_conformance.py` — the exact v11 failure samples locked (parens-in-label, escaped newlines, brackets, entities).
+- `tests/integration/test_engine_resources.py` — CPG memory growth, 429 guard, golden list/detail, blast 400/404 + golden trace.
+- `tests/integration/test_studio_security.py` — landing/studio render, chat guardrail/length/quota, challenge endpoint, no-leak assert.
+- `tests/test_{app,config,services,worker,repository_service,integration}.py` — legacy suite (chat test updated to engine-label contract; config fallback bug fixed).
+- `tests/e2e/test_studio_e2e.py` — landing cards, pytorch+openclaw × hld/lld/flow render asserts, 5 tabs, blast, challenge, guardrail chat, 4 viewports + hscroll asserts.
+- `scripts/build_golden_cache.py` — subtree→CPG→diagrams→handbook→fixture writer (validator-gated, fails loud).
+- `scripts/probe_diagrams.py` — real-mermaid-v11 render + screenshot probe for all fixtures.
+- `scripts/soak_test.py` — paced load rig (rpm/duration/workers, backpressure cap, per-minute RSS, p50/p95/p99, PASS/FAIL verdict).
+- `scripts/test_all.sh` — unit→integration→legacy→e2e→gates runner.
+- `scripts/{run_local,run_worker,setup_local,test_local}.sh` — legacy local/dev runners.
+- `scripts/{00_build_and_push_image,01_smoke_test_container,docker_preflight,deploy_pi,deploy_pi_build,install_pi_autostart_cron}.sh` — image/CI/Pi deploy plumbing.
+- `scripts/02_convert_dot_to_drawio.py` — DOT→draw.io converter.
+- `docs/profiling.md` — soak verdict + engine budgets + concurrency note.
+- `docs/{README,AGENTS,CONTRIBUTING,RASPBERRY_PI_DEPLOYMENT}.md` — ops/contrib/Pi docs.
+- `docs/diagrams/*` — `{flow,hld,lld,uml,use_cases}.{dot,drawio}` legacy design diagrams (+ one `.bkp`).
+- `.github/workflows/test.yml` — CI; `.github/{README,FUNDING}.yml` — community files.
+
+## E. Research branch-only files (162 total; shared product files identical to main-era)
+
+State/loop: `autoresearch_research.md`, `.jsonl` (14 runs), `.ideas.md`, `_strategy_graph.jsonl`,
+`-dashboard.md`, `.autoresearch-stop`; `experiments/worklog.md`; `equations.md` (42 rows);
+`strategies.md`; `derivations.md`; `novelty_check_report.md`; `review_run7_n10.md`;
+`papers/notes/{swe-bench-harness,reliable-graphrag-code}.md`.
+Research engine (measurement instruments, NOT product code — superseded by `src/` above):
+`src/00_cpg_static.py` (stdlib resolver), `01_dyn_oracle.py` (settrace oracle + event budgets),
+`02_trace_promote.py` (held-out promotion, measured unsound), `03_metric_gate.py`,
+`04_symbol_domain.py`, `05_export_boundary.py`, `06_protocol_driver.py` (manifest, killed on prior art),
+`07_import_closure.py` (inheritance witness — the surviving idea, ported),
+`08_interface_index.py` (≤1/2 bound enumeration), `09_resolution_price.py`,
+`10_nonvacuity.py`, `11_name_refuter.py`, `12_escape_channel.py`, `13_oracle_channel.py`,
+`14_ablation.py` (headroom law), `src/__init__.py`.
+Harness: `scripts/run_auto_research.py` + `run_n{10..16}_*.py` measurers;
+`experiments/run-*.log/.err` (runs 1–14 evidence); `experiments/fixtures/synthetic_{bad,cpg,promo,taint,protocol,protocol_driver,index,index_driver,escape,exports}_repo/`
+(28 fixture files incl. `broken.py` syntax-error cases and `test_beta.py`).
+Docs: `docs/{leaderboard,architecture,profiling}.md`, `docs/{hld,lld}.drawio`.
+Research `tests/` = legacy flat suite only; research `templates/`+`static/` = pre-rebuild UI.
