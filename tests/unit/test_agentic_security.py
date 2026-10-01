@@ -24,6 +24,10 @@ def test_guardrail_allows_repo_reasoning():
     assert check_scope("explain the blast impact of Session") == ""
     assert check_scope("which invariants does this repo violate and why") == ""
     assert check_scope("What layers exist in this Flask application and how do they interact at runtime?") == ""
+    # suggestion chips shipped in the UI must never trip the guardrail
+    assert check_scope("What breaks if I change Module?") == ""
+    assert check_scope("Explain the architecture in 5 bullets") == ""
+    assert check_scope("Which architecture rules fail?") == ""
 
 
 def test_scrubber_masks_fingerprints():
