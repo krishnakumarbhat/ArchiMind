@@ -254,6 +254,12 @@
     }
     global.StudioTabs.init();
     S.pz = new global.PanZoom($("viewport"), $("stage"));
+    note("drag to pan · scroll to zoom · double-click to fit");
+    ["pointerdown", "wheel"].forEach(function (ev) {
+      $("viewport").addEventListener(ev, function h() {
+        note(""); $("viewport").removeEventListener(ev, h);
+      }, { once: true });
+    });
     document.querySelectorAll(".diagram-tabs button").forEach(function (b) {
       b.addEventListener("click", function () {
         S.tab = b.dataset.tab;

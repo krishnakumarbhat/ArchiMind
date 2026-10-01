@@ -40,15 +40,23 @@
   };
 
   PanZoom.prototype.fit = function () {
-    // ponytail: legibility beats completeness — never shrink below 0.55; pan for the rest
+    // ponytail: draw.io-style — legibility first. Fits only when the diagram is
+    // smaller than the viewport; otherwise open at 100% top-left and pan.
     var r = this.vp.getBoundingClientRect();
     var svg = this.stage.querySelector("svg");
     var sw = (svg && svg.getBoundingClientRect().width / this.k) || this.stage.scrollWidth || 1;
     var sh = (svg && svg.getBoundingClientRect().height / this.k) || this.stage.scrollHeight || 1;
     var pad = 48;
-    this.k = Math.min(1.25, Math.max(0.55, Math.min((r.width - pad) / sw, (r.height - pad) / sh)));
-    this.x = Math.max(12, (r.width - sw * this.k) / 2);
-    this.y = Math.max(12, (r.height - sh * this.k) / 2);
+    var kfit = Math.min((r.width - pad) / sw, (r.height - pad) / sh);
+    if (kfit >= 1) {
+      this.k = Math.min(kfit, 2);
+      this.x = Math.max(12, (r.width - sw * this.k) / 2);
+      this.y = Math.max(12, (r.height - sh * this.k) / 2);
+    } else {
+      this.k = 1;
+      this.x = 24;
+      this.y = 24;
+    }
     this.apply();
   };
 

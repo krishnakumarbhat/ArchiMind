@@ -113,3 +113,24 @@ def test_challenge_and_guardrail_chat(server):
             timeout=15000,
         )
         browser.close()
+
+
+def test_canvas_drag_pans_viewport(server):
+    """Mouse-drag on the canvas changes the stage transform (draw.io-style pan)."""
+    with pw.sync_playwright() as p:
+        browser = _browser(p)
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.goto(server + "/", wait_until="networkidle")
+        page.wait_for_selector(".card", timeout=15000)
+        with page.expect_navigation():
+            page.click(".card >> nth=0")
+        page.wait_for_selector("#mermaidHost svg", timeout=20000)
+        before = page.evaluate("document.getElementById('stage').style.transform")
+        box = page.evaluate("(() => { const r = document.getElementById('viewport').getBoundingClientRect(); return [r.x + r.width/2, r.y + r.height/2]; })()")
+        page.mouse.move(box[0], box[1])
+        page.mouse.down()
+        page.mouse.move(box[0] + 120, box[1] + 80, steps=8)
+        page.mouse.up()
+        after = page.evaluate("document.getElementById('stage').style.transform")
+        assert before != after, (before, after)
+        browser.close()

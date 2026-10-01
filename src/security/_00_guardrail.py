@@ -16,9 +16,11 @@ _OUT_OF_SCOPE = re.compile(
 )
 
 _IN_SCOPE = re.compile(
-    r"\b(architect|diagram|mermaid|dependen|import|call ?graph|function|class|module|"
-    r"refactor|dead ?code|blast|impact|invariant|layer|coupling|cohesion|flow|trace|"
-    r"symbol|repo|codebase|test|coverage|challenge|explain (this|the) (code|function|class|file))\b",
+    r"\b(architect\w*|diagrams?|mermaid|depend\w*|imports?|call ?graphs?|functions?|"
+    r"class\w*|modules?|refactor\w*|dead ?code|blast|impacts?|break\w*|chang\w*|"
+    r"invariants?|rules?|fails?|violat\w*|layers?|coupling|cohesion|flows?|trac\w*|"
+    r"symbols?|repos?|codebase|tests?|coverage|challenge|explain|summar\w*|bullets?|"
+    r"design\w*|structur\w*|patterns?)\b",
     re.IGNORECASE,
 )
 
