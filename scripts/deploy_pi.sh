@@ -14,7 +14,9 @@ source "$ENV_FILE"
 set +a
 
 PI_USER="${PI_USER:-pi}"
-PI_HOST="${PI_HOST:-192.168.0.65}"
+# Privacy: default below is a placeholder example LAN address only.
+# Set the real address via PI_HOST in your local untracked `.env`.
+PI_HOST="${PI_HOST:-192.168.1.100}"
 PI_DIR="${PI_DIR:-/home/pi/archimind}"
 ARCHIMIND_IMAGE="${ARCHIMIND_IMAGE:-${DOCKER_IMAGE:-${DOCKERHUB_REPO:-krishnah27/archimind}:${DOCKER_IMAGE_TAG:-latest}}}"
 

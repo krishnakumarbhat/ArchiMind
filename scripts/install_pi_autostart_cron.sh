@@ -2,7 +2,8 @@
 set -euo pipefail
 
 PI_USER="${PI_USER:-pi}"
-PI_HOST="${PI_HOST:-192.168.1.65}"
+# Privacy: placeholder example LAN address only; override via PI_HOST in local `.env`.
+PI_HOST="${PI_HOST:-192.168.1.100}"
 PI_DIR="${PI_DIR:-/home/pi/archimind}"
 
 echo "[autostart] Installing reboot autostart on ${PI_USER}@${PI_HOST}"

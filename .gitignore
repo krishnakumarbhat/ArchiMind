@@ -1,11 +1,23 @@
 # Environment variables and secrets
+# SAFETY: `.env` (and variants) hold real API keys / DB URLs and must NEVER be
+# committed. Only `.env.example` (placeholders) is tracked. Keep real host IPs
+# and credentials in your local untracked `.env`.
 .env
 .env.local
 .env.production
 .env.staging
+.env.*.local
 secrets.txt
 secret.txt
 *.secret
+# Private keys / certs / tokens (defense in depth against accidental staging)
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.token
 
 # Python
 __pycache__/

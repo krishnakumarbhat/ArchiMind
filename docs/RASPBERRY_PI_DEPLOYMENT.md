@@ -13,7 +13,8 @@ ARCHIMIND_IMAGE=krishnah27/archimind:latest
 DOCKERHUB_REPO=krishnah27/archimind
 DOCKER_IMAGE_TAG=latest
 PI_USER=pi
-PI_HOST=192.168.0.65
+# Example placeholder only — use your Pi's real LAN IP in your local untracked `.env`.
+PI_HOST=192.168.1.100
 PI_DIR=/home/pi/archimind
 ```
 
@@ -82,7 +83,7 @@ The script does the following:
 If you want to operate the Pi manually instead of using the helper script:
 
 ```bash
-ssh pi@192.168.0.65
+ssh pi@192.168.1.100  # replace with your Pi's real LAN IP (kept in local `.env`, never committed)
 mkdir -p ~/archimind
 cd ~/archimind
 ```
@@ -120,7 +121,7 @@ Expected values:
 After pushing a new image:
 
 ```bash
-ssh pi@192.168.0.65 'cd ~/archimind && docker compose pull && docker compose up -d && docker compose ps'
+ssh pi@192.168.1.100 'cd ~/archimind && docker compose pull && docker compose up -d && docker compose ps'  # use your real PI_HOST
 ```
 
 If you changed tags, update `ARCHIMIND_IMAGE` in `.env` on the Pi first.
