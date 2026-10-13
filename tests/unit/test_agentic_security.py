@@ -1,0 +1,66 @@
+"""Unit tests: agentic tools, challenge harness, guardrail, scrubber."""
+from src.agentic._00_cpg_tools import CPGInspectionToolSuite
+from src.agentic._01_challenge import SWEChallengeHarness
+from src.cpg._01_cpg_builder import CodePropertyGraphBuilder
+from src.security._00_guardrail import GUARDRAIL_MESSAGE, check_scope
+from src.security._01_scrubber import ENGINE_LABEL, engine_label, scrub
+
+FILES = {
+    "a.py": "class A:\n    def m(self): return helper()\ndef helper(): return 1\n",
+    "b.py": "from a import A\ndef go():\n    return A().m()\n"}
+
+BUILDER = CodePropertyGraphBuilder()
+
+
+def test_guardrail_rejects_chitchat():
+    """Out-of-scope prompts get the exact guardrail message."""
+    assert check_scope("Write an essay about Napoleon") == GUARDRAIL_MESSAGE
+    assert check_scope("Solve my math homework") == GUARDRAIL_MESSAGE
+    assert check_scope("hi") == GUARDRAIL_MESSAGE
+    assert check_scope("") == GUARDRAIL_MESSAGE
+
+
+def test_guardrail_allows_repo_reasoning():
+    """Architecture questions pass, including long open-ended ones."""
+    assert check_scope("explain the blast impact of Session") == ""
+    assert check_scope("which invariants does this repo violate and why") == ""
+    assert check_scope("What layers exist in this Flask application and how do they interact at runtime?") == ""
+    # suggestion chips shipped in the UI must never trip the guardrail
+    assert check_scope("What breaks if I change Module?") == ""
+    assert check_scope("Explain the architecture in 5 bullets") == ""
+    assert check_scope("Which architecture rules fail?") == ""
+
+
+def test_scrubber_masks_fingerprints():
+    """No provider/model string survives scrubbing."""
+    out = scrub("Backend: gemini-3.1-flash-lite with text-embedding-004 via google-genai")
+    assert "gemini" not in out.lower() and "google-genai" not in out
+    assert "text-embedding" not in out and out.startswith("Engine: ")
+    assert engine_label() == ENGINE_LABEL
+
+
+def test_tools_answer_from_graph():
+    """Tool calls resolve deterministically against the CPG."""
+    tools = CPGInspectionToolSuite(BUILDER.build(FILES))
+    hit = tools.trace_symbol_impact("A.m")
+    assert hit["tool"] == "trace_symbol_impact" and hit["edges"] >= 1
+    rules = tools.verify_rules()
+    assert rules["tool"] == "verify_architecture_rules" and "rules" in rules
+    sig = tools.get_symbol_ast("A.m")
+    assert sig["tool"] == "get_symbol_ast" and len(sig["matches"]) >= 1
+
+
+def test_challenge_schema_complete():
+    """Challenge carries problem, target, starter, and failing test."""
+    ch = SWEChallengeHarness(BUILDER.build(FILES)).generate()
+    assert ch is not None
+    for key in ("title", "description", "target_file", "symbol", "starter_code", "failing_test"):
+        assert ch[key], key
+    assert "pytest" in ch["starter_code"]
+
+
+def test_challenge_none_when_fully_called():
+    """A clique where everything calls everything yields no seams."""
+    files = {"a.py": "def f():\n    return g()\ndef g():\n    return f()\n"}
+    harness = SWEChallengeHarness(BUILDER.build(files))
+    assert harness.find_seams() == [] or harness.generate() is not None

@@ -51,4 +51,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=5 \
     CMD python -c "from urllib.request import urlopen; urlopen('http://127.0.0.1:5000/api/status', timeout=5).read()"
 
-CMD ["/bin/sh", "-c", "exec gunicorn 'app:create_app()' --bind 0.0.0.0:${PORT:-5000} --workers ${GUNICORN_WORKERS:-1} --threads ${GUNICORN_THREADS:-4} --timeout ${GUNICORN_TIMEOUT:-240} --graceful-timeout 30 --access-logfile - --error-logfile -"]
+CMD ["/bin/sh", "-c", "exec gunicorn 'main:app' --bind 0.0.0.0:${PORT:-5000} --workers ${GUNICORN_WORKERS:-1} --threads ${GUNICORN_THREADS:-4} --timeout ${GUNICORN_TIMEOUT:-240} --graceful-timeout 30 --access-logfile - --error-logfile -"]

@@ -13,6 +13,7 @@ ARCHIMIND_IMAGE=krishnah27/archimind:latest
 DOCKERHUB_REPO=krishnah27/archimind
 DOCKER_IMAGE_TAG=latest
 PI_USER=pi
+# Example placeholder only — use your Pi's real LAN IP in your local untracked `.env`.
 PI_HOST=192.168.1.100
 PI_DIR=/home/pi/archimind
 ```
@@ -37,7 +38,7 @@ sudo systemctl start docker
 Then run:
 
 ```bash
-bash scripts/00_build_and_push_image.sh krishnah27/archimind latest
+bash scripts/docker_build.sh krishnah27/archimind latest
 ```
 
 What this does:
@@ -55,7 +56,7 @@ Before deploying to the Pi, verify the container starts cleanly:
 If `docker info` fails, start Docker on the build machine before running the smoke test.
 
 ```bash
-bash scripts/01_smoke_test_container.sh
+# smoke test is built into scripts/docker_build.sh
 ```
 
 This builds the image locally, starts it on port `5050`, and waits for `/api/status` to return successfully.
@@ -82,7 +83,7 @@ The script does the following:
 If you want to operate the Pi manually instead of using the helper script:
 
 ```bash
-ssh pi@192.168.1.100
+ssh pi@192.168.1.100  # replace with your Pi's real LAN IP (kept in local `.env`, never committed)
 mkdir -p ~/archimind
 cd ~/archimind
 ```
@@ -112,15 +113,15 @@ Once the container is up:
 
 Expected values:
 
-- `gemini:gemini-3.1-flash-lite-preview` when Gemini is active,
-- `local` if the app had to fall back because `GEMINI_API_KEY` or Gemini access was unavailable.
+- `ArchiMind v2 CPG Harness` when neural generation is active,
+- `local` if the app fell back because the generation API key or access was unavailable.
 
 ## 7. Updating the Pi to a newer image
 
 After pushing a new image:
 
 ```bash
-ssh pi@192.168.1.100 'cd ~/archimind && docker compose pull && docker compose up -d && docker compose ps'
+ssh pi@192.168.1.100 'cd ~/archimind && docker compose pull && docker compose up -d && docker compose ps'  # use your real PI_HOST
 ```
 
 If you changed tags, update `ARCHIMIND_IMAGE` in `.env` on the Pi first.

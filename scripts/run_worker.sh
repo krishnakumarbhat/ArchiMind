@@ -15,7 +15,7 @@ ANALYSIS_LOG_ID="${2:-}"
 mkdir -p data data/chroma_db data/temp_repo
 
 if [[ -n "$ANALYSIS_LOG_ID" ]]; then
-  python3 worker.py "$REPO_URL" "$ANALYSIS_LOG_ID"
+  python3 -m src.orchestration._04_worker "$REPO_URL" "$ANALYSIS_LOG_ID"
 else
-  python3 worker.py "$REPO_URL"
+  python3 -m src.orchestration._04_worker "$REPO_URL"
 fi

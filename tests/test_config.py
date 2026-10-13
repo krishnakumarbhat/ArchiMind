@@ -1,6 +1,6 @@
 """Configuration tests for environment normalization and fallback."""
 
-import config
+import src.config._02_app_config as config
 
 
 def test_get_database_url_falls_back_for_non_url_value(monkeypatch):

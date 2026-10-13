@@ -26,7 +26,7 @@ Common tasks
 - Run worker
   - `bash scripts/run_worker.sh <github_repo_url>`
 - Tests
-  - `bash scripts/test_local.sh` or `pytest -q`
+  - `bash scripts/test_all.sh` or `pytest -q`
 
 Packaging & Docker
 - See `docker-compose.yml` and `Dockerfile` in the project root. Use the numbered scripts in `ArchiMind/scripts/` for build and smoke tests.

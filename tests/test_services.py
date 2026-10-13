@@ -5,8 +5,8 @@ import tempfile
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
-from services import DocumentationService, VectorStoreService, _SimpleCollection
-from services import RepositoryService
+from src.services._00_services import (DocumentationService, RepositoryService,
+                      VectorStoreService, _SimpleCollection)
 
 
 def test_simple_collection_add_and_query():
@@ -158,7 +158,7 @@ def test_documentation_service_uses_gemini_generate_content_with_high_thinking()
     mock_types.GenerateContentConfig.side_effect = lambda **kwargs: kwargs
     mock_types.HttpOptions.side_effect = lambda **kwargs: kwargs
 
-    with patch("services.genai", mock_genai), patch("services.genai_types", mock_types):
+    with patch("src.services._00_services.genai", mock_genai), patch("src.services._00_services.genai_types", mock_types):
         service = DocumentationService(
             api_key="test-api-key",
             model_name="gemini-3.1-flash-lite-preview",
@@ -190,7 +190,7 @@ def test_documentation_service_generate_chat_answer_uses_gemini_with_question_an
     mock_types.GenerateContentConfig.side_effect = lambda **kwargs: kwargs
     mock_types.HttpOptions.side_effect = lambda **kwargs: kwargs
 
-    with patch("services.genai", mock_genai), patch("services.genai_types", mock_types):
+    with patch("src.services._00_services.genai", mock_genai), patch("src.services._00_services.genai_types", mock_types):
         service = DocumentationService(
             api_key="test-api-key",
             model_name="gemini-3.1-flash-lite-preview",

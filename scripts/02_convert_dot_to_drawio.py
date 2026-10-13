@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict, deque
 from pathlib import Path
 
-
 ATTR_PATTERN = re.compile(r"(\w+)\s*=\s*(\"(?:[^\"\\]|\\.)*\"|[^,\]]+)")
 NODE_PATTERN = re.compile(r"^(?P<name>[A-Za-z0-9_]+)\s*\[(?P<attrs>.+)\]\s*;?$")
 EDGE_PATTERN = re.compile(

@@ -6,7 +6,7 @@ from unittest.mock import patch
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("DATABASE_URL", "sqlite:///data/test_app.db")
 
-from app import AnalysisLog, User, create_app, db
+from src.web._00_application import AnalysisLog, User, create_app, db
 
 
 def _make_client():
@@ -31,7 +31,7 @@ def test_api_analyze_requires_repo_url():
     assert "error" in response.get_json()
 
 
-@patch("app.RepositoryService.get_repository_preview")
+@patch("src.web._00_application.RepositoryService.get_repository_preview")
 def test_api_preview_returns_repository_metadata(mock_preview):
     mock_preview.return_value = {
         "full_name": "example/repo",
@@ -50,8 +50,8 @@ def test_api_preview_returns_repository_metadata(mock_preview):
     assert response.get_json()["full_name"] == "example/repo"
 
 
-@patch("app.DocumentationService")
-@patch("app.VectorStoreService")
+@patch("src.web._00_application.DocumentationService")
+@patch("src.web._00_application.VectorStoreService")
 def test_api_chat_returns_grounded_answer(mock_vector_cls, mock_doc_cls):
     vector_service = mock_vector_cls.return_value
     vector_service.is_empty.return_value = False
@@ -67,14 +67,15 @@ def test_api_chat_returns_grounded_answer(mock_vector_cls, mock_doc_cls):
         json={
             "repo_url": "https://github.com/example/repo",
             "repo_name": "repo",
-            "question": "How is the app created?",
+            "question": "Explain the architecture: how is the app created?",
         },
     )
 
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["answer"] == "The app factory creates the Flask application."
-    assert payload["backend"] == "local"
+    assert payload["engine"] == "ArchiMind Neural Graph Core"
+    assert "backend" not in payload
     assert mock_vector_cls.call_args.kwargs["collection_name"] == "example__repo"
 
 

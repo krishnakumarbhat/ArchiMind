@@ -1,0 +1,35 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82", "F541", "F841"]
+# NOTE: import order is owned by isort (CI runs isort --check-only); do NOT re-add "I" here.
+
+[tool.black]
+line-length = 110
+target-version = ["py310"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["flask_login.*", "authlib.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "src.services._00_services",
+  "src.web._00_application",
+  "src.storage.models",
+  "src.services._01_oauth",
+  "src.orchestration._04_worker",
+]
+# Legacy carryover, relocated verbatim in the root-isolation refactor
+# (see single_sto.md phased plan): full strict typing is scheduled
+# post-release. All engine packages (config/cpg/governance/agentic/
+# security/storage-cache/orchestration-loop) stay strict.
+ignore_errors = true

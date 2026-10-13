@@ -6,7 +6,7 @@ from unittest.mock import patch
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("DATABASE_URL", "sqlite:///data/test_integration.db")
 
-from app import create_app
+from src.web._00_application import create_app
 
 
 def test_analyze_endpoint_starts_worker_process():

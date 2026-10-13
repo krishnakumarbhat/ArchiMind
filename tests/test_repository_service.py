@@ -6,7 +6,7 @@ from http.client import IncompleteRead
 from pathlib import Path
 from unittest.mock import patch
 
-from services import RepositoryService
+from src.services._00_services import RepositoryService
 
 
 def test_clone_repository_returns_true_if_path_exists():
@@ -55,7 +55,7 @@ class _PartialReadResponse:
         raise IncompleteRead(b"partial payload", 64)
 
 
-@patch("services.urlopen", return_value=_PartialReadResponse())
+@patch("src.services._00_services.urlopen", return_value=_PartialReadResponse())
 def test_http_get_text_uses_partial_payload_when_remote_read_is_interrupted(_mock_urlopen):
     service = RepositoryService()
     text = service._http_get_text("https://example.com/repo.txt")
@@ -76,9 +76,9 @@ class _JsonResponse:
         return self.payload
 
 
-@patch("services.time.sleep", return_value=None)
+@patch("src.services._00_services.time.sleep", return_value=None)
 @patch(
-    "services.urlopen",
+    "src.services._00_services.urlopen",
     side_effect=[
         _PartialReadResponse(),
         _JsonResponse(b'{"full_name": "example/repo"}'),

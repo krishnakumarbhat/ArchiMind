@@ -11,4 +11,4 @@ if [[ ! -f .env ]]; then
   exit 1
 fi
 
-python3 app.py
+python3 main.py
