@@ -60,9 +60,28 @@
     this.apply();
   };
 
+  PanZoom.prototype.recenter = function () {
+    // Recompute the SVG box and pull a drifted diagram back into view.
+    var r = this.vp.getBoundingClientRect();
+    var svg = this.stage.querySelector("svg");
+    if (!svg || !r.width || !r.height) return;
+    var box = svg.getBoundingClientRect();
+    var cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+    var vx = r.left + r.width / 2, vy = r.top + r.height / 2;
+    var far = Math.abs(cx - vx) > r.width || Math.abs(cy - vy) > r.height;
+    if (far || box.width === 0) this.fit();
+    else { this.x += vx - cx; this.y += vy - cy; this.apply(); }
+  };
+
   PanZoom.prototype._bind = function () {
     var self = this;
     var lx = 0, ly = 0, drag = false;
+    var resizeTimer = 0;
+    window.addEventListener("resize", function () {
+      // ponytail: debounced — zoom/resize fires continuously, layout is transform-only
+      if (resizeTimer) window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(function () { self.recenter(); }, 180);
+    });
 
     this.vp.addEventListener("wheel", function (e) {
       e.preventDefault();

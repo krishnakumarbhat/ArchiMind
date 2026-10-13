@@ -19,9 +19,15 @@ from src.cpg._01_cpg_builder import EDGE_CALLS, EDGE_INSTANTIATES, NODE_CLASS, N
 class CPGDiagramCompiler:
     """Compiles deterministic HLD/LLD/flow diagrams and handbooks from a CPG."""
 
+    EMPTY = 'graph TD\n    Empty["No Call Edges Detected in Analyzed Source Files"]'
+
     def __init__(self, graph: nx.DiGraph[Any]) -> None:
         """Bind the compiler to a built code property graph."""
         self._graph = graph
+
+    def _has_calls(self) -> bool:
+        """Report whether the graph contains any mapped call edges."""
+        return bool(self._call_edges())
 
     @staticmethod
     def _sid(raw: str, prefix: str = "n") -> str:
@@ -52,6 +58,8 @@ class CPGDiagramCompiler:
         """Compile a package-level component map with weighted dependencies."""
         g = self._graph
         paths = [str(d["path"]) for _, d in g.nodes(data=True) if d.get("kind") == NODE_FILE]
+        if not paths:
+            return self.EMPTY
         groups = Counter(self._group(p) for p in paths)
         by_file = len(groups) < 3
         key = (lambda p: os.path.splitext(os.path.basename(p))[0]) if by_file else self._group
@@ -86,7 +94,7 @@ class CPGDiagramCompiler:
             if a in top and b in top:
                 lines.append(f"    {self._sid(a, 'c')} -->|{w}| {self._sid(b, 'c')}")
         if len(lines) == 1:
-            lines.append('    c_root["repository"]')
+            return self.EMPTY
         lines.append("    classDef hub fill:#0c4a6e,stroke:#38bdf8,stroke-width:2px,color:#f1f5f9")
         lines.append("    classDef mod fill:#1e293b,stroke:#475569,color:#e2e8f0")
         for k in top:
@@ -100,6 +108,8 @@ class CPGDiagramCompiler:
         for n, d in g.nodes(data=True):
             if d.get("kind") == NODE_CLASS:
                 ranked.append((g.in_degree(n) + g.out_degree(n), n))
+        if not ranked:
+            return self.EMPTY
         ranked.sort(reverse=True)
         chosen = [n for _, n in ranked[:limit]]
         names = {n: self._sid(str(g.nodes[n]["name"]), "K") for n in chosen}
@@ -119,8 +129,6 @@ class CPGDiagramCompiler:
             for base in g.successors(n):
                 if base in names and g.edges[n, base].get("kind") == "INHERITS":
                     lines.append(f"    {names[base]} <|-- {names[n]}")
-        if len(lines) == 1:
-            lines += ["    class K_module {", "        +main()", "    }"]
         return "\n".join(lines)
 
     def flow(self, steps: int = 9) -> str:
@@ -134,15 +142,7 @@ class CPGDiagramCompiler:
         entries.sort(key=lambda n: (-self._cross(n, out), -len(out.get(n, [])), str(n)))
         lines = ["sequenceDiagram", "    autonumber"]
         if not entries:
-            return "\n".join(
-                lines
-                + [
-                    "    participant CLI as Entry",
-                    "    participant Core as Core engine",
-                    "    CLI->>Core: run()",
-                    "    Core-->>CLI: result",
-                ]
-            )
+            return self.EMPTY
         parts: Dict[str, str] = {}
         cur, seen, count = entries[0], {entries[0]}, 0
         stack = [cur]
@@ -160,8 +160,7 @@ class CPGDiagramCompiler:
                 count += 1
                 stack.insert(0, v)
         if count == 0:
-            solo = self._part(cur, parts, lines)
-            lines.append(f"    {solo}->>{solo}: run()")
+            return self.EMPTY
         return "\n".join(lines)
 
     def _home(self, node: str) -> str:

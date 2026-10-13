@@ -416,6 +416,7 @@ class AnalysisWorker:
             cpg_artifact: dict = {}
             invariant_results: list = []
             cpg_diagrams: Dict[str, str] = {}
+            ingest_warning = ""
             try:
                 from src.config._01_constants import CPG_EXTENSIONS
                 from src.cpg._01_cpg_builder import CodePropertyGraphBuilder
@@ -424,6 +425,17 @@ class AnalysisWorker:
                 from src.orchestration._03_cpg_diagrams import CPGDiagramCompiler
 
                 src_files = {k: v for k, v in file_contents.items() if k.endswith(CPG_EXTENSIONS)}
+                builder = CodePropertyGraphBuilder()
+                cpg = builder.build(dict(list(src_files.items())[:300]))
+                n_edges = cpg.number_of_edges()
+                if n_edges == 0:
+                    exts = sorted({os.path.splitext(k)[1] or "(none)" for k in file_contents})
+                    ingest_warning = (
+                        f"Ingested {len(file_contents)} file(s) ({len(src_files)} supported: "
+                        f"{', '.join(CPG_EXTENSIONS)}; seen: {', '.join(exts)}), but mapped 0 call edges. "
+                        "Diagrams show an explicit empty state instead of a placeholder."
+                    )
+                    self.logger.warning("Zero call edges for %s: %s", repo_url, ingest_warning)
                 builder = CodePropertyGraphBuilder()
                 cpg = builder.build(dict(list(src_files.items())[:300]))
                 compiler = CPGDiagramCompiler(cpg)
@@ -497,6 +509,7 @@ class AnalysisWorker:
                 "engine": "ArchiMind v2 CPG Harness",
                 "repair_log": repair_log,
                 "cpg_artifact": cpg_artifact,
+                "ingest_warning": ingest_warning,
                 "invariants": invariant_results,
                 "cpg_diagrams": cpg_diagrams,
             }

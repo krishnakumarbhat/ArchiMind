@@ -89,6 +89,10 @@ def test_api_analyze_success(mock_popen):
     with app.app_context():
         assert AnalysisLog.query.count() == 1
     assert mock_popen.called
+    argv, kwargs = mock_popen.call_args
+    assert argv[0][1] == "src/orchestration/_04_worker.py"
+    assert argv[0][2] == "https://github.com/example/repo"
+    assert kwargs["env"]["PYTHONPATH"].split(os.pathsep)[0].endswith("ArchiMind")
 
 
 def test_api_check_limit_anonymous_structure():

@@ -329,9 +329,13 @@ class ArchiMindApplication:
         db.session.add(analysis_log)
         db.session.commit()
 
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        env = dict(os.environ)
+        env["PYTHONPATH"] = project_root + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
         subprocess.Popen(
-            [sys.executable, "-m", "src.orchestration._04_worker", repo_url, str(analysis_log.id)],
-            cwd=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            [sys.executable, "src/orchestration/_04_worker.py", repo_url, str(analysis_log.id)],
+            cwd=project_root,
+            env=env,
             close_fds=True,
         )
 

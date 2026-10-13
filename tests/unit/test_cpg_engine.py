@@ -140,3 +140,24 @@ def test_impact_report_shape_and_timing():
     artifact = CodePropertyGraphBuilder.to_compact(BUILDER.build(FILES))
     rep = ReverseBlastRadiusEngine(artifact).compute_impact("UserRepo.fetch")
     assert rep.symbol == "UserRepo.fetch" and rep.edges >= 1 and rep.ms < 1000
+
+
+def test_empty_graph_emits_explicit_empty_state():
+    """Zero files/edges yield a styled empty state, never a placeholder diagram."""
+    from src.orchestration._03_cpg_diagrams import CPGDiagramCompiler
+
+    g = BUILDER.build({})
+    comp = CPGDiagramCompiler(g)
+    for code in (comp.hld(), comp.lld(), comp.flow()):
+        assert 'No Call Edges Detected in Analyzed Source Files' in code
+        assert 'A-->B' not in code and 'c_root' not in code and 'K_module' not in code
+        assert MermaidEvaluatorOptimizer.validate(code) == ""
+
+
+def test_no_dummy_fallback_strings_anywhere():
+    """No shipped diagram path may contain hardcoded dummy content."""
+    import src.orchestration._03_cpg_diagrams as dmod
+    import inspect
+
+    src = inspect.getsource(dmod)
+    assert 'A-->B' not in src and 'c_root' not in src and 'K_module' not in src

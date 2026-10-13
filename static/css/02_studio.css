@@ -1,7 +1,7 @@
 /* 02_studio.css — studio shell: topbar, tabs, docked assistant, reader, governance. */
 .topbar {
-  height: var(--topbar-h); display: flex; align-items: center; gap: 10px;
-  padding: 0 clamp(10px, 2vw, 20px); border-bottom: 1px solid var(--border);
+  min-height: var(--topbar-h); box-sizing: border-box; display: flex; align-items: center; gap: 10px;
+  padding: 0.75rem 1.25rem; margin: 0; border-bottom: 1px solid var(--border);
   background: rgba(12, 15, 20, 0.86); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 40;
 }
 .brand { font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
@@ -23,6 +23,7 @@
 .input:focus { outline: none; border-color: var(--accent); }
 
 .studio { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 27vw, 420px);
+  grid-template-rows: minmax(0, 1fr);
   height: calc(100dvh - var(--topbar-h)); min-height: 0; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .tabs { display: flex; gap: 4px; padding: 8px clamp(8px, 2vw, 16px); border-bottom: 1px solid var(--border);
