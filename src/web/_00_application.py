@@ -68,8 +68,10 @@ class ApplicationConfig:
     """Runtime configuration for the Flask application."""
 
     def __init__(self):
-        debug_enabled = _get_bool_env("FLASK_DEBUG", False)
-        default_secure_cookie = not debug_enabled
+        # ponytail: secure cookies over plain HTTP are silently dropped by browsers,
+        # which makes login look broken locally. Default OFF; production sets
+        # SESSION_COOKIE_SECURE=1 (Render serves HTTPS).
+        default_secure_cookie = _get_bool_env("SESSION_COOKIE_SECURE", False)
 
         self.SECRET_KEY = os.getenv("SECRET_KEY", uuid.uuid4().hex)
         self.DATA_PATH = config.DATA_PATH
@@ -635,7 +637,10 @@ class ArchiMindApplication:
             else:
                 flash("Email does not exist.", category="error")
 
-        return render_template("login.html", user=current_user)
+        return render_template(
+            "login.html", user=current_user,
+            google_enabled=bool(self.config.GOOGLE_CLIENT_ID and self.config.GOOGLE_CLIENT_SECRET),
+        )
 
     def _logout(self):
         logout_user()

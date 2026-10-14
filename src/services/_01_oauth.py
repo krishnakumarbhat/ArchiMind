@@ -49,7 +49,10 @@ oauth_bp = Blueprint("oauth", __name__)
 
 @oauth_bp.route("/login/google")
 def google_login():
-    """Initiate Google OAuth2 login flow."""
+    """Initiate Google OAuth2 login flow (fail-soft when unconfigured)."""
+    if not os.getenv("GOOGLE_CLIENT_ID") or not os.getenv("GOOGLE_CLIENT_SECRET"):
+        flash("Google login is not configured on this server. Use email login.", "error")
+        return redirect(url_for("_landing"))
     redirect_uri = url_for("oauth.google_callback", _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 

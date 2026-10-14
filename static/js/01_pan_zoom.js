@@ -18,6 +18,21 @@
     this.stage.style.transform = "translate(" + this.x + "px," + this.y + "px) scale(" + this.k + ")";
   };
 
+  PanZoom.prototype.showZoom = function () {
+    // Visible zoom feedback so users can tell gestures are registering.
+    var chip = this.vp.querySelector(".zoom-chip");
+    if (!chip) {
+      chip = document.createElement("div");
+      chip.className = "zoom-chip";
+      this.vp.appendChild(chip);
+    }
+    chip.textContent = Math.round(this.k * 100) + "%";
+    chip.classList.add("show");
+    var self = this;
+    if (this._zoomT) window.clearTimeout(this._zoomT);
+    this._zoomT = window.setTimeout(function () { chip.classList.remove("show"); }, 900);
+  };
+
   PanZoom.prototype.zoomAt = function (cx, cy, factor) {
     var k2 = Math.min(4, Math.max(0.2, this.k * factor));
     var s = k2 / this.k;
@@ -25,6 +40,7 @@
     this.y = cy - (cy - this.y) * s;
     this.k = k2;
     this.apply();
+    this.showZoom();
   };
 
   PanZoom.prototype.zoomBy = function (factor) {
@@ -127,11 +143,25 @@
     function up(e) {
       self._pointers.delete(e.pointerId);
       if (self._pointers.size < 2) self._pinch = 0;
-      if (self._pointers.size === 0) drag = false;
+      // ponytail: pinch lifting to one finger must hand off to pan, not die
+      if (self._pointers.size === 1) {
+        var rest = Array.from(self._pointers.values())[0];
+        drag = true; lx = rest.x; ly = rest.y;
+      } else if (self._pointers.size === 0) {
+        drag = false;
+      }
+      self.showZoom();
     }
     this.vp.addEventListener("pointerup", up);
     this.vp.addEventListener("pointercancel", up);
-    this.vp.addEventListener("dblclick", function () { self.fit(); });
+    // ponytail: iOS Safari fires gesture events and page-zooms unless stopped here
+    ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
+      self.vp.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+    });
+    this.vp.addEventListener("touchmove", function (e) {
+      if (e.touches && e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    this.vp.addEventListener("dblclick", function () { self.fit(); self.showZoom(); });
   };
 
   PanZoom.prototype.exportSVG = function () {

@@ -34,3 +34,8 @@
   background: rgba(15, 23, 36, 0.72); border: 1px solid var(--border); border-radius: 999px; padding: 5px 11px; }
 .canvas-empty, .canvas-error { padding: 3rem 2rem; color: var(--muted); font-size: var(--fs-sm); max-width: 36rem; }
 .canvas-error { color: var(--bad); }
+.zoom-chip { position: absolute; left: 50%; bottom: 1rem; transform: translate3d(-50%, 8px, 0); z-index: 6;
+  background: rgba(15, 23, 36, 0.85); border: 1px solid var(--border-strong); color: var(--text);
+  font-size: var(--fs-sm); font-weight: 600; border-radius: 999px; padding: 5px 12px;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; }
+.zoom-chip.show { opacity: 1; transform: translate3d(-50%, 0, 0); }
