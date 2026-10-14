@@ -17,7 +17,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import src.config._02_app_config as config
-from src.storage.models import AnalysisLog, User, db
+from src.services._00_services import DocumentationService, RepositoryService, VectorStoreService
 from src.services._01_oauth import (
     get_repository_details,
     get_user_repository_history,
@@ -25,7 +25,7 @@ from src.services._01_oauth import (
     init_redis,
     oauth_bp,
 )
-from src.services._00_services import DocumentationService, RepositoryService, VectorStoreService
+from src.storage.models import AnalysisLog, User, db
 
 load_dotenv()
 
@@ -644,7 +644,8 @@ class ArchiMindApplication:
                 flash("Email does not exist.", category="error")
 
         return render_template(
-            "login.html", user=current_user,
+            "login.html",
+            user=current_user,
             google_enabled=bool(self.config.GOOGLE_CLIENT_ID and self.config.GOOGLE_CLIENT_SECRET),
         )
 

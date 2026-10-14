@@ -21,19 +21,27 @@ def test_landing_renders_search_hero():
 def test_workspace_renders_five_tabs():
     """Studio route serves all five tab anchors."""
     html = _client().get("/workspace/golden:pytorch").get_data(as_text=True)
-    for tab in ("data-stab=\"canvas\"", "data-stab=\"handbook\"", "data-stab=\"govern\"",
-                "data-stab=\"agent\"", "data-stab=\"telemetry\""):
+    for tab in (
+        'data-stab="canvas"',
+        'data-stab="handbook"',
+        'data-stab="govern"',
+        'data-stab="agent"',
+        'data-stab="telemetry"',
+    ):
         assert tab in html
 
 
 def test_chat_guardrail_blocks_essay():
     """Out-of-scope chat is rejected without touching the model."""
     client = _client()
-    resp = client.post("/api/chat", json={
-        "repo_url": "https://github.com/psf/requests",
-        "repo_name": "requests",
-        "question": "Write an essay about Napoleon",
-    })
+    resp = client.post(
+        "/api/chat",
+        json={
+            "repo_url": "https://github.com/psf/requests",
+            "repo_name": "requests",
+            "question": "Write an essay about Napoleon",
+        },
+    )
     assert resp.status_code == 200
     body = resp.get_json()
     assert body["guardrail"] is True and "scoped strictly" in body["answer"]
@@ -62,12 +70,15 @@ def test_challenge_endpoint_needs_graph():
 def test_no_model_names_leak_in_chat():
     """Chat responses never expose provider/model fingerprints."""
     client = _client()
-    resp = client.post("/api/chat", json={
-        "repo_url": "https://github.com/psf/requests",
-        "repo_name": "requests",
-        "question": "blast impact of Session",
-        "golden": "requests",
-    })
+    resp = client.post(
+        "/api/chat",
+        json={
+            "repo_url": "https://github.com/psf/requests",
+            "repo_name": "requests",
+            "question": "blast impact of Session",
+            "golden": "requests",
+        },
+    )
     body = resp.get_json()
     text = (body.get("answer") or "") + (body.get("engine") or "")
     assert "gemini" not in text.lower() and "Backend:" not in text

@@ -22,12 +22,14 @@ def parse_attrs(raw_attrs: str) -> dict[str, str]:
     for match in ATTR_PATTERN.finditer(raw_attrs):
         key = match.group(1)
         value = match.group(2).strip().strip('"')
-        value = value.replace(r"\n", "\n").replace(r'\"', '"')
+        value = value.replace(r"\n", "\n").replace(r"\"", '"')
         attributes[key] = value
     return attributes
 
 
-def parse_dot(dot_path: Path) -> tuple[str, str, dict[str, dict[str, str]], list[dict[str, str]], dict[str, str], dict[str, str]]:
+def parse_dot(
+    dot_path: Path,
+) -> tuple[str, str, dict[str, dict[str, str]], list[dict[str, str]], dict[str, str], dict[str, str]]:
     title = dot_path.stem.replace("_", " ").title()
     rankdir = "LR"
     node_defaults: dict[str, str] = {}
@@ -75,7 +77,9 @@ def parse_dot(dot_path: Path) -> tuple[str, str, dict[str, dict[str, str]], list
     return title, rankdir, nodes, edges, node_defaults, edge_defaults
 
 
-def compute_positions(node_names: list[str], edges: list[dict[str, str]], rankdir: str) -> dict[str, tuple[int, int]]:
+def compute_positions(
+    node_names: list[str], edges: list[dict[str, str]], rankdir: str
+) -> dict[str, tuple[int, int]]:
     if not node_names:
         return {}
 

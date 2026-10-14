@@ -10,7 +10,7 @@ from src.orchestration._04_worker import AnalysisWorker
 
 def test_clean_json_response_handles_fences():
     worker = AnalysisWorker()
-    raw = "```json\n{\"k\":\"v\"}\n```"
+    raw = '```json\n{"k":"v"}\n```'
     assert worker._clean_json_response(raw) == '{"k":"v"}'
 
 
@@ -50,14 +50,21 @@ def test_run_analysis_success(mock_repo_cls, mock_vector_cls, mock_doc_cls):
 
         worker = AnalysisWorker()
 
-        with patch("src.orchestration._04_worker.config.STATUS_FILE_PATH", status_file), \
-             patch("src.orchestration._04_worker.config.LOCAL_CLONE_PATH", os.path.join(temp_dir, "repo")), \
-             patch("src.orchestration._04_worker.config.CHROMA_DB_PATH", os.path.join(temp_dir, "chroma")), \
-             patch("src.orchestration._04_worker.config.EMBEDDING_MODEL", "models/gemini-embedding-001"), \
-             patch("src.orchestration._04_worker.config.ALLOWED_EXTENSIONS", {".py"}), \
-             patch("src.orchestration._04_worker.config.IGNORED_DIRECTORIES", {".git"}), \
-             patch.object(worker, "_update_database_log"), \
-             patch.object(worker, "_save_to_history"):
+        with patch("src.orchestration._04_worker.config.STATUS_FILE_PATH", status_file), patch(
+            "src.orchestration._04_worker.config.LOCAL_CLONE_PATH", os.path.join(temp_dir, "repo")
+        ), patch(
+            "src.orchestration._04_worker.config.CHROMA_DB_PATH", os.path.join(temp_dir, "chroma")
+        ), patch(
+            "src.orchestration._04_worker.config.EMBEDDING_MODEL", "models/gemini-embedding-001"
+        ), patch(
+            "src.orchestration._04_worker.config.ALLOWED_EXTENSIONS", {".py"}
+        ), patch(
+            "src.orchestration._04_worker.config.IGNORED_DIRECTORIES", {".git"}
+        ), patch.object(
+            worker, "_update_database_log"
+        ), patch.object(
+            worker, "_save_to_history"
+        ):
             worker.status_file = status_file
             worker.run_analysis("https://github.com/example/repo", analysis_log_id=1)
 
@@ -103,14 +110,21 @@ def test_run_analysis_refreshes_existing_index(mock_repo_cls, mock_vector_cls, m
 
         worker = AnalysisWorker()
 
-        with patch("src.orchestration._04_worker.config.STATUS_FILE_PATH", status_file), \
-             patch("src.orchestration._04_worker.config.LOCAL_CLONE_PATH", os.path.join(temp_dir, "repo")), \
-             patch("src.orchestration._04_worker.config.CHROMA_DB_PATH", os.path.join(temp_dir, "chroma")), \
-             patch("src.orchestration._04_worker.config.EMBEDDING_MODEL", "models/gemini-embedding-001"), \
-             patch("src.orchestration._04_worker.config.ALLOWED_EXTENSIONS", {".py"}), \
-             patch("src.orchestration._04_worker.config.IGNORED_DIRECTORIES", {".git"}), \
-             patch.object(worker, "_update_database_log"), \
-             patch.object(worker, "_save_to_history"):
+        with patch("src.orchestration._04_worker.config.STATUS_FILE_PATH", status_file), patch(
+            "src.orchestration._04_worker.config.LOCAL_CLONE_PATH", os.path.join(temp_dir, "repo")
+        ), patch(
+            "src.orchestration._04_worker.config.CHROMA_DB_PATH", os.path.join(temp_dir, "chroma")
+        ), patch(
+            "src.orchestration._04_worker.config.EMBEDDING_MODEL", "models/gemini-embedding-001"
+        ), patch(
+            "src.orchestration._04_worker.config.ALLOWED_EXTENSIONS", {".py"}
+        ), patch(
+            "src.orchestration._04_worker.config.IGNORED_DIRECTORIES", {".git"}
+        ), patch.object(
+            worker, "_update_database_log"
+        ), patch.object(
+            worker, "_save_to_history"
+        ):
             worker.status_file = status_file
             worker.run_analysis("https://github.com/example/repo", analysis_log_id=2)
 

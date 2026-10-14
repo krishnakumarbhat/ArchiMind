@@ -127,7 +127,9 @@ def test_canvas_drag_pans_viewport(server):
             page.click(".card >> nth=0")
         page.wait_for_selector("#mermaidHost svg", timeout=20000)
         before = page.evaluate("document.getElementById('stage').style.transform")
-        box = page.evaluate("(() => { const r = document.getElementById('viewport').getBoundingClientRect(); return [r.x + r.width/2, r.y + r.height/2]; })()")
+        box = page.evaluate(
+            "(() => { const r = document.getElementById('viewport').getBoundingClientRect(); return [r.x + r.width/2, r.y + r.height/2]; })()"
+        )
         page.mouse.move(box[0], box[1])
         page.mouse.down()
         page.mouse.move(box[0] + 120, box[1] + 80, steps=8)

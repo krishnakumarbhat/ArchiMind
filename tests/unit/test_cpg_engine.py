@@ -85,9 +85,9 @@ def test_compact_roundtrip():
     g = BUILDER.build(FILES)
     g2 = CodePropertyGraphBuilder.from_compact(CodePropertyGraphBuilder.to_compact(g))
     assert g2.number_of_nodes() == g.number_of_nodes()
-    assert CodePropertyGraphBuilder.blast_radius(g2, "UserRepo.fetch") == CodePropertyGraphBuilder.blast_radius(
-        g, "UserRepo.fetch"
-    )
+    assert CodePropertyGraphBuilder.blast_radius(
+        g2, "UserRepo.fetch"
+    ) == CodePropertyGraphBuilder.blast_radius(g, "UserRepo.fetch")
 
 
 def test_invariants_shape():
@@ -116,13 +116,17 @@ def test_eval_optimizer_heals_broken_mermaid():
         return "not a diagram" if calls["n"] == 1 else "graph TD\n    A-->B"
 
     state = OPTIMIZER.run("hld", "demo", "ctx", gen)
-    assert MermaidEvaluatorOptimizer.validate(str(state.get("mermaid", ""))) == "" and state.get("attempts") == 2
+    assert (
+        MermaidEvaluatorOptimizer.validate(str(state.get("mermaid", ""))) == "" and state.get("attempts") == 2
+    )
 
 
 def test_eval_optimizer_caps_retries():
     """Persistently broken generator stops at the retry cap."""
     state = OPTIMIZER.run("hld", "demo", "ctx", lambda k, r, c, e: "junk")
-    assert (state.get("attempts") or 0) <= 3 and MermaidEvaluatorOptimizer.validate(str(state.get("mermaid", ""))) != ""
+    assert (state.get("attempts") or 0) <= 3 and MermaidEvaluatorOptimizer.validate(
+        str(state.get("mermaid", ""))
+    ) != ""
 
 
 def test_tarball_url_rejects_non_github():
@@ -149,15 +153,16 @@ def test_empty_graph_emits_explicit_empty_state():
     g = BUILDER.build({})
     comp = CPGDiagramCompiler(g)
     for code in (comp.hld(), comp.lld(), comp.flow()):
-        assert 'No Call Edges Detected in Analyzed Source Files' in code
-        assert 'A-->B' not in code and 'c_root' not in code and 'K_module' not in code
+        assert "No Call Edges Detected in Analyzed Source Files" in code
+        assert "A-->B" not in code and "c_root" not in code and "K_module" not in code
         assert MermaidEvaluatorOptimizer.validate(code) == ""
 
 
 def test_no_dummy_fallback_strings_anywhere():
     """No shipped diagram path may contain hardcoded dummy content."""
-    import src.orchestration._03_cpg_diagrams as dmod
     import inspect
 
+    import src.orchestration._03_cpg_diagrams as dmod
+
     src = inspect.getsource(dmod)
-    assert 'A-->B' not in src and 'c_root' not in src and 'K_module' not in src
+    assert "A-->B" not in src and "c_root" not in src and "K_module" not in src

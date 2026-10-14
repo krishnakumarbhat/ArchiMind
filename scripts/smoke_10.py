@@ -58,7 +58,11 @@ def main() -> int:
 
             comp = CPGDiagramCompiler(g)
             diags = {"hld": comp.hld(), "lld": comp.lld(), "flow": comp.flow()}
-            bad = {k: MermaidEvaluatorOptimizer.validate(v) for k, v in diags.items() if MermaidEvaluatorOptimizer.validate(v)}
+            bad = {
+                k: MermaidEvaluatorOptimizer.validate(v)
+                for k, v in diags.items()
+                if MermaidEvaluatorOptimizer.validate(v)
+            }
             row["diagrams_invalid"] = bad
             row["status"] = "PASS" if not bad and files else ("EMPTY" if not files else "FAIL")
         except Exception as exc:
@@ -68,9 +72,17 @@ def main() -> int:
             failures += 1
         row["secs"] = round(time.time() - t0, 1)
         results.append(row)
-        print(f"[{i}/10] {url.split('/')[-1]:12s} {row['status']:6s} files={row.get('files')} "
-              f"nodes={row.get('nodes')} edges={row.get('edges')} {row['secs']}s", flush=True)
-    summary = {"repos": len(REPOS), "failures": failures, "total_secs": round(time.time() - t_all, 1), "rows": results}
+        print(
+            f"[{i}/10] {url.split('/')[-1]:12s} {row['status']:6s} files={row.get('files')} "
+            f"nodes={row.get('nodes')} edges={row.get('edges')} {row['secs']}s",
+            flush=True,
+        )
+    summary = {
+        "repos": len(REPOS),
+        "failures": failures,
+        "total_secs": round(time.time() - t_all, 1),
+        "rows": results,
+    }
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2)
     print("SMOKE:", json.dumps({k: v for k, v in summary.items() if k != "rows"}))

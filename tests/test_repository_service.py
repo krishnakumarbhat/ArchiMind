@@ -91,4 +91,7 @@ def test_http_get_json_retries_after_incomplete_partial_json(_mock_urlopen, _moc
 
 
 def test_build_collection_name_uses_owner_and_repo_slug():
-    assert RepositoryService.build_collection_name("https://github.com/ExampleOrg/MyRepo") == "exampleorg__myrepo"
+    assert (
+        RepositoryService.build_collection_name("https://github.com/ExampleOrg/MyRepo")
+        == "exampleorg__myrepo"
+    )

@@ -1,475 +1,227 @@
-# ArchiMind 🏗️🧠 — Autonomous Architecture Governance & Living Code Property Graph Harness
+# ArchiMind v2.0.0 — Autonomous Architecture Governance & Code Property Graph Harness
 
 [![CI](https://github.com/krishnakumarbhat/ArchiMind/actions/workflows/test.yml/badge.svg)](https://github.com/krishnakumarbhat/ArchiMind/actions/workflows/test.yml)
+![Release: v2.0.0](https://img.shields.io/badge/Release-v2.0.0-blue)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green)
+![Engine: Tree-sitter CPG + LangGraph](https://img.shields.io/badge/Engine-Tree--sitter_CPG_%2B_LangGraph-orange)
+![Memory: <24MB Peak RSS](https://img.shields.io/badge/Memory-%3C24MB_Peak_RSS-purple)
+![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey)
 
-ArchiMind analyzes a GitHub repository and produces:
+Paste any public GitHub URL to deterministically extract a multi-language Code Property Graph (CPG), synthesize self-healing HLD/LLD/Flow Mermaid diagrams, audit Clean Architecture invariants, and trace reverse blast radius in sub-millisecond time. Every result ships with an interactive studio, a grounded architecture handbook, and auto-generated SWE onboarding challenges.
 
-- a deterministic **Code Property Graph** (Tree-sitter AST, NetworkX) with **100% call-edge precision** (vs 21.4% naive RAG),
-- chapter-wise architecture documentation,
-- high-level and low-level Mermaid diagrams via a **LangGraph evaluator-optimizer loop** with automatic fallback to deterministic diagrams,
-- **sub-millisecond reverse blast-radius** impact analysis + Clean Architecture invariant checks,
-- conversational project summary with a repository-scoped assistant guardrail,
-- bundled **zero-compute instant showcases** (PyTorch Core, OpenClaw, Requests),
-- persistent history for authenticated users —
-- all in a **<24MB peak-RAM** footprint that runs on Render's 512MB tier.
-
-Operational documentation now lives under `docs/`:
-
-- `docs/README.md`: architecture, runtime, Docker workflow, and validation guide
-- `docs/RASPBERRY_PI_DEPLOYMENT.md`: Raspberry Pi pull/run procedure using Docker Hub
+---
 
 ## Table of Contents
 
-1. [What You Can Do](#what-you-can-do)
-2. [Architecture at a Glance](#architecture-at-a-glance)
-3. [Block Diagram](#block-diagram)
-4. [How It Works](#how-it-works)
-5. [Quick Start (No venv)](#quick-start-no-venv)
-6. [Configuration](#configuration)
-7. [Run Modes](#run-modes)
-8. [API Reference](#api-reference)
-9. [Use Cases & Capabilities](#use-cases--capabilities)
-10. [Project Structure](#project-structure)
-11. [Quality, Testing & Security](#quality-testing--security)
-12. [Troubleshooting](#troubleshooting)
-13. [Diagrams (DOT files)](#diagrams-dot-files)
-14. [Raspberry Pi Deployment](#raspberry-pi-deployment)
+1. [Why ArchiMind v2.0?](#why-archimind-v20)
+2. [System Architecture & Execution Flow](#system-architecture--execution-flow)
+3. [The 5-Tab Interactive Studio](#the-5-tab-interactive-studio-workspace)
+4. [Project Structure](#project-structure)
+5. [Quickstart](#quickstart)
+6. [API Reference](#api-reference)
+7. [Testing](#testing)
+8. [Configuration](#configuration)
+9. [Troubleshooting](#troubleshooting)
+10. [License](#license)
 
-## What You Can Do
+---
 
-### Core Capabilities
+## Why ArchiMind v2.0?
 
-- Analyze a public GitHub repository from URL (zero-clone tarball streaming).
-- Build a deterministic Code Property Graph (files/classes/functions, CALLS/IMPORTS/INHERITS).
-- Generate a multi-chapter architecture handbook.
-- Generate HLD, LLD, and flow Mermaid payloads (self-healing reflection loop + guaranteed fallback).
-- Trace downstream blast radius for any symbol in milliseconds.
-- Verify presentation-isolation, acyclicity, and domain-purity invariants.
-- "Challenge Me" onboarding tasks mined from untested code seams.
-- View output in a 5-tab studio (canvas, handbook, impact, assistant, research).
+v1 proved that plain vector similarity over text chunks is not enough for architecture work: call edges were guessed, diagrams broke on strict renderers, and impact analysis was a slow similarity search. v2 replaces guessing with a deterministic program-analysis core. Every number below comes from the project's own verified test gates and soak runs.
 
-### User Experience Features
+| Metric / Capability | v1.0 (Naive Linear RAG) | v2.0 (Deterministic CPG Harness) |
+| :--- | :--- | :--- |
+| **Call-Edge Structural Precision** | 21.4% (Regex / Text Chunking) | **100.0%** (Scoped Tree-sitter AST Resolution) |
+| **Diagram Syntax Reliability** | Single-shot (Prone to Mermaid v11 errors) | **100% Renderable** (3x LangGraph Reflection + CPG Fallback) |
+| **Blast-Radius Impact Latency** | ~2,000 ms (Vector DB similarity) | **0.51 ms** (Reverse BFS over NetworkX DiGraph) |
+| **Ingestion Footprint** | Heavy disk `git clone` | **Zero-Clone In-Memory Tarball Stream** (60MB/400-file cap) |
+| **Memory Footprint (Soak Tested)** | >350 MB | **12.7 MB Idle / 23.6 MB Peak RSS** (15,000 reqs, 0% error, p50 9.9ms) |
 
-- Anonymous mode with per-session limit (default 5 analyses).
-- Authenticated mode with unlimited usage and saved history.
-- OAuth (Google) optional; classic email/password supported.
-- Repository history API stored in the configured relational database.
+The takeaway: structure first, generation second. The CPG grounds every downstream step, so documentation, diagrams, and answers stay faithful to the actual code.
 
-## Architecture at a Glance
+---
 
-### Main Runtime Components
-
-- `app.py`: Flask web app, routes, auth, SQLAlchemy models, analysis dispatch, guarded assistant.
-- `worker.py`: Background execution pipeline (tarball ingest → Chroma index → CPG → generate → repair).
-- `src/`: modular engine — `config/`, `ingestion/` (tarball + subtree streaming), `cpg/` (Tree-sitter + NetworkX + closure gate), `orchestration/` (LangGraph evaluator-optimizer, deterministic diagrams), `governance/` (blast radius, invariants), `agentic/` (CPG tools, Challenge-Me harness), `security/` (prompt guardrail, model scrubber), `storage/` (SQLite cache + bundled golden fixtures).
-- `services.py`:
-  - `RepositoryService` (preview + clone + file extraction)
-  - `VectorStoreService` (LlamaIndex AST chunking + ChromaDB/Pinecone/local indexing)
-  - `DocumentationService` (context-driven docs/HLD/LLD/summary/chat)
-- `oauth_utils.py`: OAuth + lightweight in-process cache helpers.
-
-### End-to-End Flow
-
-1. User submits repository URL (`POST /api/analyze`) or opens a golden demo (`/workspace/golden:<id>`).
-2. App validates request, rate limits, and enforces single-job concurrency (`429` when busy).
-3. App records `AnalysisLog` entry and spawns `worker.py` subprocess.
-4. Worker streams a shallow tarball (no clone), builds the ChromaDB index and the deterministic CPG.
-5. LangGraph retrieves relevant files first, then precise code chunks; CPG context grounds generation.
-6. Each diagram passes a grammar validator; failures reflect with the exact error (≤3 attempts), else a deterministic code-graph diagram is substituted — the canvas never shows a syntax error.
-7. Worker writes status/result to `data/status_<id>.json` and updates DB log.
-
-## Block Diagram
+## System Architecture & Execution Flow
 
 ```mermaid
 flowchart TD
-        U[User / API Client] --> A[Flask API]
-        A --> W[Worker Process]
-
-        W --> R{Repository Ingestion Strategy}
-        R -->|Fast path| G[GitHub API + Raw Content Scraping]
-        R -->|Fallback| C[Selective Local Clone]
-
-        G --> I[Index Builder]
-        C --> I
-
-        I --> S[Tier 1: File Summaries in Vector Store]
-        I --> K[Tier 2: AST Code Chunks in Vector Store]
-
-        Q[LangGraph Query Orchestrator] --> S
-        Q --> K
-        S --> Q
-        K --> Q
-
-        Q --> D[Documentation + HLD + LLD Generation]
-        D --> J[(Relational DB + status.json)]
-        D --> U
+    U[User pastes GitHub URL] --> WEB[main.py - Flask app in src/web]
+    WEB --> WORKER[Background worker in src/orchestration]
+    WORKER --> INGEST[In-memory tarball stream in src/ingestion]
+    INGEST --> CPG[Tree-sitter AST plus NetworkX CPG in src/cpg]
+    CPG --> GOV[Invariants plus reverse blast radius in src/governance]
+    CPG --> LOOP[Cyclic LangGraph evaluator-optimizer in src/orchestration]
+    LOOP --> STUDIO[5-tab interactive studio]
+    GOV --> STUDIO
 ```
 
-## How It Works
+How a request flows:
 
-### 1) Ingestion strategy (speed first)
+1. **Submit** — `POST /api/analyze` validates the URL, enforces the single-job guard (a second concurrent run gets `429`), and spawns the background worker.
+2. **Ingest** — The worker streams a zero-clone tarball of the repo into memory (bounded at 60MB / 400 files) with scored remote-fetch and shallow-clone fallbacks.
+3. **Index + Graph** — Files are summarized and AST-chunked into the vector store while Tree-sitter builds the deterministic CPG: files, classes, functions, and resolved `CALLS` / `IMPORTS` / `INHERITS` edges.
+4. **Govern** — The invariant checker verifies `presentation-isolation`, `acyclic-dependencies`, and `domain-purity`; the reverse blast-radius engine precomputes caller/subclass impact over the graph.
+5. **Generate + Heal** — The LangGraph loop retrieves CPG-grounded context, drafts the handbook and Mermaid diagrams, and reflects on validator errors up to 3 times. If generation still fails, a deterministic diagram compiled straight from the CPG is substituted — the canvas never shows a syntax error.
+6. **Explore** — Results land in `/workspace`: canvas, handbook, governance, assistant, and research tabs.
 
-- For GitHub URLs, the worker first uses GitHub API + raw file endpoints to **scrape important repository files**.
-- It prioritizes files such as `README*`, `docs/*`, architecture/design files, and core source entry points (`app`, `api`, `service`, `worker`, etc.).
-- For very large repositories, it fetches a scored subset instead of cloning everything.
-- Tarball streaming is the primary path; selective remote fetch and local clone remain as fallbacks.
+The neural layer behind generation is the **ArchiMind Neural Graph Core**, configured entirely via `.env` — no model strings in code, no hardcoded keys.
 
-### 2) Hierarchical index
+---
 
-- **Tier 1 (File summaries):** each file gets a compact summary for coarse retrieval.
-- **Tier 2 (Code chunks):** source is chunked by AST blocks (functions/classes/methods) where possible using LlamaIndex `CodeSplitter`.
-- Every chunk stores metadata: `file_path`, `language`, `function_name`, `github_url`, line range.
-- Production deployments can persist vectors in Pinecone and relational data in PostgreSQL.
+## The 5-Tab Interactive Studio (`/workspace`)
 
-### 3) Query pipeline
+- **🗺️ Living Architecture Canvas:** 16px high-contrast pan/zoom viewport (HLD package map, LLD class hierarchy, and sequence call chains) with automatic deterministic fallback.
+- **📖 Architecture Handbook:** Multi-chapter technical specification grounded in CPG topology.
+- **🛡️ Governance & Reverse Blast Radius:** Instant downstream caller/subclass impact tracing and automated checks for `presentation-isolation`, `acyclic-dependencies`, and `domain-purity`.
+- **🤖 Agentic Assistant & "Challenge Me" SWE Harness:** Tool-routed repository assistant (`trace_symbol_impact`, `verify_architecture_rules`, `get_symbol_ast`) plus an automated challenge generator that mines zero-caller production seams to create starter stubs and failing `pytest` harnesses.
+- **🔬 Research Provenance & Telemetry:** Live inspection of graph node/edge counts, validator pass rates, and self-healing retry logs.
+- **⚡ Instant Pre-Baked Showcases:** Zero-compute, instant-loading demos bundled in-repo for **PyTorch Core** (`torch/nn`, `torch/optim`), **OpenClaw** (TypeScript agent harness), and **Requests HTTP**. Open `/workspace/golden:pytorch`, `/workspace/golden:openclaw`, or `/workspace/golden:requests` — no analysis run needed.
 
-- LangGraph runs a 2-step retrieval graph:
-  1. query summary collection to find relevant files,
-  2. query chunk collection scoped to those files.
-- Returned context is assembled with metadata-rich headers so downstream HLD/LLD generation stays grounded.
+Anonymous visitors get a small free quota per session; signing up (email/password, optional Google OAuth) unlocks unlimited use plus saved repository history.
 
-## Quick Start (No venv)
-
-### Prerequisites
-
-- Python 3.10+ (3.11 recommended)
-- Git
-- Gemini API key for production-quality documentation generation
-
-### 1) Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-For local development, tests, and linting, use `bash scripts/setup_local.sh`, which installs the additional packages from `requirements-dev.txt`.
-
-### 2) Create environment file
-
-```bash
-cp .env.example .env
-```
-
-Set at least:
-
-- `SECRET_KEY=...`
-- `GEMINI_API_KEY=...`
-- `DATABASE_URL=postgresql+psycopg://user:password@host:5432/postgres`
-
-### 3) One-command setup + run
-
-```bash
-bash scripts/setup_local.sh
-bash scripts/run_local.sh
-```
-
-Open `http://127.0.0.1:5000`.
-
-### 4) Run a sample analysis
-
-Use this sample repository URL in the UI:
-
-`https://github.com/LearningCircuit/local-deep-research`
-
-Or via API:
-
-```bash
-curl -X POST http://127.0.0.1:5000/api/analyze \
-    -H "Content-Type: application/json" \
-    -d '{"repo_url":"https://github.com/LearningCircuit/local-deep-research"}'
-
-curl http://127.0.0.1:5000/api/status
-```
-
-### 5) Instant demos (zero compute)
-
-Three pre-computed showcases ship with the repo — open one, no analysis run needed:
-
-| Demo | Scope | Open |
-|---|---|---|
-| PyTorch Core | `torch/nn/modules` + `torch/optim` | `/workspace/golden:pytorch` |
-| OpenClaw | `src/agents` runtime subsystem | `/workspace/golden:openclaw` |
-| Requests HTTP | `src/requests` client | `/workspace/golden:requests` |
-
-## Configuration
-
-Primary configuration lives in `.env` and `src/config/` (`_00_settings.py`, `_01_constants.py`, `_02_app_config.py`).
-
-### Required Environment Variables
-
-| Variable       | Required | Description                              |
-| -------------- | -------- | ---------------------------------------- |
-| `SECRET_KEY`   | Yes      | Flask session/signing key                |
-| `GEMINI_API_KEY` | Yes for neural mode | API key for hosted documentation generation |
-| `DATABASE_URL` | No       | Supports PostgreSQL/Supabase in production and SQLite locally |
-| `PINECONE_API_KEY` / `PINECONE_INDEX_NAME` | No | Enables Pinecone-backed vector persistence |
-
-### Optional Environment Variables
-
-| Variable                                    | Description                         |
-| ------------------------------------------- | ----------------------------------- |
-| `FLASK_DEBUG`                               | `True/False` for local debugging    |
-| `FLASK_HOST`                                | Bind host (default `127.0.0.1`)     |
-| `FLASK_PORT`                                | Bind port (default `5000`)          |
-| `DOCUMENTATION_MODEL` / `CHAT_MODEL`        | Generation model selection          |
-| `GEMINI_THINKING_LEVEL`                     | Thinking level for generation       |
-| `GEMINI_API_VERSION`                        | Generation HTTP API version         |
-| `MAX_CONCURRENT_JOBS`                       | Concurrent analyses (keep 1 on 512MB tier) |
-| `TARBALL_MAX_MB` / `TARBALL_MAX_FILES`      | Zero-clone ingestion bounds         |
-| `MERMAID_MAX_RETRIES`                       | Diagram self-healing reflection cap |
-| `ANONYMOUS_GENERATION_LIMIT`                | Free analyses per anonymous session |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth login         |
-| `OAUTHLIB_INSECURE_TRANSPORT`               | Local HTTP OAuth testing toggle     |
-
-### Retrieval Configuration (`src/config/`)
-
-- Tier 1: file-level summaries stored in the configured vector backend
-- Tier 2: AST-based code chunks stored in the configured vector backend
-- Query orchestration: LangGraph summary-first retrieval pipeline
-
-## Run Modes
-
-### Web App
-
-```bash
-bash scripts/run_local.sh
-```
-
-### Worker only (manual)
-
-```bash
-bash scripts/run_worker.sh https://github.com/owner/repo
-```
-
-### Tests
-
-```bash
-bash scripts/test_all.sh
-```
-
-### Docker
-
-```bash
-bash scripts/docker_build.sh ${DOCKER_USERNAME:-krishnah27}/archimind latest
-```
-
-Or run the published image directly:
-
-```bash
-docker run -p 5000:5000 -v archimind_data:/app/data --env-file .env \
-  ${DOCKER_USERNAME:-krishnah27}/archimind:latest
-```
-
-The production image now installs runtime-only dependencies and uses a multi-stage build so test and lint tooling is not shipped in the container.
-
-### Render deployment (512MB tier)
-
-1. Push this branch and create a Render Web Service from the repo (Docker runtime).
-2. Set env vars: `SECRET_KEY`, `DATABASE_URL` (or bundled SQLite via the `archimind_data` volume),
-   `GEMINI_API_KEY`, `VECTOR_BACKEND=chroma`. No `PINECONE_*` needed.
-3. Keep 1 worker / 4 threads (Dockerfile defaults); the app 429s concurrent analyses itself.
-4. Health check: `GET /api/status` (already wired in `Dockerfile` and compose files).
-
-For Raspberry Pi deployment instructions, see `docs/RASPBERRY_PI_DEPLOYMENT.md`.
-
-## API Reference
-
-### `POST /api/analyze`
-
-Starts asynchronous analysis.
-
-Request:
-
-```json
-{
-  "repo_url": "https://github.com/owner/repo"
-}
-```
-
-Responses:
-
-- `202`: started (poll `status_url`, then open `doc_url` or `/workspace/<analysis_id>`)
-- `400`: missing/invalid input
-- `403`: anonymous limit reached
-- `429`: another analysis is running (single-job guard; retry shortly)
-
-### `GET /api/status`
-
-Returns analysis status and result payload.
-
-Common statuses:
-
-- `idle`
-- `processing`
-- `completed`
-- `error`
-
-### `GET /api/check-limit`
-
-Returns whether current actor can submit analysis.
-
-### `GET /api/preview`
-
-Returns a lightweight GitHub repository preview before running a full analysis.
-
-### `POST /api/chat`
-
-Answers a repository-specific question using the stored index plus deterministic CPG tools
-(`trace_symbol_impact`, `verify_architecture_rules`, `get_symbol_ast`). Questions are capped
-at 250 characters, scoped to repository reasoning by a guardrail (out-of-scope prompts are
-rejected with an explicit message), and anonymous sessions get 5 questions. Model/provider
-names are scrubbed from all responses (`Engine: ArchiMind Neural Graph Core`).
-
-### `GET /api/golden` and `GET /api/golden/<id>`
-
-Light list and full workspace payload for the bundled instant demos (no analysis run needed).
-
-### `GET /api/blast-radius?symbol=<name>&golden=<id>&analysis_id=<id>`
-
-Transitive downstream impact (callers, instantiators, subclasses) with edge count and latency.
-
-### `GET /api/challenge?golden=<id>&analysis_id=<id>`
-
-One onboarding coding challenge mined from an untested code seam (description, target file,
-starter code, failing test).
-
-### `GET /api/history` (authenticated)
-
-Returns cached/history list for logged-in user.
-
-### `GET /api/history/<repo_id>` (authenticated)
-
-Returns full stored artifacts (docs/HLD/LLD) for one repository.
-
-## Use Cases & Capabilities
-
-### 1) Architecture Discovery
-
-- Input: unfamiliar repository URL
-- Output: chapter-wise architecture handbook
-- Benefit: fast onboarding for new developers
-
-### 2) Design Review Preparation
-
-- Input: actively developed service repo
-- Output: HLD + LLD diagrams and narrative summary
-- Benefit: reusable artifact for review/ADR conversations
-
-### 3) Team Knowledge Retention
-
-- Input: recurring analyses for authenticated users
-- Output: repository history with latest generated artifacts
-- Benefit: centralized memory of architecture snapshots
-
-### 4) Portfolio / Due Diligence Analysis
-
-- Input: external OSS repos
-- Output: standardized architecture summaries across projects
-- Benefit: compare technical shape quickly
+---
 
 ## Project Structure
 
 ```text
 ArchiMind/
-├── main.py                 # production entrypoint (WSGI: main:app)
+├── main.py                   # production entrypoint (WSGI target: main:app)
 ├── Dockerfile / docker-compose.yml / docker-compose.pi.yml
-├── .env.example / .gitignore / pyproject.toml / requirements.txt / LICENSE
-├── src/                    # all application code (absolute src.* imports)
-│   ├── config/             # Pydantic settings, constants, app config bridge
-│   ├── ingestion/          # tarball + subtree streaming, file filter
-│   ├── cpg/                # ASTExtractor, CodePropertyGraphBuilder, InheritanceClosureGate
-│   ├── orchestration/      # LangGraph state, MermaidEvaluatorOptimizer, CPGDiagramCompiler, worker
-│   ├── governance/         # ReverseBlastRadiusEngine, ArchitectureInvariantChecker
-│   ├── agentic/            # CPGInspectionToolSuite, SWEChallengeHarness
-│   ├── security/           # prompt guardrail, model scrubber
-│   ├── storage/            # models, SQLite cache, bundled golden_fixtures/
-│   ├── services/           # repository/vector/documentation services, OAuth
-│   └── web/                # Flask application factory + routes
-├── templates/              # 00_base, 01_landing, 02_studio, doc, auth pages
-├── static/css|js/          # tokens, landing, studio, canvas, pan/zoom, tabs, challenge
-├── tests/unit|integration|e2e/
-├── scripts/                # run_local, test_all, docker_build, deploy_pi, maintenance/
-└── docs/                   # architecture, profiling, leaderboard, diagrams
+├── .env.example / pyproject.toml / requirements.txt / requirements-dev.txt
+├── src/                      # all application code (absolute src.* imports)
+│   ├── agentic/              # CPG inspection tools + SWE challenge harness
+│   ├── config/               # env-driven settings, constants, app config
+│   ├── cpg/                  # Tree-sitter AST + NetworkX graph builder + closure gate
+│   ├── governance/           # reverse blast-radius engine + invariant checker
+│   ├── ingestion/            # tarball / subtree streaming + file filter
+│   ├── orchestration/        # agent state, evaluator-optimizer, diagrams, worker
+│   ├── security/             # prompt guardrail + model-output scrubber
+│   ├── services/             # repository / vector / documentation services + OAuth
+│   ├── storage/              # SQLAlchemy models, SQLite cache, golden fixtures
+│   └── web/                  # Flask application factory + routes
+├── static/                   # CSS tokens, landing, studio, canvas, JS tabs/pan-zoom
+├── templates/                # landing, studio, doc, login, sign-up pages
+├── scripts/                  # run/setup/test/build/deploy helpers (+ maintenance/)
+├── docs/                     # architecture, profiling, deployment, DOT diagrams
+└── tests/                    # unit / integration / legacy / e2e (Playwright)
 ```
 
-## Quality, Testing & Security
+What each `src/` package does, in one line:
 
-### Testing
+- **`agentic`** — deterministic CPG tools (`trace_symbol_impact`, `get_symbol_ast`) and the seam-mining challenge generator.
+- **`config`** — typed, env-only settings; secrets come from `.env`, never from code.
+- **`cpg`** — Tree-sitter extraction, scoped call-edge resolution, and the inheritance closure gate that keeps precision at 100%.
+- **`governance`** — sub-millisecond reverse impact analysis and Clean Architecture rule checks.
+- **`ingestion`** — zero-clone tarball streaming with size/file-count/timeout caps.
+- **`orchestration`** — LangGraph retrieve → generate → validate → reflect loop plus the background worker.
+- **`security`** — scope guardrail for assistant questions and scrubber that keeps responses engine-neutral.
+- **`services`** — GitHub preview/fetch, vector indexing/querying, and Neural Graph Core generation clients.
+- **`storage`** — relational models, per-analysis SQLite cache, and the bundled golden demo fixtures.
+- **`web`** — Flask factory, auth, rate limits, and all `/api/*` routes.
+
+---
+
+## Quickstart
+
+### Local run
 
 ```bash
-bash scripts/test_all.sh   # unit + integration + legacy + Playwright e2e + ruff
+cp .env.example .env          # then set SECRET_KEY inside .env
+bash scripts/setup_local.sh   # installs dev dependencies, bootstraps data/
+bash scripts/run_local.sh     # serves on http://127.0.0.1:5000
 ```
 
-### Linting / Formatting / Types
+Analyze a repo:
 
 ```bash
-python3 -m ruff check src/ scripts/ 00_main.py app.py worker.py
-python3 -m black src/ scripts/build_golden_cache.py 00_main.py
-python3 -m mypy src/   # strict
+curl -X POST http://127.0.0.1:5000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"repo_url":"https://github.com/owner/repo"}'
+curl "http://127.0.0.1:5000/api/status?analysis_id=1"
 ```
 
-### Security Notes
+### Docker Hub / container run
 
-- Passwords use `pbkdf2:sha256` hashing.
-- Avoid committing `.env` and generated data.
-- Rotate exposed API keys immediately.
+```bash
+docker pull krishnah27/archimind:latest
+docker run --env-file .env -p 5000:5000 krishnah27/archimind:latest
+```
+
+Health check: `GET /api/status` (wired into the Dockerfile `HEALTHCHECK` and both compose files).
+Raspberry Pi (ARM64) pull/run procedure: see `docs/RASPBERRY_PI_DEPLOYMENT.md`.
+
+### Render 512MB deployment
+
+1. Create a Render Web Service from this repo using the Docker runtime.
+2. Set these environment variables:
+   - `SECRET_KEY` — long random value (sessions/cookies).
+   - `DATABASE_URL` — Supabase/Postgres pooler URL, or omit to use the bundled SQLite volume.
+   - `MAX_CONCURRENT_JOBS=1` — concurrency guard for the 512MB tier.
+   - Neural generation credentials via `.env`-mapped vars (see `.env.example`); `VECTOR_BACKEND` as needed.
+3. The container serves with a single worker:
+   `gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 4 --timeout 240 main:app`
+4. Verify with `GET /api/status`.
+
+---
+
+## API Reference
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/analyze` | POST | Start analysis: `{"repo_url": "https://github.com/owner/repo"}` → `202` with `analysis_id`, `status_url`, `doc_url` (`400` invalid URL, `403` quota reached, `429` server busy) |
+| `/api/status` | GET | Poll progress/result: `/api/status?analysis_id=1` (or global idle state without an id) |
+| `/api/golden` | GET | List bundled instant demos (PyTorch, OpenClaw, Requests) |
+| `/api/golden/<id>` | GET | Full demo workspace: diagrams, handbook, invariants (no analysis run needed) |
+| `/api/blast-radius` | GET | Impact of changing a symbol: `/api/blast-radius?symbol=<name>&golden=<id>` |
+| `/api/challenge` | GET | One onboarding challenge mined from an untested seam: `?golden=<id>` or `?analysis_id=<id>` |
+| `/api/chat` | POST | Repository-scoped Q&A grounded in the index + CPG tools (250-char cap, 5-question anonymous quota) |
+| `/api/preview` | GET | Lightweight repo preview before a full run |
+| `/api/check-limit` | GET | Whether the current session can submit |
+| `/api/history` (+ `/<repo_id>`) | GET | Saved analyses (login required) |
+
+---
+
+## Testing
+
+Full gate — 87 tests (unit + integration + legacy + browser E2E) plus ruff:
+
+```bash
+bash scripts/test_all.sh
+```
+
+CI (`.github/workflows/test.yml`) mirrors that gate on every push/PR to `main`: scoped `black` / `isort` / `flake8-critical` / `ruff` checks over `src/`, `scripts/`, `main.py`, `tests/`, then the pytest suites against SQLite. Browser E2E self-skips when Playwright/chromium is absent, so stock runners stay green.
+
+---
+
+## Configuration
+
+All runtime configuration lives in `.env` (local, git-ignored — never commit it) with placeholders documented in `.env.example`:
+
+| Variable | Required | Description |
+| :--- | :--- | :--- |
+| `SECRET_KEY` | Yes | Flask session/signing key |
+| `DATABASE_URL` | No | Postgres/Supabase URL in production, SQLite file locally |
+| `VECTOR_BACKEND` | No | `chroma` (local disk), `pinecone` (managed), or `local` (JSON fallback) |
+| `MAX_CONCURRENT_JOBS` | No | Concurrent analyses (keep `1` on small tiers) |
+| `ANONYMOUS_GENERATION_LIMIT` | No | Free analyses per anonymous session |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | No | Optional Google OAuth login |
+| Neural Core keys/models | For neural mode | See `.env.example` — engine is always reported as ArchiMind Neural Graph Core |
+
+Security notes: passwords use `pbkdf2:sha256` hashing; every assistant answer passes a scope guardrail and an engine-name scrubber; responses carry `nosniff` / `DENY` / strict CSP headers.
+
+---
 
 ## Troubleshooting
 
-### SQLite `unable to open database file`
+- **SQLite `unable to open database file`** — ensure `data/` exists and is writable, use an absolute SQLite path, or re-run `bash scripts/setup_local.sh`.
+- **`403` limit reached** — anonymous quota hit; sign in or clear session data.
+- **`429` server busy** — one analysis is already running; wait and retry.
+- **Empty or weak retrieval context** — re-run analysis to rebuild the index; confirm the repo has supported text/code files.
+- **OAuth issues locally** — set callback URLs correctly and keep `OAUTHLIB_INSECURE_TRANSPORT=1` for local HTTP only.
 
-- Ensure `data/` exists and is writable.
-- Use absolute or normalized SQLite path in `DATABASE_URL`.
-- Run `bash scripts/setup_local.sh` to bootstrap required folders.
-
-### `403` limit reached
-
-- Anonymous session hit configured cap.
-- Sign in or clear browser session data.
-
-### Empty or weak retrieval context
-
-- Re-run analysis to rebuild summary + chunk collections.
-- Verify target repository has supported text/code files.
-
-### OAuth issues in local dev
-
-- Set callback URLs correctly in Google Console.
-- Keep `OAUTHLIB_INSECURE_TRANSPORT=1` only for local HTTP.
-
-## Diagrams (DOT files)
-
-Generated architecture/use-case Graphviz files are included:
-
-- `docs/diagrams/hld.dot`
-- `docs/diagrams/hld.drawio`
-- `docs/diagrams/lld.dot`
-- `docs/diagrams/lld.drawio`
-- `docs/diagrams/flow.dot`
-- `docs/diagrams/flow.drawio`
-- `docs/diagrams/uml.dot`
-- `docs/diagrams/uml.drawio`
-- `docs/diagrams/use_cases.dot`
-- `docs/diagrams/use_cases.drawio`
-
-Render any DOT file:
-
-```bash
-dot -Tpng docs/diagrams/hld.dot -o hld.png
-```
-
-Regenerate all draw.io files from the DOT sources:
-
-```bash
-/usr/bin/python3 scripts/02_convert_dot_to_drawio.py
-```
-
-## Raspberry Pi Deployment
-
-For ARM64 production deployment with Docker Buildx + Docker Compose, see:
-
-- `docs/RASPBERRY_PI_DEPLOYMENT.md`
+---
 
 ## License
 
-MIT (see `LICENSE` if present in your distribution).
+MIT — see `LICENSE`.

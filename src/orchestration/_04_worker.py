@@ -17,8 +17,8 @@ if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
 import src.config._02_app_config as config
-from src.services._01_oauth import save_repository_to_history
 from src.services._00_services import DocumentationService, RepositoryService, VectorStoreService
+from src.services._01_oauth import save_repository_to_history
 
 logging.basicConfig(
     level=logging.INFO,
@@ -159,8 +159,8 @@ class AnalysisWorker:
             return
 
         try:
-            from src.web._00_application import create_app
             from src.storage.models import AnalysisLog, db
+            from src.web._00_application import create_app
 
             app = create_app()
 
@@ -300,8 +300,8 @@ class AnalysisWorker:
     ) -> None:
         """Save completed analysis to user's repository history."""
         try:
-            from src.web._00_application import create_app
             from src.storage.models import AnalysisLog, db
+            from src.web._00_application import create_app
 
             app = create_app()
 

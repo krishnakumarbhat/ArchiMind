@@ -5,8 +5,12 @@ import tempfile
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
-from src.services._00_services import (DocumentationService, RepositoryService,
-                      VectorStoreService, _SimpleCollection)
+from src.services._00_services import (
+    DocumentationService,
+    RepositoryService,
+    VectorStoreService,
+    _SimpleCollection,
+)
 
 
 def test_simple_collection_add_and_query():
@@ -25,7 +29,9 @@ def test_simple_collection_add_and_query():
 
 def test_vector_service_query_similar_documents():
     with tempfile.TemporaryDirectory() as temp_dir:
-        service = VectorStoreService(temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo")
+        service = VectorStoreService(
+            temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo"
+        )
         service.summary_collection = _SimpleCollection(temp_dir, "repo_name_summaries")
         service.chunk_collection = _SimpleCollection(temp_dir, "repo_name_chunks")
 
@@ -44,7 +50,9 @@ def test_vector_service_query_similar_documents():
 
 def test_vector_service_reloads_updated_collection_from_disk():
     with tempfile.TemporaryDirectory() as temp_dir:
-        service = VectorStoreService(temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo")
+        service = VectorStoreService(
+            temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo"
+        )
         service.generate_embeddings(
             {
                 "app.py": "def alpha_feature():\n    return True\n",
@@ -90,7 +98,9 @@ def test_vector_service_reloads_updated_collection_from_disk():
             embeddings=[service._embed_texts([chunk_doc])[0]],
         )
 
-        reloaded_service = VectorStoreService(temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo")
+        reloaded_service = VectorStoreService(
+            temp_dir, "repo-name", "local", repo_url="https://github.com/example/repo"
+        )
         fresh_context = reloaded_service.query_similar_documents("beta feature", n_results=2)
 
         assert "beta_feature" in fresh_context
@@ -143,8 +153,12 @@ def test_documentation_service_uses_gemini_generate_content_with_high_thinking()
     mock_client = Mock()
     mock_client.models.generate_content.side_effect = [
         SimpleNamespace(text="# Architecture Handbook"),
-        SimpleNamespace(text='{"title":"HLD","description":"overview","mermaid_code":"flowchart TD\\nA-->B"}'),
-        SimpleNamespace(text='{"title":"LLD","description":"details","mermaid_code":"sequenceDiagram\\nA->>B: hi"}'),
+        SimpleNamespace(
+            text='{"title":"HLD","description":"overview","mermaid_code":"flowchart TD\\nA-->B"}'
+        ),
+        SimpleNamespace(
+            text='{"title":"LLD","description":"details","mermaid_code":"sequenceDiagram\\nA->>B: hi"}'
+        ),
         SimpleNamespace(text='{"title":"Flow","description":"path","mermaid_code":"flowchart LR\\nA-->B"}'),
         SimpleNamespace(text="Short onboarding summary"),
     ]
@@ -158,7 +172,9 @@ def test_documentation_service_uses_gemini_generate_content_with_high_thinking()
     mock_types.GenerateContentConfig.side_effect = lambda **kwargs: kwargs
     mock_types.HttpOptions.side_effect = lambda **kwargs: kwargs
 
-    with patch("src.services._00_services.genai", mock_genai), patch("src.services._00_services.genai_types", mock_types):
+    with patch("src.services._00_services.genai", mock_genai), patch(
+        "src.services._00_services.genai_types", mock_types
+    ):
         service = DocumentationService(
             api_key="test-api-key",
             model_name="gemini-3.1-flash-lite-preview",
@@ -190,7 +206,9 @@ def test_documentation_service_generate_chat_answer_uses_gemini_with_question_an
     mock_types.GenerateContentConfig.side_effect = lambda **kwargs: kwargs
     mock_types.HttpOptions.side_effect = lambda **kwargs: kwargs
 
-    with patch("src.services._00_services.genai", mock_genai), patch("src.services._00_services.genai_types", mock_types):
+    with patch("src.services._00_services.genai", mock_genai), patch(
+        "src.services._00_services.genai_types", mock_types
+    ):
         service = DocumentationService(
             api_key="test-api-key",
             model_name="gemini-3.1-flash-lite-preview",

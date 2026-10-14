@@ -2,13 +2,18 @@ name: Python CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
   checks:
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: test-secret-key
+      GEMINI_API_KEY: ""
+      DATABASE_URL: sqlite:///data/ci_test.db
+      VECTOR_BACKEND: local
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,16 +32,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Lint
-        run: |
-          black --check .
-          isort --check-only .
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      # Lint the v2 modular layout: production entrypoint (main.py),
+      # engine packages (src/) and automation (scripts/), plus tests/.
+      # Formatter configs live in pyproject.toml (black/isort line-length 110,
+      # isort profile=black); ruff rules are scoped to critical checks.
+      - name: Lint (black)
+        run: black --check src/ scripts/ main.py tests/
 
-      - name: Run tests
-        env:
-          GEMINI_API_KEY: test-api-key
-          SECRET_KEY: test-secret-key
-          DATABASE_URL: sqlite:///data/ci_test.db
-        run: |
-          pytest tests/ -v --maxfail=1
+      - name: Lint (isort)
+        run: isort --check-only src/ scripts/ main.py tests/
+
+      - name: Lint (flake8 critical)
+        run: flake8 src/ scripts/ main.py tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Lint (ruff)
+        run: ruff check src/ scripts/ main.py
+
+      - name: Unit tests
+        run: pytest tests/unit -q -p no:cacheprovider -p no:asyncio
+
+      - name: Integration tests
+        run: pytest tests/integration -q -p no:cacheprovider -p no:asyncio
+
+      - name: Legacy suite
+        run: pytest tests/ -q -p no:cacheprovider -p no:asyncio --ignore=tests/unit --ignore=tests/integration --ignore=tests/e2e
+
+      # Browser E2E self-skips when playwright/chromium is absent
+      # (pytest.importorskip), so this stays green on stock runners.
+      - name: Browser E2E (skips without chromium)
+        run: pytest tests/e2e -q -p no:cacheprovider -p no:asyncio

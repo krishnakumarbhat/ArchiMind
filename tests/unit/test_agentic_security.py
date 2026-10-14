@@ -7,7 +7,8 @@ from src.security._01_scrubber import ENGINE_LABEL, engine_label, scrub
 
 FILES = {
     "a.py": "class A:\n    def m(self): return helper()\ndef helper(): return 1\n",
-    "b.py": "from a import A\ndef go():\n    return A().m()\n"}
+    "b.py": "from a import A\ndef go():\n    return A().m()\n",
+}
 
 BUILDER = CodePropertyGraphBuilder()
 
@@ -24,7 +25,9 @@ def test_guardrail_allows_repo_reasoning():
     """Architecture questions pass, including long open-ended ones."""
     assert check_scope("explain the blast impact of Session") == ""
     assert check_scope("which invariants does this repo violate and why") == ""
-    assert check_scope("What layers exist in this Flask application and how do they interact at runtime?") == ""
+    assert (
+        check_scope("What layers exist in this Flask application and how do they interact at runtime?") == ""
+    )
     # suggestion chips shipped in the UI must never trip the guardrail
     assert check_scope("What breaks if I change Module?") == ""
     assert check_scope("Explain the architecture in 5 bullets") == ""
