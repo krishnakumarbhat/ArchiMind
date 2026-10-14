@@ -139,10 +139,16 @@ class ArchiMindApplication:
         if config.uses_sqlite(self.config.DATABASE_URL):
             self.app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"connect_args": {"check_same_thread": False}}
         else:
-            self.app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-                "pool_pre_ping": True,
-                "pool_recycle": 300,
-            }
+            from sqlalchemy.pool import NullPool
+
+            options: dict = {"poolclass": NullPool, "pool_pre_ping": True}
+            # ponytail: Supabase/Supavisor run in transaction-pool mode, which has no
+            # prepared-statement cache — a pooled psycopg connection reusing server-side
+            # statement names raises duplicate-prepared-statement errors under threads.
+            # NullPool opens a fresh connection per checkout: slightly slower, always correct.
+            if "supabase.com" in self.config.DATABASE_URL:
+                options["connect_args"] = {"sslmode": "require"}
+            self.app.config["SQLALCHEMY_ENGINE_OPTIONS"] = options
 
     def _initialize_extensions(self):
         """Initializes Flask extensions."""
